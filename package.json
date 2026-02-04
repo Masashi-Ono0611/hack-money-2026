@@ -1,0 +1,5 @@
+{
+	"devDependencies": {
+		"jose": "^6.1.3"
+	}
+}
