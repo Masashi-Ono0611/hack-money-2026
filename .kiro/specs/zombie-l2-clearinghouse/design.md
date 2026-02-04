@@ -32,6 +32,51 @@ Ethereum L2エコシステムにおいて、「ユーザーがいなくても収
 
 ---
 
+## Gap Analysis 対応: 段階的実装戦略
+
+> **注記**: Gap Analysis の結果に基づき、以下の段階的実装戦略を採用します。
+
+### Phase 1: MVP（技術検証）- 2-3日
+
+**目的**: 技術スタックの動作検証、Uniswap v4 統合確認
+
+**スコープ**:
+- CPT Token + Operator Vault（シンプルな ERC20 + 入出金）
+- Utilization Hook（モック Oracle 固定値）
+- Uniswap v4 Pool 初期化
+- 簡易 Dashboard（静的データ表示）
+
+**ディレクトリ構造**: 既存の `contract/`, `frontend/` をそのまま使用
+
+### Phase 2: 外部統合 - 4-5日
+
+**目的**: Yellow SDK / Arc + Circle 統合、完全な裁定フロー実装
+
+**スコープ**:
+- Price Watcher + Arbitrage Engine
+- Yellow Session Manager（Yellow SDK 統合 or モックフォールバック）
+- Settlement Orchestrator（Circle Programmable Wallets API）
+- 既存スクリプト（`scripts/arc-transfer.ts`, `scripts/settle-to-vault.ts`）の活用
+
+### Phase 3: Dashboard 完成 + デモ - 2-3日
+
+**目的**: ハッカソンデモ用の完成度向上
+
+**スコープ**:
+- Dashboard コンポーネント（Recharts チャート、ログ表示）
+- WebSocket/Polling による状態更新
+- デモスクリプト（稼働率変化シミュレーション・裁定実行）
+
+### リスク軽減戦略
+
+| リスク | 軽減策 |
+|-------|--------|
+| Yellow SDK 統合失敗 | モック実装にフォールバック（詳細は後述） |
+| Uniswap v4 Hook デプロイ失敗 | CREATE2 + HookMiner パターン採用 |
+| Phase 遅延 | Phase 2 で裁定フロー完成すればハッカソン提出可能 |
+
+---
+
 ## Architecture
 
 ### Architecture Pattern & Boundary Map
@@ -112,15 +157,26 @@ graph TB
 |-------|------------------|-----------------|-------|
 | **Smart Contracts** | Solidity 0.8.x | CPT Token, Utilization Hook, Operator Vault | ERC20標準、Uniswap v4 Hook インターフェース準拠 |
 | **Blockchain** | Base Sepolia (L2-A), WorldCoin Sepolia (L2-B), Arc (決済ハブ) | CPT発行・市場形成・USDC決済 | Testnet環境でデプロイ |
-| **Uniswap v4** | v4 (latest) | CPT/USDC プール、Hook による動的制御 | スポンサープライズ要件 |
-| **Yellow SDK** | Nitrolite (latest) | ステートチャネル・ガスレスセッション | スポンサープライズ要件 |
-| **Circle** | Gateway / CCTP | USDC決済・クロスチェーン転送 | スポンサープライズ要件 |
+| **Uniswap v4** | v4 (latest) | CPT/USDC プール、Hook による動的制御 | スポンサープライズ要件、**CREATE2 + HookMiner でデプロイ** |
+| **Yellow SDK** | Nitrolite (latest) | ステートチャネル・ガスレスセッション | スポンサープライズ要件、**モックフォールバック戦略あり** |
+| **Circle** | **Programmable Wallets API (W3S)** | USDC決済・ウォレット間転送 | スポンサープライズ要件、**既存実装あり** (`scripts/arc-transfer.ts`) |
 | **Offchain Runtime** | Node.js 20+ / TypeScript | 価格監視・裁定エンジン・決済処理 | viem でコントラクト呼び出し |
 | **Frontend** | Next.js 14+ / TypeScript | Dashboard（価格差・Hook・ログ・残高） | App Router、TailwindCSS、Shadcn/ui |
 | **Wallet Integration** | wagmi / viem | ウォレット接続・Tx署名 | テスト用（MetaMask） |
 | **Charts** | Recharts or Chart.js | 価格推移可視化 | ハッカソンデモ用 |
-| **Deployment** | Foundry or Hardhat | コントラクトデプロイ・テスト | スクリプト自動化 |
+| **Deployment** | Foundry | コントラクトデプロイ・テスト | スクリプト自動化、**既存 `contract/` ディレクトリ活用** |
 | **Testing** | Foundry test / Vitest | コントラクト・TypeScriptロジックテスト | CI 統合 |
+
+### 技術的不確実性への対応
+
+> **Gap Analysis からの知見**: 以下の外部統合は調査・検証が必要です。
+
+| 統合対象 | リスクレベル | 対応戦略 |
+|---------|-------------|---------|
+| **Yellow SDK (Nitrolite)** | High | 公式ドキュメント調査 → 統合実装 → 失敗時はモック実装にフォールバック |
+| **Uniswap v4 Hook デプロイ** | Medium | CREATE2 + HookMiner パターン採用（アドレスビットパターン制約対応） |
+| **Circle W3S API** | Low | **既存実装あり**（`scripts/arc-transfer.ts`, `scripts/settle-to-vault.ts`）|
+| **Arc Testnet** | Low | 既存環境変数設定あり（`ARC_API_KEY`, `ARC_WALLET_ID_*`）|
 
 ---
 
@@ -312,12 +368,59 @@ interface IComputeToken is IERC20 {
 - Uniswap v4 Hook インターフェース準拠
 - beforeSwap で稼働率を取得し、手数料を調整
 - Hook 実行権限は Uniswap v4 Pool のみ
+- **CREATE2 + HookMiner パターンでデプロイ（アドレスビットパターン制約対応）**
 
 **Dependencies**
 - Inbound: Uniswap v4 Pool — beforeSwap 呼び出し (P0)
 - Outbound: Mock Oracle — 稼働率シグナル取得 (P1)
 
 **Contracts**: Service [x]
+
+##### Uniswap v4 Hook デプロイ戦略
+
+> **Gap Analysis 対応**: Hook アドレスは特定のビットパターンを持つ必要があります。
+
+**Uniswap v4 Hook アドレス制約**:
+- Hook の機能（beforeSwap, afterSwap 等）はアドレスの特定ビットで示される
+- 例: `beforeSwap` を有効にするには、アドレスの特定ビットが `1` である必要がある
+
+**CREATE2 + HookMiner パターン**:
+
+```solidity
+// Hook デプロイ用のヘルパー（Uniswap v4-periphery から参照）
+import {HookMiner} from "@uniswap/v4-periphery/src/utils/HookMiner.sol";
+
+// デプロイスクリプト (Foundry)
+contract DeployUtilizationHook is Script {
+    function run() external {
+        // 1. 必要な Hook フラグを定義
+        uint160 flags = uint160(
+            Hooks.BEFORE_SWAP_FLAG |
+            Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
+        );
+
+        // 2. CREATE2 で適切なアドレスを探索
+        (address hookAddress, bytes32 salt) = HookMiner.find(
+            CREATE2_DEPLOYER,
+            flags,
+            type(UtilizationHook).creationCode,
+            abi.encode(poolManager, mockOracle)
+        );
+
+        // 3. CREATE2 でデプロイ
+        vm.startBroadcast();
+        UtilizationHook hook = new UtilizationHook{salt: salt}(
+            poolManager,
+            mockOracle
+        );
+        vm.stopBroadcast();
+
+        require(address(hook) == hookAddress, "Hook address mismatch");
+    }
+}
+```
+
+**フォールバック**: HookMiner が適切なアドレスを見つけられない場合、salt の探索範囲を拡大
 
 ##### Service Interface
 
@@ -342,14 +445,15 @@ interface IUtilizationHook {
 }
 ```
 
-- **Preconditions**: Uniswap v4 Pool から呼び出される
+- **Preconditions**: Uniswap v4 Pool から呼び出される、アドレスが正しいビットパターンを持つ
 - **Postconditions**: 稼働率に応じた動的手数料が返される（低稼働率 = 低手数料）
 - **Invariants**: fee は 0.05% ~ 1.0% の範囲
 
 **Implementation Notes**
 - Integration: Uniswap v4 BaseHook を継承、Oracle から稼働率取得
+- Deployment: **CREATE2 + HookMiner パターン**（アドレスビットパターン制約対応）
 - Validation: 稼働率が範囲外の場合はデフォルト手数料（0.3%）を適用
-- Risks: Oracle 障害時のフォールバック必須
+- Risks: Oracle 障害時のフォールバック必須、HookMiner 探索失敗時は salt 範囲拡大
 
 ---
 
@@ -509,10 +613,11 @@ type YellowSessionParams = {
 - Yellow セッションの開始・売買指示・終了
 - オフチェーンでマッチングを実行
 - セッション終了時に最終ネット結果を返す
+- **Yellow SDK 統合失敗時はモック実装にフォールバック**
 
 **Dependencies**
 - Inbound: Arbitrage Engine — セッション開始指示 (P0)
-- Outbound: Yellow SDK (Nitrolite) — セッション管理 (P0)
+- Outbound: Yellow SDK (Nitrolite) — セッション管理 (P0) **or モック実装**
 - Outbound: Settlement Orchestrator — ネット結果通知 (P0)
 
 **Contracts**: Service [x], Event [x]
@@ -541,6 +646,11 @@ interface YellowSessionManagerService {
    * @returns 最終利益（USDC単位）
    */
   closeSession(sessionId: string): Promise<bigint>;
+
+  /**
+   * モード判定（Yellow SDK or モック）
+   */
+  isUsingMock(): boolean;
 }
 
 type Order = {
@@ -550,9 +660,9 @@ type Order = {
 };
 ```
 
-- **Preconditions**: Yellow SDK が初期化済み
+- **Preconditions**: Yellow SDK が初期化済み、またはモックモードが有効
 - **Postconditions**: セッション終了時に最終利益が確定
-- **Invariants**: セッション内でのガス不要
+- **Invariants**: セッション内でのガス不要（Yellow SDK使用時）
 
 ##### Event Contract
 
@@ -560,10 +670,60 @@ type Order = {
 - **Subscribed events**: なし
 - **Delivery guarantees**: 非同期（Settlement Orchestrator に通知）
 
+##### フォールバック戦略: モック実装
+
+> **Gap Analysis 対応**: Yellow SDK 統合が失敗した場合のフォールバック
+
+```typescript
+// モック実装の概要
+class MockYellowSessionManager implements YellowSessionManagerService {
+  private sessions: Map<string, MockSession> = new Map();
+
+  async createSession(params: YellowSessionParams): Promise<string> {
+    const sessionId = `mock-${Date.now()}`;
+    this.sessions.set(sessionId, {
+      id: sessionId,
+      orders: [],
+      netProfit: 0n,
+      status: 'ACTIVE',
+    });
+    console.log(`[MOCK] Yellow session created: ${sessionId}`);
+    return sessionId;
+  }
+
+  async placeOrder(sessionId: string, order: Order): Promise<void> {
+    const session = this.sessions.get(sessionId);
+    if (!session) throw new Error('Session not found');
+    session.orders.push(order);
+    console.log(`[MOCK] Order placed: ${order.type} ${order.amount} ${order.token}`);
+  }
+
+  async closeSession(sessionId: string): Promise<bigint> {
+    const session = this.sessions.get(sessionId);
+    if (!session) throw new Error('Session not found');
+
+    // シミュレートされた利益計算（デモ用）
+    const simulatedProfit = BigInt(Math.floor(Math.random() * 100)) * 10n ** 6n; // 0-100 USDC
+    session.netProfit = simulatedProfit;
+    session.status = 'CLOSED';
+
+    console.log(`[MOCK] Session closed with profit: ${simulatedProfit} USDC`);
+    return simulatedProfit;
+  }
+
+  isUsingMock(): boolean {
+    return true;
+  }
+}
+```
+
+**モード切り替え**: 環境変数 `USE_YELLOW_MOCK=true` で制御
+
 **Implementation Notes**
 - Integration: Yellow SDK (Nitrolite) を使用、反復的に売買を実行
+- Fallback: `USE_YELLOW_MOCK=true` でモック実装に切り替え
 - Validation: セッション実行中のエラーはクローズしてログ記録
-- Risks: Yellow Network 障害時の対処（タイムアウト設定）
+- Risks: Yellow Network 障害時の対処（タイムアウト設定、モックフォールバック）
 
 ---
 
@@ -581,10 +741,19 @@ type Order = {
 
 **Dependencies**
 - Inbound: Yellow Session Manager — ネット結果通知 (P0)
-- Outbound: Arc Settlement (Circle Gateway/CCTP) — USDC 転送 (P0)
+- Outbound: **Circle Programmable Wallets API (W3S)** — USDC 転送 (P0)
 - Outbound: Operator Vault — 入金確認 (P0)
 
 **Contracts**: Service [x]
+
+##### 既存実装の参照
+
+> **Gap Analysis 対応**: 以下の既存スクリプトを基盤として活用します。
+
+| ファイル | 役割 | 活用方法 |
+|---------|------|---------|
+| `scripts/arc-transfer.ts` | Circle W3S API によるUSDC転送 | `ArcTransferService` クラスを参考に実装 |
+| `scripts/settle-to-vault.ts` | Operator Vaultへの決済 | `VaultSettlementService` クラスを参考に実装 |
 
 ##### Service Interface
 
@@ -595,18 +764,71 @@ interface SettlementOrchestratorService {
    * @param netProfit 最終利益（USDC単位）
    * @returns 決済トランザクションハッシュ
    */
-  settleProfit(netProfit: bigint): Promise<string>;
+  settleProfit(netProfit: bigint): Promise<SettlementResult>;
+
+  /**
+   * Operator Vault の残高を取得する
+   */
+  getVaultBalance(): Promise<bigint>;
+}
+
+// 既存実装 (scripts/settle-to-vault.ts) から抽出
+interface SettlementResult {
+  success: boolean;
+  transactionId?: string;
+  txHash?: string;
+  amount?: string;
+  error?: string;
 }
 ```
 
-- **Preconditions**: netProfit > 0
+- **Preconditions**: netProfit > 0、環境変数が設定済み
 - **Postconditions**: USDC が Operator Vault に入金される
-- **Invariants**: 決済トランザクションは冪等性を保証
+- **Invariants**: 決済トランザクションは冪等性を保証（idempotencyKey使用）
+
+##### 必要な環境変数
+
+> **既存実装からの引き継ぎ**: 以下の環境変数が必要です。
+
+```bash
+ARC_API_KEY=              # Circle W3S API キー
+ARC_WALLET_ID_SOURCE=     # 裁定利益の送金元ウォレットID
+ARC_WALLET_ID_OPERATOR_VAULT= # Operator Vault のウォレットID
+ENTITY_SECRET_HEX=        # エンティティシークレット（hex形式）
+```
+
+##### 実装パターン（既存コードベース）
+
+```typescript
+// scripts/settle-to-vault.ts の VaultSettlementService を参考に
+class SettlementOrchestrator implements SettlementOrchestratorService {
+  private apiKey: string;
+  private sourceWalletId: string;
+  private vaultWalletId: string;
+  private entitySecretHex: string;
+
+  constructor() {
+    this.apiKey = process.env.ARC_API_KEY || '';
+    this.sourceWalletId = process.env.ARC_WALLET_ID_SOURCE || '';
+    this.vaultWalletId = process.env.ARC_WALLET_ID_OPERATOR_VAULT || '';
+    this.entitySecretHex = process.env.ENTITY_SECRET_HEX || '';
+  }
+
+  async settleProfit(netProfit: bigint): Promise<SettlementResult> {
+    // 1. Public Key取得
+    // 2. Entity Secret暗号化
+    // 3. Circle W3S API で transfer 実行
+    // 4. トランザクション確認
+    // 詳細は scripts/settle-to-vault.ts を参照
+  }
+}
+```
 
 **Implementation Notes**
-- Integration: Circle Gateway/CCTP を使用してクロスチェーン USDC 転送
+- Integration: **Circle Programmable Wallets API (W3S)** を使用（既存実装活用）
 - Validation: 決済失敗時は3回リトライ、失敗時はエラーログ
 - Risks: Arc ネットワーク障害時の対処（手動リトライ機能）
+- Reference: `scripts/arc-transfer.ts`, `scripts/settle-to-vault.ts`
 
 ---
 
@@ -926,4 +1148,69 @@ interface IHooks {
 
 ---
 
-**設計完了**: 全14要件をカバーする包括的な技術設計を完了しました。次フェーズ（タスク分解）に進む準備が整いました。
+## Gap Analysis 対応サマリー
+
+> **更新日**: Gap Analysis の結果を反映して設計を改善しました。
+
+### 主要な改善点
+
+| 項目 | 変更前 | 変更後 |
+|------|--------|--------|
+| **段階的実装** | 一括実装 | Phase 1/2/3 の段階的アプローチを採用 |
+| **Arc + Circle 統合** | Circle Gateway / CCTP | **Circle Programmable Wallets API (W3S)** - 既存実装あり |
+| **Yellow SDK** | 詳細なし | **モックフォールバック戦略** を明記 |
+| **Hook デプロイ** | 詳細なし | **CREATE2 + HookMiner パターン** を採用 |
+| **既存コード連携** | なし | `scripts/arc-transfer.ts`, `scripts/settle-to-vault.ts` を参照 |
+
+### 既存資産の活用
+
+```
+/scripts/
+├── arc-transfer.ts          # Circle W3S API による USDC 転送
+│   └── ArcTransferService   # Settlement Orchestrator の参照実装
+├── settle-to-vault.ts       # Operator Vault への決済
+│   └── VaultSettlementService # 決済フローの参照実装
+```
+
+### 環境変数設定（既存実装より）
+
+```bash
+# Arc / Circle W3S API
+ARC_API_KEY=
+ARC_WALLET_ID_SOURCE=
+ARC_WALLET_ID_TARGET=
+ARC_WALLET_ID_OPERATOR_VAULT=
+ENTITY_SECRET_HEX=
+
+# Yellow SDK（モックモード切り替え）
+USE_YELLOW_MOCK=false  # true でモック実装を使用
+```
+
+### リスク対応マトリクス
+
+| リスク | レベル | 対応 | フォールバック |
+|-------|--------|------|---------------|
+| Yellow SDK 統合失敗 | High | 早期調査、ドキュメント確認 | モック実装に切り替え |
+| Hook デプロイ失敗 | Medium | CREATE2 + HookMiner | salt 探索範囲拡大 |
+| Circle W3S API エラー | Low | 既存実装あり | リトライロジック |
+| Oracle 障害 | Low | Mock Oracle 使用 | デフォルト手数料適用 |
+
+### 次のステップ
+
+1. **Phase 1 (MVP)** の実装開始
+   - 既存 `contract/` ディレクトリを活用
+   - CPT Token, Operator Vault, Utilization Hook の実装
+   - Uniswap v4 Pool 初期化
+
+2. **Yellow SDK 調査** (並行実施)
+   - Nitrolite SDK ドキュメント確認
+   - サンプルコード動作検証
+   - 統合可否の判断 → モック実装への切り替え判断
+
+3. **Phase 2** に向けた準備
+   - 既存スクリプトの Settlement Orchestrator への統合
+   - Price Watcher, Arbitrage Engine の実装
+
+---
+
+**設計完了**: Gap Analysis の結果を反映し、全14要件をカバーする包括的な技術設計を完了しました。段階的実装戦略により、リスクを軽減しながらハッカソン期間内での完成を目指します。
