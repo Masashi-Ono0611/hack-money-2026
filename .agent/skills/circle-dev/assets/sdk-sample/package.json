@@ -1,0 +1,31 @@
+{
+  "name": "sdk-sample",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run ./src/index.ts",
+    "generate": "bun run ./src/generate.ts",
+    "register": "bun run ./src/register.ts",
+    "createWallet": "bun run ./src/create-wallet.ts",
+    "getBalance": "bun run ./src/get-balance.ts",
+    "transfer": "bun run ./src/transfer.ts",
+    "bridge": "bun run ./src/bridge.ts",
+    "crosschain:createWallet": "bun run ./src/crosschain/create-wallet.ts",
+    "crosschain:getBalance": "bun run ./src/crosschain/get-balance.ts",
+    "crosschain:getGatewayBalance": "bun run ./src/crosschain/get-gateway-balance.ts",
+    "crosschain:deposit": "bun run ./src/crosschain/deposit.ts",
+    "crosschain:transfer": "bun run ./src/crosschain/transfer.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "dotenv": "^17.2.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@circle-fin/adapter-circle-wallets": "^1.1.1",
+    "@circle-fin/bridge-kit": "^1.5.0",
+    "@circle-fin/developer-controlled-wallets": "^10.1.0"
+  }
+}

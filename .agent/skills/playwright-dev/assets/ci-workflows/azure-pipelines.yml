@@ -1,0 +1,209 @@
+trigger:
+  branches:
+    include:
+      - main
+      - master
+  paths:
+    exclude:
+      - README.md
+      - docs/*
+
+pr:
+  branches:
+    include:
+      - main
+      - master
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  NODE_VERSION: "20.x"
+  PLAYWRIGHT_BROWSERS_PATH: 0
+
+stages:
+  - stage: Test
+    displayName: "Run Playwright Tests"
+    jobs:
+      - job: TestJob
+        displayName: "Test with Sharding"
+        strategy:
+          parallel: 3
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(NODE_VERSION)
+            displayName: "Install Node.js"
+
+          - script: |
+              npm ci
+            displayName: "Install dependencies"
+
+          - script: |
+              npx playwright install --with-deps
+            displayName: "Install Playwright browsers"
+
+          - script: |
+              npx playwright test --shard=$(System.JobPositionInPhase)/$(System.TotalJobsInPhase)
+            displayName: "Run Playwright tests (Shard $(System.JobPositionInPhase)/$(System.TotalJobsInPhase))"
+            env:
+              CI: true
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "blob-report"
+              artifact: "blob-report-$(System.JobPositionInPhase)"
+              publishLocation: "pipeline"
+            condition: always()
+            displayName: "Upload blob report"
+
+  - stage: MergeReports
+    displayName: "Merge Test Reports"
+    dependsOn: Test
+    condition: always()
+    jobs:
+      - job: MergeJob
+        displayName: "Merge and Publish Reports"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(NODE_VERSION)
+            displayName: "Install Node.js"
+
+          - script: |
+              npm ci
+            displayName: "Install dependencies"
+
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: "current"
+              patterns: "blob-report-*/**"
+              targetPath: "all-blob-reports"
+            displayName: "Download all blob reports"
+
+          - script: |
+              npx playwright merge-reports --reporter html ./all-blob-reports
+            displayName: "Merge reports into HTML"
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "playwright-report"
+              artifact: "playwright-html-report-$(Build.BuildNumber)"
+              publishLocation: "pipeline"
+            condition: always()
+            displayName: "Publish HTML report"
+
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: "current"
+              patterns: "blob-report-*/**"
+              targetPath: "all-blob-reports"
+            displayName: "Download shard artifacts for test results"
+            condition: always()
+
+          # Optional: Publish test results to Azure DevOps Tests tab
+          - script: |
+              npx playwright merge-reports --reporter junit ./all-blob-reports
+            displayName: "Generate JUnit XML"
+            condition: always()
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: "JUnit"
+              testResultsFiles: "results.xml"
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: "Playwright Tests - $(Build.BuildNumber)"
+            condition: always()
+            displayName: "Publish test results to Azure DevOps"
+
+  # Optional: Deploy HTML report to Azure Blob Storage or Static Web App
+  - stage: DeployReport
+    displayName: "Deploy Test Report"
+    dependsOn: MergeReports
+    condition: and(succeeded(), in(variables['Build.SourceBranch'], 'refs/heads/main', 'refs/heads/master'))
+    jobs:
+      - deployment: DeployReportJob
+        displayName: "Deploy to Azure Blob Storage"
+        environment: "test-reports"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    buildType: "current"
+                    artifactName: "playwright-html-report-$(Build.BuildNumber)"
+                    targetPath: "$(Pipeline.Workspace)/playwright-report"
+                  displayName: "Download HTML report"
+
+              # Uncomment and configure for Azure Blob Storage deployment
+              # - task: AzureFileCopy@4
+              #   inputs:
+              #     SourcePath: '$(Pipeline.Workspace)/playwright-report'
+              #     azureSubscription: 'YOUR_AZURE_SUBSCRIPTION'
+              #     Destination: 'AzureBlob'
+              #     storage: 'YOUR_STORAGE_ACCOUNT'
+              #     ContainerName: '$web'
+              #     BlobPrefix: 'test-reports/$(Build.BuildNumber)'
+              #   displayName: 'Upload report to Azure Blob Storage'
+
+              # Alternative: Deploy to Azure Static Web Apps
+              # - task: AzureStaticWebApp@0
+              #   inputs:
+              #     app_location: '$(Pipeline.Workspace)/playwright-report'
+              #     azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
+              #   displayName: 'Deploy to Azure Static Web Apps'
+
+  # Optional: Separate jobs for different browsers
+  - stage: TestBrowsers
+    displayName: "Test Specific Browsers"
+    condition: eq(variables['RUN_BROWSER_TESTS'], 'true')
+    jobs:
+      - job: TestChromium
+        displayName: "Test Chromium"
+        steps:
+          - template: templates/test-template.yml
+            parameters:
+              browser: "chromium"
+
+      - job: TestFirefox
+        displayName: "Test Firefox"
+        steps:
+          - template: templates/test-template.yml
+            parameters:
+              browser: "firefox"
+
+      - job: TestWebKit
+        displayName: "Test WebKit"
+        steps:
+          - template: templates/test-template.yml
+            parameters:
+              browser: "webkit"
+
+# Optional: Template for browser-specific tests
+# Create file: templates/test-template.yml
+# parameters:
+#   browser: ''
+#
+# steps:
+# - task: NodeTool@0
+#   inputs:
+#     versionSpec: '20.x'
+#   displayName: 'Install Node.js'
+#
+# - script: npm ci
+#   displayName: 'Install dependencies'
+#
+# - script: npx playwright install --with-deps ${{ parameters.browser }}
+#   displayName: 'Install Playwright ${{ parameters.browser }}'
+#
+# - script: npx playwright test --project=${{ parameters.browser }}
+#   displayName: 'Run tests on ${{ parameters.browser }}'
+#
+# - task: PublishTestResults@2
+#   inputs:
+#     testResultsFormat: 'JUnit'
+#     testResultsFiles: '**/test-results/**/*.xml'
+#     testRunTitle: 'Playwright Tests - ${{ parameters.browser }}'
+#   condition: always()

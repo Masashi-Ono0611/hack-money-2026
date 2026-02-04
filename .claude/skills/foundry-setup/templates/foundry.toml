@@ -1,0 +1,129 @@
+# Foundry Configuration File
+# See https://book.getfoundry.sh/config/
+
+[profile.default]
+# Source and output directories
+src = "src"
+out = "out"
+test = "test"
+script = "script"
+libs = ["lib"]
+
+# Compiler settings
+solc_version = "0.8.30"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+
+# Testing configuration
+verbosity = 2
+fuzz = { runs = 256 }
+invariant = { runs = 256, depth = 15 }
+
+# Gas reporting
+gas_reports = ["*"]
+gas_reports_ignore = []
+
+# Code coverage
+no_match_coverage = ["test/**/*", "script/**/*"]
+
+# Formatting
+line_length = 120
+tab_width = 2
+bracket_spacing = false
+int_types = "long"
+multiline_func_header = "attributes_first"
+quote_style = "double"
+number_underscore = "thousands"
+
+# Caching
+force = false
+cache = true
+cache_path = "cache"
+build_info = true
+build_info_path = "out/build-info"
+
+# Networking
+eth_rpc_url = "${ETH_RPC_URL}"
+etherscan_api_key = "${ETHERSCAN_API_KEY}"
+
+# CI/CD
+no_storage_caching = false
+no_rpc_rate_limit = false
+
+# -----------------------------------
+# Production Profile
+# -----------------------------------
+[profile.production]
+optimizer = true
+optimizer_runs = 10000
+via_ir = true
+verbosity = 1
+
+# -----------------------------------
+# Testing Profile
+# -----------------------------------
+[profile.test]
+optimizer = true
+optimizer_runs = 200
+verbosity = 3
+fuzz = { runs = 1000 }
+invariant = { runs = 512, depth = 20 }
+
+# -----------------------------------
+# Gas Optimization Profile
+# -----------------------------------
+[profile.gas-optimized]
+optimizer = true
+optimizer_runs = 1000000
+via_ir = true
+gas_reports = ["*"]
+
+# -----------------------------------
+# CI Profile
+# -----------------------------------
+[profile.ci]
+optimizer = true
+optimizer_runs = 200
+verbosity = 2
+fuzz = { runs = 10000 }
+invariant = { runs = 1000, depth = 20 }
+
+# RPC endpoints (configure in .env)
+[rpc_endpoints]
+mainnet = "${MAINNET_RPC_URL}"
+sepolia = "${SEPOLIA_RPC_URL}"
+arbitrum = "${ARBITRUM_RPC_URL}"
+optimism = "${OPTIMISM_RPC_URL}"
+polygon = "${POLYGON_RPC_URL}"
+base = "${BASE_RPC_URL}"
+
+# Etherscan API keys (configure in .env)
+[etherscan]
+mainnet = { key = "${ETHERSCAN_API_KEY}" }
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
+arbitrum = { key = "${ARBISCAN_API_KEY}" }
+optimism = { key = "${OPTIMISM_ETHERSCAN_API_KEY}" }
+polygon = { key = "${POLYGONSCAN_API_KEY}" }
+base = { key = "${BASESCAN_API_KEY}" }
+
+# Formatter rules
+[fmt]
+line_length = 120
+tab_width = 2
+bracket_spacing = false
+int_types = "long"
+multiline_func_header = "attributes_first"
+quote_style = "double"
+number_underscore = "thousands"
+single_line_statement_blocks = "preserve"
+override_spacing = false
+wrap_comments = true
+ignore = []
+
+# Documentation generation
+[doc]
+out = "docs"
+repository = ""
+ignore = []

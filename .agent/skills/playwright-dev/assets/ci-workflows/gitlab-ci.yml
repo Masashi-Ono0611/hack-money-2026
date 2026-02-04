@@ -1,0 +1,118 @@
+stages:
+  - test
+  - merge
+  - deploy
+
+variables:
+  PLAYWRIGHT_BROWSERS_PATH: 0
+
+# Cache node_modules and Playwright browsers
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+    - ~/.cache/ms-playwright/
+
+# Test job with parallel execution (sharding)
+test:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.49.0-jammy
+  parallel: 3
+  before_script:
+    - npm ci
+  script:
+    - npx playwright test --reporter=blob --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL
+  after_script:
+    - |
+      if [ -d "blob-report" ]; then
+        echo "Blob report generated successfully"
+      fi
+  artifacts:
+    when: always
+    paths:
+      - blob-report/
+    expire_in: 1 day
+    name: "blob-report-$CI_NODE_INDEX"
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+
+# Merge all shard reports into a single HTML report
+merge-reports:
+  stage: merge
+  image: mcr.microsoft.com/playwright:v1.49.0-jammy
+  needs:
+    - test
+  dependencies:
+    - test
+  before_script:
+    - npm ci
+  script:
+    # Merge all blob reports
+    - npx playwright merge-reports --reporter html ./blob-report
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - test-results/
+    expire_in: 30 days
+    name: "playwright-html-report"
+  allow_failure: false
+
+# Optional: Deploy report to GitLab Pages
+pages:
+  stage: deploy
+  image: alpine:latest
+  needs:
+    - merge-reports
+  dependencies:
+    - merge-reports
+  script:
+    - mkdir -p public
+    - cp -r playwright-report/* public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - main
+    - master
+  when: manual
+
+# Optional: Run tests on schedule (nightly)
+test:nightly:
+  extends: test
+  only:
+    - schedules
+  variables:
+    CI_NODE_TOTAL: 5
+  parallel: 5
+
+# Optional: Run only specific project/browser
+test:chromium:
+  extends: test
+  script:
+    - npx playwright test --reporter=blob --project=chromium --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL
+  only:
+    variables:
+      - $TEST_BROWSER == "chromium"
+
+test:firefox:
+  extends: test
+  script:
+    - npx playwright test --reporter=blob --project=firefox --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL
+  only:
+    variables:
+      - $TEST_BROWSER == "firefox"
+
+test:webkit:
+  extends: test
+  script:
+    - npx playwright test --reporter=blob --project=webkit --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL
+  only:
+    variables:
+      - $TEST_BROWSER == "webkit"

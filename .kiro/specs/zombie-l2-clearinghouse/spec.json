@@ -1,0 +1,22 @@
+{
+  "feature_name": "zombie-l2-clearinghouse",
+  "created_at": "2026-02-03T16:00:07Z",
+  "updated_at": "2026-02-03T16:12:10Z",
+  "language": "ja",
+  "phase": "tasks-generated",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": true
+    }
+  },
+  "ready_for_implementation": false
+}

@@ -1,0 +1,36 @@
+{
+  "name": "circle-dev-skill",
+  "version": "1.0.0",
+  "description": "Comprehensive Circle development support skill for stablecoin applications",
+  "private": true,
+  "scripts": {
+    "wallet:create": "ts-node scripts/wallet_creation_example.ts",
+    "cctp:transfer": "ts-node scripts/cctp_transfer_example.ts",
+    "bridge:transfer": "ts-node scripts/bridge_kit_example.ts",
+    "paymaster:example": "ts-node scripts/paymaster_example.ts"
+  },
+  "keywords": [
+    "circle",
+    "usdc",
+    "stablecoin",
+    "cctp",
+    "bridge-kit",
+    "wallets",
+    "web3",
+    "blockchain"
+  ],
+  "dependencies": {
+    "@circle-fin/developer-controlled-wallets": "^1.0.0",
+    "@circle-fin/w3s-pw-web-sdk": "^3.0.0",
+    "@circle-fin/bridge-kit": "^1.0.0",
+    "@circle-fin/circle-sdk": "^1.0.0",
+    "ethers": "^6.9.0",
+    "viem": "^2.0.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.2"
+  }
+}
