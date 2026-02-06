@@ -42,7 +42,7 @@
 
 ### 3. Mock Oracle 実装
 
-- [ ] 3.1 (P) Mock Oracle Contract 実装
+- [x] 3.1 (P) Mock Oracle Contract 実装
   - _utilization 変数（デフォルト50%）を実装
   - getUtilization 関数を実装（view）
   - setUtilization 関数を実装（範囲検証 0-100%、require文）
@@ -51,7 +51,7 @@
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.6_
   - _Contracts: MockOracle (Service)_
 
-- [ ] 3.2 (P) Mock Oracle 単体テスト
+- [x] 3.2 (P) Mock Oracle 単体テスト
   - getUtilization テスト（デフォルト50%）
   - setUtilization テスト（0-100%範囲、範囲外は revert）
   - UtilizationUpdated イベント発行確認
