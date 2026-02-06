@@ -14,7 +14,8 @@ contract DeployCore is Script {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
         string memory chainName = vm.envString("CHAIN_NAME");
-        string memory jsonPath = string.concat(vm.projectRoot(), "/contract/deployed-addresses.json");
+        string memory jsonPath = string.concat(vm.projectRoot(), "./deployed-addresses.json");
+        string memory usdcConfigPath = string.concat(vm.projectRoot(), "./usdc-addresses.json");
         _ensureJsonFile(jsonPath);
 
         vm.startBroadcast(deployerPrivateKey);
@@ -30,7 +31,7 @@ contract DeployCore is Script {
             json = vm.serializeAddress(chainName, "oracle", address(oracle));
             vm.writeJson(json, jsonPath, string.concat(".", chainName));
         } else if (_isArc(chainName)) {
-            address usdcAddress = vm.envAddress("USDC_ADDRESS");
+            address usdcAddress = _readUsdcAddress(usdcConfigPath, chainName);
             OperatorVault vault = new OperatorVault(usdcAddress, deployer);
             console.log("Operator Vault deployed at:", address(vault));
 
@@ -61,5 +62,10 @@ contract DeployCore is Script {
         } catch {
             vm.writeFile(path, "{}");
         }
+    }
+
+    function _readUsdcAddress(string memory path, string memory chainName) private view returns (address) {
+        string memory json = vm.readFile(path);
+        return vm.parseJsonAddress(json, string.concat(".", chainName));
     }
 }
