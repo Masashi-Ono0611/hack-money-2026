@@ -646,13 +646,9 @@ sequenceDiagram
 
 ## 3技術の関係を一言で
 
-> **Uniswap v4 が価格を決め、
-> Yellow が速く動かし、
-> Arc + USDC が価値を確定する。**
+> **Uniswap v4 が価格を決め、Yellow が速く動かし、Arc + USDC が価値を確定する。**
 
 ## Tech Stacks
-
-## 技術スタック一覧（提案）
 
 ### ① ブロックチェーン / ネットワーク
 
@@ -714,3 +710,48 @@ sequenceDiagram
 ### TL;DR
 
 Zombie L2 Clearinghouse は、**使われていないL2を「失敗」ではなく「安価な計算資源」として再定義し、Uniswap v4・Yellow・USDC を組み合わせて、L2運営に現実的な収益をもたらす財務インフラ** です。
+
+## 動かし方
+
+### コントラクト
+
+`contract`フォルダ配下で実行する
+
+#### セットアップ
+
+```bash
+cp .env.example .env
+```
+
+#### ビルド
+
+```bash
+forge build
+```
+
+#### テスト
+
+```bash
+forge test
+
+# PRCエンドポイントを指定してテストする場合
+source .env
+forge test --fork-url $BASE_SEPOLIA_RPC_URL
+forge test --fork-url $WORLDCOIN_SEPOLIA_RPC_URL
+forge test --fork-url $ARC_RPC_URL
+```
+
+#### デプロイ
+
+```bash
+source .env
+
+# base sepolia
+CHAIN_NAME=base-sepolia forge script script/DeployCore.s.sol --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast --verify
+
+# world sepolia
+CHAIN_NAME=world-chain-sepolia forge script script/DeployCore.s.sol --rpc-url $WORLDCOIN_SEPOLIA_RPC_URL --broadcast --verify
+
+# Arc Testnet
+CHAIN_NAME=arc forge script script/DeployCore.s.sol --rpc-url $ARC_RPC_URL --broadcast --verify
+```

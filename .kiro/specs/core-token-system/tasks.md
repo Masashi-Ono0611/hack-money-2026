@@ -14,7 +14,7 @@
 
 ### 1. OpenZeppelin Contracts 導入
 
-- [ ] 1. (P) OpenZeppelin Contracts インストール
+- [x] 1. (P) OpenZeppelin Contracts インストール
   - Foundry で OpenZeppelin Contracts v5.x をインストール（`forge install OpenZeppelin/openzeppelin-contracts`）
   - foundry.toml で remappings 設定（`@openzeppelin/contracts=lib/openzeppelin-contracts/contracts`）
   - ERC20, Ownable, ReentrancyGuard が利用可能であることを確認
@@ -24,14 +24,14 @@
 
 ### 2. CPT Token Contract 実装
 
-- [ ] 2.1 (P) CPT Token Contract 実装
+- [x] 2.1 (P) CPT Token Contract 実装
   - OpenZeppelin ERC20 + Ownable を継承した ComputeToken コントラクトを実装
   - mint 関数を実装（onlyOwner modifier、_mint で msg.sender に発行）
   - NatSpec コメントを追加（@title, @notice, @dev, @param）
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.6_
   - _Contracts: ComputeToken (Service)_
 
-- [ ] 2.2 (P) CPT Token 単体テスト
+- [x] 2.2 (P) CPT Token 単体テスト
   - mint 権限テスト（owner のみ発行可能、非 owner は revert）
   - ERC20 標準機能テスト（transfer, balanceOf, totalSupply）
   - approve + transferFrom テスト
@@ -42,7 +42,7 @@
 
 ### 3. Mock Oracle 実装
 
-- [ ] 3.1 (P) Mock Oracle Contract 実装
+- [x] 3.1 (P) Mock Oracle Contract 実装
   - _utilization 変数（デフォルト50%）を実装
   - getUtilization 関数を実装（view）
   - setUtilization 関数を実装（範囲検証 0-100%、require文）
@@ -51,7 +51,7 @@
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.6_
   - _Contracts: MockOracle (Service)_
 
-- [ ] 3.2 (P) Mock Oracle 単体テスト
+- [x] 3.2 (P) Mock Oracle 単体テスト
   - getUtilization テスト（デフォルト50%）
   - setUtilization テスト（0-100%範囲、範囲外は revert）
   - UtilizationUpdated イベント発行確認
@@ -61,7 +61,7 @@
 
 ### 4. Operator Vault 実装
 
-- [ ] 4.1 (P) Operator Vault Contract 実装
+- [x] 4.1 (P) Operator Vault Contract 実装
   - OpenZeppelin Ownable + ReentrancyGuard を継承した OperatorVault コントラクトを実装
   - コンストラクタで USDC アドレスと initialOwner を受け取る（ゼロアドレスチェック）
   - depositUSDC 関数を実装（nonReentrant、amount > 0 チェック、transferFrom、Deposit イベント）
@@ -71,7 +71,7 @@
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.7, 7.6_
   - _Contracts: OperatorVault (Service, Event)_
 
-- [ ] 4.2 (P) Operator Vault 単体テスト
+- [x] 4.2 (P) Operator Vault 単体テスト
   - depositUSDC テスト（approve + depositUSDC、Deposit イベント確認）
   - withdraw テスト（owner のみ、balance確認、Withdraw イベント確認）
   - balanceOf テスト
@@ -79,7 +79,7 @@
   - 非 owner からの withdraw が revert することを確認
   - _Requirements: 3.6, 6.3, 7.2_
 
-- [ ] 4.3 (P) ReentrancyGuard テスト
+- [x] 4.3 (P) ReentrancyGuard テスト
   - depositUSDC の再入攻撃防止テスト
   - withdraw の再入攻撃防止テスト
   - _Requirements: 7.6_
@@ -88,7 +88,7 @@
 
 ### 5. 統合テスト
 
-- [ ] 5. 統合テスト実装（2.1, 3.1, 4.1に依存）
+- [x] 5. 統合テスト実装（2.1, 3.1, 4.1に依存）
   - CPT Token + Mock Oracle の連携テスト（稼働率に基づくシミュレーション）
   - Operator Vault + USDC Token の連携テスト（入出金フロー）
   - _Requirements: 6.4_
@@ -97,7 +97,7 @@
 
 ### 6. デプロイスクリプト実装
 
-- [ ] 6.1 DeployCore Script 実装（2.1, 3.1, 4.1に依存）
+- [x] 6.1 DeployCore Script 実装（2.1, 3.1, 4.1に依存）
   - Foundry Script を継承した DeployCore スクリプトを実装
   - 環境変数から DEPLOYER_PRIVATE_KEY, CHAIN_NAME, USDC_ADDRESS を読み込む
   - CHAIN_NAME に基づいて CPT Token, Mock Oracle（L2）または Operator Vault（Arc）をデプロイ
@@ -105,12 +105,12 @@
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
   - _Contracts: DeployCore (Script)_
 
-- [ ] 6.2 環境変数設定
+- [x] 6.2 環境変数設定
   - .env.example を作成（BASE_SEPOLIA_RPC_URL, WORLDCOIN_SEPOLIA_RPC_URL, ARC_RPC_URL, DEPLOYER_PRIVATE_KEY, USDC_ADDRESS）
   - .gitignore に .env を追加
   - _Requirements: 4.6, 7.3, 7.4_
 
-- [ ] 6.3 デプロイアドレス記録
+- [x] 6.3 デプロイアドレス記録
   - デプロイ結果を contract/deployed-addresses.json に記録する仕組みを実装
   - Base Sepolia, World Chain Sepolia, Arc の3チェーン分のアドレスを記録
   - _Requirements: 4.4_
@@ -119,13 +119,13 @@
 
 ### 7. セキュリティ検証
 
-- [ ] 7.1 権限管理確認（2.1, 4.1に依存）
+- [x] 7.1 権限管理確認（2.1, 4.1に依存）
   - CPT Token の mint 権限が owner のみであることを確認
   - Operator Vault の withdraw 権限が owner のみであることを確認
   - 非 owner からの操作が revert することを確認
   - _Requirements: 7.1, 7.2, 7.5_
 
-- [ ] 7.2 (P) 環境変数セキュリティ確認
+- [x] 7.2 (P) 環境変数セキュリティ確認
   - 秘密鍵・APIキーがハードコードされていないことを確認
   - .env ファイルが .gitignore に含まれることを確認
   - _Requirements: 7.3, 7.4_
@@ -134,7 +134,7 @@
 
 ### 8. エラーハンドリング実装
 
-- [ ] 8. (P) エラーハンドリング確認（2.1, 3.1, 4.1に依存）
+- [x] 8. (P) エラーハンドリング確認（2.1, 3.1, 4.1に依存）
   - すべてのパブリック関数で適切なエラーハンドリングが実装されていることを確認
   - require 文で明確なエラーメッセージを提供
   - 重要な処理にイベントログを発行（Mint, Transfer, Deposit, Withdraw, UtilizationUpdated）
@@ -144,7 +144,7 @@
 
 ### 9. テストカバレッジ確認
 
-- [ ] 9. テストカバレッジ測定（2.2, 3.2, 4.2, 4.3, 5に依存）
+- [x] 9. テストカバレッジ測定（2.2, 3.2, 4.2, 4.3, 5に依存）
   - forge coverage を実行してカバレッジレポートを生成
   - 最低80%カバレッジを確認
   - mint, depositUSDC, withdraw は 100% カバレッジを確認
