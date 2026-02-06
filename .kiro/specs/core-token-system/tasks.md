@@ -97,7 +97,7 @@
 
 ### 6. デプロイスクリプト実装
 
-- [ ] 6.1 DeployCore Script 実装（2.1, 3.1, 4.1に依存）
+- [x] 6.1 DeployCore Script 実装（2.1, 3.1, 4.1に依存）
   - Foundry Script を継承した DeployCore スクリプトを実装
   - 環境変数から DEPLOYER_PRIVATE_KEY, CHAIN_NAME, USDC_ADDRESS を読み込む
   - CHAIN_NAME に基づいて CPT Token, Mock Oracle（L2）または Operator Vault（Arc）をデプロイ
@@ -105,12 +105,12 @@
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
   - _Contracts: DeployCore (Script)_
 
-- [ ] 6.2 環境変数設定
+- [x] 6.2 環境変数設定
   - .env.example を作成（BASE_SEPOLIA_RPC_URL, WORLDCOIN_SEPOLIA_RPC_URL, ARC_RPC_URL, DEPLOYER_PRIVATE_KEY, USDC_ADDRESS）
   - .gitignore に .env を追加
   - _Requirements: 4.6, 7.3, 7.4_
 
-- [ ] 6.3 デプロイアドレス記録
+- [x] 6.3 デプロイアドレス記録
   - デプロイ結果を contract/deployed-addresses.json に記録する仕組みを実装
   - Base Sepolia, World Chain Sepolia, Arc の3チェーン分のアドレスを記録
   - _Requirements: 4.4_
