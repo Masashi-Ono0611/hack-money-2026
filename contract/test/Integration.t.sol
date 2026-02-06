@@ -7,6 +7,11 @@ import {ComputeToken} from "../src/ComputeToken.sol";
 import {MockOracle} from "../src/MockOracle.sol";
 import {OperatorVault} from "../src/OperatorVault.sol";
 
+/**
+ * @title モック用のERC30トークン
+ * @author
+ * @notice
+ */
 contract MockUSDC is ERC20 {
     constructor() ERC20("Mock USDC", "mUSDC") {}
 
@@ -15,10 +20,18 @@ contract MockUSDC is ERC20 {
     }
 }
 
+/**
+ * @title 結合テスト用のテストコード
+ * @author
+ * @notice
+ */
 contract IntegrationTest is Test {
     address private owner = address(0xA11CE);
     address private user = address(0xB0B);
 
+    /**
+     * CPTとオラクルのシミュレーション用コントラクト
+     */
     function test_CPTAndOracle_UtilizationSimulation() public {
         ComputeToken token = new ComputeToken("Compute Token", "CPT", owner);
         MockOracle oracle = new MockOracle();
@@ -33,6 +46,9 @@ contract IntegrationTest is Test {
         assertEq(token.totalSupply(), 1_000e18);
     }
 
+    /**
+     * VaultコントラクトとUSDCの処理のテストコード
+     */
     function test_VaultAndUSDC_DepositWithdrawFlow() public {
         MockUSDC usdc = new MockUSDC();
         OperatorVault vault = new OperatorVault(address(usdc), owner);
