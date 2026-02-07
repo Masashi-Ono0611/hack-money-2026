@@ -1,0 +1,17 @@
+{
+  "name": "chainlink-functions-example",
+  "version": "1.0.0",
+  "description": "Example project for Chainlink Functions",
+  "scripts": {
+    "simulate": "node scripts/request.js"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^1.1.0",
+    "@chainlink/functions-toolkit": "^0.2.8",
+    "ethers": "^6.10.0",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "hardhat": "^2.19.0"
+  }
+}
