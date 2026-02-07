@@ -116,7 +116,7 @@ describe('oracle-updater', () => {
     expect(base.fallbackRpc).toBe('https://base-fallback');
     expect(base.emaWindow).toBe(30);
     expect(base.botUpdateInterval).toBe(30000);
-    expect(uni.functionsEnabled).toBe(true);
+    expect(uni.functionsEnabled).toBe(false);
     expect(config.chainlink['base-sepolia']!.subscriptionId).toBe(42n);
   });
 });

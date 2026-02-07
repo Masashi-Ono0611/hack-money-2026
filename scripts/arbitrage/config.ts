@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { ArbitrageConfig, ChainConfig, LogLevel } from './types.js';
+import { BASE_SEPOLIA_FUNCTIONS_DEFAULTS } from './functions/config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CONTRACT_DIR = resolve(__dirname, '../../contract');
@@ -227,7 +228,8 @@ export function loadOracleConfig(env: NodeJS.ProcessEnv = process.env): OracleCo
         fallbackRpc: unichainRpcFallback,
         emaWindow: unichainEmaWindow,
         botUpdateInterval: botInterval,
-        functionsEnabled: optionalEnvFrom('ORACLE_UNICHAIN_FUNCTIONS_ENABLED', 'false', env) === 'true',
+        // Unichain Sepolia is fixed to disabled for Functions in this phase.
+        functionsEnabled: false,
         functionsVerifyInterval: verifyInterval,
         divergenceThreshold,
         staleTtl,
@@ -237,11 +239,11 @@ export function loadOracleConfig(env: NodeJS.ProcessEnv = process.env): OracleCo
       [baseChainName]: {
         routerAddress: optionalEnvFrom(
           'ORACLE_BASE_FUNCTIONS_ROUTER',
-          '0xf9B8fc078197181C841c296C876945aaa425B278',
+          BASE_SEPOLIA_FUNCTIONS_DEFAULTS.router,
           env,
         ) as `0x${string}`,
         subscriptionId: BigInt(optionalEnvFrom('ORACLE_BASE_FUNCTIONS_SUBSCRIPTION_ID', '0', env)),
-        donId: optionalEnvFrom('ORACLE_BASE_FUNCTIONS_DON_ID', 'fun-base-sepolia-1', env),
+        donId: optionalEnvFrom('ORACLE_BASE_FUNCTIONS_DON_ID', BASE_SEPOLIA_FUNCTIONS_DEFAULTS.donId, env),
         callbackGasLimit: Number(optionalEnvFrom('ORACLE_BASE_FUNCTIONS_CALLBACK_GAS_LIMIT', '300000', env)),
       },
     },

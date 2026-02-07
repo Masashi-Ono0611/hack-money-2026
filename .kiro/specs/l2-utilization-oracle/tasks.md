@@ -144,25 +144,25 @@
 
 ---
 
-- [ ] 5. Functions Source / デプロイ資材整備（P1）
+- [x] 5. Functions Source / デプロイ資材整備（P1）
 
-- [ ] 5.1 `scripts/arbitrage/functions/source.js` を作成する
+- [x] 5.1 `scripts/arbitrage/functions/source.js` を作成する
   - RPC取得 + EMA計算（botと同式）
   - _Requirements: 7.1_
 
-- [ ] 5.2 `scripts/arbitrage/functions/deploy/` を作成する
+- [x] 5.2 `scripts/arbitrage/functions/deploy/` を作成する
   - subscription/router/don設定を投入可能にする
   - _Requirements: 7.4, 11.2_
 
-- [ ] 5.3 リクエスト引数仕様を固定する
+- [x] 5.3 リクエスト引数仕様を固定する
   - chainId, blockWindow, rpcHints など
   - _Requirements: 7.1, 11.1_
 
-- [ ] 5.4 Base Sepolia向け運用手順を記述する
+- [x] 5.4 Base Sepolia向け運用手順を記述する
   - 実行・更新・障害対応
   - _Requirements: 7.2, 7.4, 7.5_
 
-- [ ] 5.5 UnichainでFunctions無効を設定で固定する
+- [x] 5.5 UnichainでFunctions無効を設定で固定する
   - _Requirements: 11.3_
 
 ---
