@@ -38,9 +38,10 @@ export function VaultBalanceCard({ onLog }: Props) {
       } else {
         onLog(`Vault: ${data.error ?? "no balance data"}`);
       }
-    } catch (err: any) {
-      onLog(`Vault: fetch failed - ${err.message}`);
-      setStatus({ ok: false, balance: null, token: null, error: err.message });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      onLog(`Vault: fetch failed - ${error.message}`);
+      setStatus({ ok: false, balance: null, token: null, error: error.message });
     } finally {
       setLoading(false);
     }

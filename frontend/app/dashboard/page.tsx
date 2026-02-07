@@ -20,7 +20,7 @@ export default function DashboardPage() {
   const [isDemoRunning, setIsDemoRunning] = useState(false);
   const [sessionLogs, setSessionLogs] = useState<LogEntry[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  let logCounter = useRef(0);
+  const logCounter = useRef(0);
 
   const addLog = useCallback(
     (type: LogEntry["type"], message: string, detail?: string) => {
@@ -57,6 +57,8 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    // Safe: fetch once on mount then interval; state updates are expected
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchChainData();
     intervalRef.current = setInterval(fetchChainData, 5_000);
     return () => {

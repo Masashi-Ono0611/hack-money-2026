@@ -50,6 +50,8 @@ export default function SettlementPage() {
 
   // Auto-refresh chain data every 15s
   useEffect(() => {
+    // Safe: initial fetch + interval polling for dashboard data
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchChainData();
     intervalRef.current = setInterval(fetchChainData, 15_000);
     return () => {
