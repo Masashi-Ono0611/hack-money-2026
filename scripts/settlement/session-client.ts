@@ -57,7 +57,9 @@ export class SessionClient {
       const balancesResult = await yellow.getBalances();
       const balances = Array.isArray(balancesResult)
         ? balancesResult
-        : (balancesResult as any)?.balances ?? [];
+        : (balancesResult as any)?.ledger_balances
+          ?? (balancesResult as any)?.balances
+          ?? [];
 
       const targetAsset = this.config.asset!;
       const assetBalance = balances.find(

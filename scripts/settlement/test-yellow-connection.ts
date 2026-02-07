@@ -52,7 +52,9 @@ async function main() {
     const balancesResult = await yellow.getBalances();
     const balances = Array.isArray(balancesResult)
       ? balancesResult
-      : (balancesResult as any)?.balances ?? [];
+      : (balancesResult as any)?.ledger_balances
+        ?? (balancesResult as any)?.balances
+        ?? [];
     if (balances.length === 0) {
       console.log('   (no balances found – use the Yellow faucet to get ytest.usd)');
     } else {
