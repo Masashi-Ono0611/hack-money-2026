@@ -25,8 +25,8 @@
 
 ### 2. Utilization Hook コアロジック実装
 
-- [ ] 2.1 UtilizationHook コントラクトを実装する
-  - BaseHook を継承した Hook コントラクトを作成する
+- [x] 2.1 UtilizationHook コントラクトを実装する
+  - IHooks インターフェースを直接実装した Hook コントラクトを作成する（BaseHook は v4-periphery 最新版で削除済み）
   - IMockOracle インターフェースを定義する（core-token-system との連携用）
   - 手数料定数を定義する（LOW_FEE: 0.05%, DEFAULT_FEE: 0.3%, HIGH_FEE: 1.0%）
   - 稼働率閾値を定義する（LOW_THRESHOLD: 30, HIGH_THRESHOLD: 70）
