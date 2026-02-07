@@ -43,9 +43,9 @@ interface UsdcAddresses {
 
 // StateView addresses per chain (from Uniswap v4 periphery deployments)
 const STATE_VIEW_ADDRESSES: Record<string, `0x${string}`> = {
-  'base-sepolia': '0x571291b572ed32ce6751a2Cb2F1CFEeD1e09a81d',
-  'unichain-sepolia': '0xC5Cb7D0e1b0a1A8A1E8A1e8A1E8a1e8a1e8A1e8A',
-  'sepolia': '0x75f7Ab88d2F27386C1E5c304EbBBa84d3BFf0adF',
+  'base-sepolia': '0x571291B572ED32Ce6751A2cb2F1CFeeD1E09a81D',
+  'unichain-sepolia': '0x75f7Ab88D2f27386c1e5C304eBBBA84D3BfF0adF',
+  'sepolia': '0x75f7Ab88D2f27386c1e5C304eBBBA84D3BfF0adF',
 };
 
 function buildChainConfig(

@@ -10,7 +10,8 @@
 		"yellow:open-channel": "tsx scripts/settlement/open-channel.ts",
 		"arbitrage": "tsx scripts/arbitrage/index.ts",
 		"test:arbitrage": "vitest run",
-		"test:arbitrage:watch": "vitest"
+		"test:arbitrage:watch": "vitest",
+		"demo": "tsx scripts/demo/run-demo.ts"
 	},
 	"devDependencies": {
 		"@types/node": "^25.2.0",
