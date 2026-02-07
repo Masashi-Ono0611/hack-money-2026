@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { Sidebar } from "./_components/sidebar";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ghost Yield — Zombie L2 Clearinghouse",
+  title: "Ghost Yield",
   description: "Turn idle Ethereum L2 compute into USDC revenue",
 };
 
