@@ -4,7 +4,9 @@
 	"type": "module",
 	"scripts": {
 		"transfer": "tsx scripts/arc-transfer.ts",
-		"settle": "tsx scripts/settle-to-vault.ts"
+		"settle": "tsx scripts/settle-to-vault.ts",
+		"settle:vault": "tsx scripts/settlement/settle-to-vault.ts",
+		"vault:balance": "tsx scripts/settlement/check-vault-balance.ts"
 	},
 	"devDependencies": {
 		"@types/node": "^25.2.0",

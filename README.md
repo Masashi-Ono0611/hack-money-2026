@@ -925,3 +925,47 @@ forge script script/VerifyHookBehavior.s.sol:VerifyHookBehavior \
 --rpc-url $UNICHAIN_SEPOLIA_RPC_URL \
 --broadcast -vvv
 ```
+
+### 2-7. 最終決済（Arc + USDC → Operator Vault）
+
+裁定利益を Arc 経由で USDC として Operator Vault へ送金するフローです。
+
+#### 前提条件
+
+- ルートの `.env` に以下が設定されていること
+
+```
+ARC_API_KEY=<your-api-key>
+ARC_WALLET_ID_SOURCE=<source-wallet-id>
+ARC_WALLET_ID_OPERATOR_VAULT=<vault-wallet-id>
+ENTITY_SECRET_HEX=<entity-secret-hex>
+```
+
+- SOURCE ウォレットに USDC-TESTNET 残高があること
+
+#### Vault 残高確認
+
+```bash
+source .env
+pnpm vault:balance
+```
+
+#### 決済実行（Vault へ USDC 送金）
+
+```bash
+source .env
+
+# dry-run（実際には送金しない）
+pnpm settle:vault -- --amount 5 --dry-run
+
+# 本番実行
+pnpm settle:vault -- --amount 5
+```
+
+#### オプション
+
+- `--amount <USDC>` : 送金額（必須）
+- `--vault-wallet <walletId>` : Vault ウォレット ID（省略時は `ARC_WALLET_ID_OPERATOR_VAULT`）
+- `--token-symbol <symbol>` : トークンシンボル（デフォルト: `USDC-TESTNET`）
+- `--idempotency-key <uuid>` : 冪等性キー（省略時は自動生成）
+- `--dry-run` : 送金せずに確認のみ
