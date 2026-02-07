@@ -10,6 +10,8 @@ import {OperatorVault} from "../src/OperatorVault.sol";
 /// @notice Core Token System のデプロイスクリプト
 /// @dev 環境変数でチェーンとUSDCアドレスを指定
 contract DeployCore is Script {
+    uint256 internal constant DEFAULT_ORACLE_STALE_TTL = 20 minutes;
+
     /**
      * 実行関数
      */
@@ -32,6 +34,22 @@ contract DeployCore is Script {
 
             MockOracle oracle = new MockOracle();
             console.log("Mock Oracle deployed at:", address(oracle));
+
+            uint256 staleTtl = vm.envOr("ORACLE_STALE_TTL_SECONDS", uint256(DEFAULT_ORACLE_STALE_TTL));
+            oracle.setStaleTtl(staleTtl);
+            console.log("Oracle stale TTL:", staleTtl);
+
+            address botUpdater = _readOptionalAddress("ORACLE_BOT_UPDATER");
+            if (botUpdater != address(0)) {
+                oracle.setAuthorizedUpdater(botUpdater, true);
+                console.log("Oracle bot updater authorized:", botUpdater);
+            }
+
+            address functionsUpdater = _readOptionalAddress("FUNCTIONS_RECEIVER_ADDRESS");
+            if (functionsUpdater != address(0)) {
+                oracle.setAuthorizedUpdater(functionsUpdater, true);
+                console.log("Oracle functions updater authorized:", functionsUpdater);
+            }
 
             string memory json = vm.serializeAddress(chainName, "cpt", address(cpt));
             json = vm.serializeAddress(chainName, "oracle", address(oracle));
@@ -85,5 +103,13 @@ contract DeployCore is Script {
     function _readUsdcAddress(string memory path, string memory chainName) private view returns (address) {
         string memory json = vm.readFile(path);
         return vm.parseJsonAddress(json, string.concat(".", chainName));
+    }
+
+    function _readOptionalAddress(string memory envKey) private view returns (address) {
+        string memory value = vm.envOr(envKey, string(""));
+        if (bytes(value).length == 0) {
+            return address(0);
+        }
+        return vm.parseAddress(value);
     }
 }

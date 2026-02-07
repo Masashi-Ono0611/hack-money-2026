@@ -114,6 +114,33 @@ contract PoolHookIntegrationTest is Test {
         assertEq(feeFromSwap, feeFromEvent, "Swap fee should equal FeeOverridden fee");
     }
 
+    function test_swap_staleOracle_appliesDefaultFee() public {
+        (PoolManager poolManager, MockOracle oracle, PoolKey memory key, PoolSwapTest swapRouter,) =
+            _deployAndInitPoolWithLiquidity();
+
+        oracle.setStaleTtl(60);
+        oracle.setUtilization(10);
+        vm.warp(block.timestamp + 61);
+        vm.recordLogs();
+
+        swapRouter.swap(
+            key,
+            IPoolManager.SwapParams({
+                zeroForOne: true, amountSpecified: -1e15, sqrtPriceLimitX96: TickMath.MIN_SQRT_PRICE + 1
+            }),
+            PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false}),
+            ""
+        );
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint24 feeFromSwap = _extractLastSwapFee(logs, address(poolManager));
+        assertEq(feeFromSwap, 3000, "stale oracle should force default fee");
+
+        (, uint256 utilizationFromEvent, uint24 feeFromEvent) = _extractLastFeeOverridden(logs, address(key.hooks));
+        assertEq(utilizationFromEvent, 10, "event should keep stale utilization value");
+        assertEq(feeFromEvent, 3000, "event fee should be default fee");
+    }
+
     function test_create2HookMiner_endToEnd_deployedHookWorks() public {
         (PoolManager poolManager, MockOracle oracle, PoolKey memory key, PoolSwapTest swapRouter, ComputeToken cpt) =
             _deployAndInitPoolWithLiquidity();

@@ -33,6 +33,9 @@ contract VerifyHookBehavior is Script {
         uint256 utilLow;
         uint256 utilMid;
         uint256 utilHigh;
+        uint256 utilStale;
+        uint256 staleTtlSeconds;
+        uint256 staleWarpSeconds;
         address poolManager;
         address cpt;
         address usdc;
@@ -62,6 +65,7 @@ contract VerifyHookBehavior is Script {
         _verifyOne(
             cfg.deployerPrivateKey, swapRouter, key, cfg.oracle, cfg.utilHigh, 10000, cfg.cpt, cfg.swapInputAmount
         );
+        _verifyStale(cfg, swapRouter, key);
 
         console.log("VerifyHookBehavior: success");
     }
@@ -77,9 +81,14 @@ contract VerifyHookBehavior is Script {
         cfg.utilLow = vm.envOr("UTIL_LOW", uint256(10));
         cfg.utilMid = vm.envOr("UTIL_MID", uint256(50));
         cfg.utilHigh = vm.envOr("UTIL_HIGH", uint256(90));
+        cfg.utilStale = vm.envOr("UTIL_STALE", uint256(10));
+        cfg.staleTtlSeconds = vm.envOr("STALE_TTL_SECONDS", uint256(60));
+        cfg.staleWarpSeconds = vm.envOr("STALE_WARP_SECONDS", uint256(61));
         _validateUtilization(cfg.utilLow);
         _validateUtilization(cfg.utilMid);
         _validateUtilization(cfg.utilHigh);
+        _validateUtilization(cfg.utilStale);
+        require(cfg.staleWarpSeconds > cfg.staleTtlSeconds, "VerifyHookBehavior: stale warp must exceed ttl");
 
         string memory root = vm.projectRoot();
         string memory deployedPath = string.concat(root, "/deployed-addresses.json");
@@ -142,6 +151,43 @@ contract VerifyHookBehavior is Script {
         console.log("utilization:", utilization);
         console.log("expected fee:", uint256(expectedFee));
         console.log("observed fee:", uint256(feeFromSwap));
+    }
+
+    function _verifyStale(VerifyConfig memory cfg, address swapRouter, PoolKey memory key) internal {
+        vm.recordLogs();
+
+        vm.startBroadcast(cfg.deployerPrivateKey);
+        IMockOracle(cfg.oracle).setStaleTtl(cfg.staleTtlSeconds);
+        IMockOracle(cfg.oracle).setUtilization(cfg.utilStale);
+        vm.warp(block.timestamp + cfg.staleWarpSeconds);
+        PoolSwapTest(swapRouter)
+            .swap(
+                key,
+                IPoolManager.SwapParams({
+                    zeroForOne: Currency.unwrap(key.currency0) == cfg.cpt,
+                    amountSpecified: -int256(cfg.swapInputAmount),
+                    sqrtPriceLimitX96: Currency.unwrap(key.currency0) == cfg.cpt
+                        ? TickMath.MIN_SQRT_PRICE + 1
+                        : TickMath.MAX_SQRT_PRICE - 1
+                }),
+                PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false}),
+                ""
+            );
+        vm.stopBroadcast();
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint24 feeFromSwap = _extractLastSwapFee(logs);
+        (bytes32 poolIdFromEvent, uint256 utilizationFromEvent, uint24 feeFromEvent) =
+            _extractLastFeeOverridden(logs, address(key.hooks));
+
+        require(poolIdFromEvent == PoolId.unwrap(key.toId()), "VerifyHookBehavior: invalid stale poolId");
+        require(utilizationFromEvent == cfg.utilStale, "VerifyHookBehavior: invalid stale utilization");
+        require(feeFromEvent == 3000, "VerifyHookBehavior: stale event fee should be default");
+        require(feeFromSwap == 3000, "VerifyHookBehavior: stale swap fee should be default");
+
+        console.log("stale utilization:", cfg.utilStale);
+        console.log("stale expected fee:", uint256(3000));
+        console.log("stale observed fee:", uint256(feeFromSwap));
     }
 
     function _buildPoolKey(address cpt, address usdc, address hook) internal pure returns (PoolKey memory key) {

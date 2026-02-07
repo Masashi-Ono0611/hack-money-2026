@@ -50,6 +50,8 @@ contract DeployHook is Script {
         require(deployedHookAddress.code.length > 0, "DeployHook: deployed code missing");
 
         hook = UtilizationHook(deployedHookAddress);
+        // New oracle metadata API compatibility check.
+        hook.oracle().getUtilizationWithMeta();
         _writeHookAddress(deployedAddressesPath, chainName, deployedHookAddress);
         console.log("Hook deployed at:", deployedHookAddress);
     }

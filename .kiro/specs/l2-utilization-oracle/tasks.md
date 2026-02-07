@@ -167,21 +167,21 @@
 
 ---
 
-- [ ] 6. Foundry デプロイ/検証スクリプト更新（P1）
+- [x] 6. Foundry デプロイ/検証スクリプト更新（P1）
 
-- [ ] 6.1 `DeployCore.s.sol` を更新する
+- [x] 6.1 `DeployCore.s.sol` を更新する
   - 拡張Oracleの初期化（TTL/updater設定）
   - _Requirements: 3.1, 4.3, 11.1_
 
-- [ ] 6.2 `DeployHook.s.sol` を更新する
+- [x] 6.2 `DeployHook.s.sol` を更新する
   - 新Oracle IF と再デプロイ手順に対応
   - _Requirements: 5.1, 10.4_
 
-- [ ] 6.3 `VerifyHookBehavior.s.sol` を更新する
+- [x] 6.3 `VerifyHookBehavior.s.sol` を更新する
   - staleシナリオを追加
   - _Requirements: 5.2, 9.1_
 
-- [ ] 6.4 `deployed-addresses.json` 更新運用を明文化する
+- [x] 6.4 `deployed-addresses.json` 更新運用を明文化する
   - _Requirements: 11.1_
 
 ---
