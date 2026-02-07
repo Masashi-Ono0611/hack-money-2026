@@ -14,6 +14,11 @@ coverage/
 # Production
 build/
 dist/
+/.next/
+/.turbo/
+frontend/.next/
+frontend/.turbo/
+frontend/node_modules/
 
 # Misc
 .DS_Store

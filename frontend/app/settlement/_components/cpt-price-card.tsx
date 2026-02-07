@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { RefreshCw, TrendingUp, Minus } from "lucide-react";
 
 interface ChainData {
   chain: string;
@@ -36,19 +36,20 @@ export function CptPriceCard({ onLog }: Props) {
     onLog("Fetching CPT prices from on-chain pools...");
     try {
       const res = await fetch("/api/settlement/chain-data");
-      const data = await res.json();
-      if (data.ok) {
+      const data = (await res.json()) as { ok: boolean; chains: ChainData[]; error?: string };
+      if (data.ok && Array.isArray(data.chains)) {
         setChains(data.chains);
         const prices = data.chains
-          .filter((c: ChainData) => c.price !== null)
-          .map((c: ChainData) => `${c.label}: ${c.price!.toFixed(6)} CPT/USDC`)
+          .filter((c) => c.price !== null)
+          .map((c) => `${c.label}: ${c.price!.toFixed(6)} CPT/USDC`)
           .join(", ");
         onLog(`Prices: ${prices || "no data"}`);
       } else {
         onLog(`Chain data error: ${data.error}`);
       }
-    } catch (err: any) {
-      onLog(`Chain data fetch failed: ${err.message}`);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      onLog(`Chain data fetch failed: ${error.message}`);
     } finally {
       setLoading(false);
     }

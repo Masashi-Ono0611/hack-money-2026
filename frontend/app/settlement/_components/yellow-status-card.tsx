@@ -34,7 +34,7 @@ export function YellowStatusCard({ onLog }: Props) {
     onLog("Checking Yellow ClearNode connection...");
     try {
       const res = await fetch("/api/settlement/yellow-status");
-      const data = await res.json();
+      const data = (await res.json()) as YellowStatus;
       setStatus(data);
       if (data.ok) {
         onLog(
@@ -43,9 +43,10 @@ export function YellowStatusCard({ onLog }: Props) {
       } else {
         onLog(`Yellow: error - ${data.error}`);
       }
-    } catch (err: any) {
-      onLog(`Yellow: fetch failed - ${err.message}`);
-      setStatus({ ok: false, connected: false, authenticated: false, channelCount: 0, balances: {}, error: err.message });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      onLog(`Yellow: fetch failed - ${error.message}`);
+      setStatus({ ok: false, connected: false, authenticated: false, channelCount: 0, balances: {}, error: error.message });
     } finally {
       setLoading(false);
     }

@@ -17,7 +17,6 @@ export async function GET() {
     const channelsMatch = out.match(/Channels:\s*(\d+)/);
     const channelCount = channelsMatch ? Number(channelsMatch[1]) : 0;
 
-    const balanceLines = [...out.matchAll(/\s+(\S+):\s+(\S+)/g)];
     const balances: Record<string, string> = {};
     let capture = false;
     for (const line of out.split("\n")) {
@@ -37,9 +36,17 @@ export async function GET() {
       balances,
       raw: out.slice(-500),
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return NextResponse.json(
-      { ok: false, error: err.message, raw: String(err.stdout ?? err.stderr ?? "").slice(-500) },
+      {
+        ok: false,
+        error: error.message,
+        raw:
+          typeof err === "object" && err !== null && "stdout" in err
+            ? String((err as { stdout?: string; stderr?: string }).stdout ?? (err as { stderr?: string }).stderr ?? "").slice(-500)
+            : "",
+      },
       { status: 500 },
     );
   }

@@ -54,9 +54,10 @@ export function AutoSettleCard({ onLog }: Props) {
       } else {
         onLog(`Settle failed: ${data.error ?? "unknown"}`);
       }
-    } catch (err: any) {
-      onLog(`Settle: fetch failed - ${err.message}`);
-      setResult({ ok: false, success: false, dryRun, sessionId, profit: null, transferAmount: null, transactionId: null, error: err.message });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      onLog(`Settle: fetch failed - ${error.message}`);
+      setResult({ ok: false, success: false, dryRun, sessionId, profit: null, transferAmount: null, transactionId: null, error: error.message });
     } finally {
       setLoading(false);
     }

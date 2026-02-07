@@ -21,9 +21,17 @@ export async function GET() {
       token,
       raw: out.slice(-500),
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return NextResponse.json(
-      { ok: false, error: err.message, raw: String(err.stdout ?? err.stderr ?? "").slice(-500) },
+      {
+        ok: false,
+        error: error.message,
+        raw:
+          typeof err === "object" && err !== null && "stdout" in err
+            ? String((err as { stdout?: string; stderr?: string }).stdout ?? (err as { stderr?: string }).stderr ?? "").slice(-500)
+            : "",
+      },
       { status: 500 },
     );
   }

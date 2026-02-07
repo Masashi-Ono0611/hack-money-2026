@@ -4,10 +4,15 @@ import path from "path";
 
 const ROOT = path.resolve(process.cwd(), "..");
 
+type AutoSettleRequest = {
+  sessionId?: string;
+  dryRun?: boolean;
+};
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({}));
-    const sessionId = body.sessionId || "demo-session-001";
+    const body = (await req.json().catch(() => ({}))) as AutoSettleRequest;
+    const sessionId = body.sessionId ?? "demo-session-001";
     const dryRun = body.dryRun !== false;
 
     const flags = dryRun ? "--dry-run" : "";
@@ -35,12 +40,15 @@ export async function POST(req: Request) {
       transactionId: txMatch?.[1] ?? null,
       raw: out.slice(-1000),
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
     return NextResponse.json(
       {
         ok: false,
-        error: err.message,
-        raw: String(err.stdout ?? err.stderr ?? "").slice(-1000),
+        error: error.message,
+        raw: typeof err === "object" && err !== null && "stdout" in err
+          ? String((err as { stdout?: string; stderr?: string }).stdout ?? (err as { stderr?: string }).stderr ?? "").slice(-1000)
+          : "",
       },
       { status: 500 },
     );
