@@ -21,9 +21,10 @@ contract DeployHook is Script {
         // 環境変数から読み取る
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         string memory chainName = vm.envString("CHAIN_NAME");
+        string memory deployedAddressesPath = string.concat(vm.projectRoot(), "/deployed-addresses.json");
         address poolManager =
             _readPoolManagerAddress(string.concat(vm.projectRoot(), "/uniswap-v4-addresses.json"), chainName);
-        address mockOracle = _readOracleAddress(string.concat(vm.projectRoot(), "/deployed-addresses.json"), chainName);
+        address mockOracle = _readOracleAddress(deployedAddressesPath, chainName);
 
         uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG);
         bytes memory creationCode = type(UtilizationHook).creationCode;
@@ -49,6 +50,7 @@ contract DeployHook is Script {
         require(deployedHookAddress.code.length > 0, "DeployHook: deployed code missing");
 
         hook = UtilizationHook(deployedHookAddress);
+        _writeHookAddress(deployedAddressesPath, chainName, deployedHookAddress);
         console.log("Hook deployed at:", deployedHookAddress);
     }
 
@@ -60,5 +62,35 @@ contract DeployHook is Script {
     function _readOracleAddress(string memory path, string memory chainName) private view returns (address) {
         string memory json = vm.readFile(path);
         return vm.parseJsonAddress(json, string.concat(".", chainName, ".oracle"));
+    }
+
+    function _writeHookAddress(string memory path, string memory chainName, address hookAddress) private {
+        string memory json = vm.serializeAddress(chainName, "hook", hookAddress);
+
+        (bool hasCpt, address cpt) = _tryReadAddress(path, string.concat(".", chainName, ".cpt"));
+        if (hasCpt) {
+            json = vm.serializeAddress(chainName, "cpt", cpt);
+        }
+
+        (bool hasOracle, address oracle) = _tryReadAddress(path, string.concat(".", chainName, ".oracle"));
+        if (hasOracle) {
+            json = vm.serializeAddress(chainName, "oracle", oracle);
+        }
+
+        (bool hasVault, address vault) = _tryReadAddress(path, string.concat(".", chainName, ".vault"));
+        if (hasVault) {
+            json = vm.serializeAddress(chainName, "vault", vault);
+        }
+
+        vm.writeJson(json, path, string.concat(".", chainName));
+    }
+
+    function _tryReadAddress(string memory path, string memory jsonPath) private view returns (bool, address) {
+        string memory json = vm.readFile(path);
+        try vm.parseJsonAddress(json, jsonPath) returns (address addr) {
+            return (true, addr);
+        } catch {
+            return (false, address(0));
+        }
     }
 }

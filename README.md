@@ -751,24 +751,56 @@ Core Token System のデプロイスクリプトを実行する場合
 source .env
 
 # sepolia
-CHAIN_NAME=sepolia forge script script/DeployCore.s.sol --rpc-url $SEPOLIA_RPC_URL --broadcast -vvv
+CHAIN_NAME=sepolia \
+forge script script/DeployCore.s.sol \
+--rpc-url $SEPOLIA_RPC_URL \
+--broadcast -vvv
 
 # unichain sepolia
-CHAIN_NAME=unichain-sepolia forge script script/DeployCore.s.sol --rpc-url $UNICHAIN_SEPOLIA_RPC_URL --broadcast -vvv
+CHAIN_NAME=unichain-sepolia \
+forge script script/DeployCore.s.sol \
+--rpc-url $UNICHAIN_SEPOLIA_RPC_URL \
+--broadcast -vvv
 
 # base sepolia
-CHAIN_NAME=base-sepolia forge script script/DeployCore.s.sol --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast -vvv
+CHAIN_NAME=base-sepolia \
+forge script script/DeployCore.s.sol \
+--rpc-url $BASE_SEPOLIA_RPC_URL \
+--broadcast -vvv
 
 # world sepolia
-CHAIN_NAME=world-chain-sepolia forge script script/DeployCore.s.sol --rpc-url $WORLDCOIN_SEPOLIA_RPC_URL --broadcast -vvv
+CHAIN_NAME=world-chain-sepolia \
+forge script script/DeployCore.s.sol\
+--rpc-url $WORLDCOIN_SEPOLIA_RPC_URL \
+--broadcast -vvv
 
 # Arc Testnet
-CHAIN_NAME=arc forge script script/DeployCore.s.sol --rpc-url $ARC_RPC_URL --broadcast -vvv
+CHAIN_NAME=arc \
+forge script script/DeployCore.s.sol \
+--rpc-url $ARC_RPC_URL \
+--broadcast -vvv
 ```
 
-Hooksコントラクトをデプロイする場合
+Hooksコントラクトをデプロイする場合(UniswapV4のテストネットに対応しているチェーンである必要あり)
 
 ```bash
 source .env
 
+# sepolia
+CHAIN_NAME=sepolia \
+forge script script/DeployHook.s.sol:DeployHook \
+--rpc-url $SEPOLIA_RPC_URL \
+--broadcast -vvv
+
+# base sepolia
+CHAIN_NAME=base-sepolia \
+forge script script/DeployHook.s.sol:DeployHook \
+--rpc-url $BASE_SEPOLIA_RPC_URL \
+--broadcast -vvv
+
+# unichain sepolia
+CHAIN_NAME=unichain-sepolia \
+forge script script/DeployHook.s.sol:DeployHook \
+--rpc-url $UNICHAIN_SEPOLIA_RPC_URL \
+--broadcast -vvv
 ```
