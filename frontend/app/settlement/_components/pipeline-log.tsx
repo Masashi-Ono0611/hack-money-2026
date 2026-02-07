@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ScrollText, Trash2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
@@ -24,37 +16,47 @@ export function PipelineLog({ logs, onClear }: Props) {
   }, [logs]);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">
-          <ScrollText className="h-4 w-4 text-zinc-400" />
+          <ScrollText size={14} className="text-[#8a8a8a]" />
           <div>
-            <CardTitle className="text-base">Activity Log</CardTitle>
-            <CardDescription>Pipeline execution history</CardDescription>
+            <span className="font-sans text-base font-semibold text-white">
+              ACTIVITY LOG
+            </span>
+            <p className="mt-0.5 font-mono text-[11px] text-[#8a8a8a]">
+              Pipeline execution history
+            </p>
           </div>
         </div>
         {logs.length > 0 && (
-          <Button variant="ghost" size="icon" onClick={onClear}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <button
+            onClick={onClear}
+            className="flex items-center justify-center p-2 text-[#8a8a8a] transition-colors hover:text-white"
+          >
+            <Trash2 size={14} />
+          </button>
         )}
-      </CardHeader>
-      <CardContent>
+      </div>
+
+      {/* Content */}
+      <div className="border-t border-[#2f2f2f] px-6 py-4">
         {logs.length === 0 ? (
-          <p className="text-sm text-zinc-400">
+          <span className="font-mono text-xs text-[#8a8a8a]">
             No activity yet. Use the controls above to get started.
-          </p>
+          </span>
         ) : (
-          <div className="max-h-64 overflow-y-auto rounded bg-zinc-50 p-3 font-mono text-xs leading-relaxed dark:bg-zinc-900">
+          <div className="max-h-64 overflow-y-auto">
             {logs.map((log, i) => (
-              <div key={i} className="text-zinc-600 dark:text-zinc-400">
+              <div key={i} className="py-0.5 font-mono text-[11px] text-[#8a8a8a]">
                 {log}
               </div>
             ))}
             <div ref={bottomRef} />
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

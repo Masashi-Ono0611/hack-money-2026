@@ -1,15 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Wifi, WifiOff, RefreshCw } from "lucide-react";
 
 interface Props {
@@ -53,60 +44,83 @@ export function YellowStatusCard({ onLog }: Props) {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <div className="flex flex-col border border-[#2f2f2f] bg-[#0A0A0A]">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4">
         <div>
-          <CardTitle className="text-base">Yellow ClearNode</CardTitle>
-          <CardDescription>State channel connection</CardDescription>
+          <span className="font-sans text-base font-semibold text-white">
+            YELLOW CLEARNODE
+          </span>
+          <p className="mt-0.5 font-mono text-[11px] text-[#8a8a8a]">
+            State channel connection
+          </p>
         </div>
-        <Button variant="outline" size="icon" onClick={fetchStatus} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-3">
+        <button
+          onClick={fetchStatus}
+          disabled={loading}
+          className="flex items-center justify-center border border-[#2f2f2f] bg-[#0A0A0A] p-2 text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 border-t border-[#2f2f2f] px-6 py-5">
         {!status ? (
-          <p className="text-sm text-zinc-400">Click refresh to check status</p>
+          <span className="font-mono text-xs text-[#8a8a8a]">
+            Click refresh to check status
+          </span>
         ) : (
-          <>
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
               {status.connected ? (
-                <Wifi className="h-4 w-4 text-emerald-500" />
+                <Wifi size={14} className="text-[#00FF88]" />
               ) : (
-                <WifiOff className="h-4 w-4 text-red-500" />
+                <WifiOff size={14} className="text-[#FF4444]" />
               )}
-              <Badge variant={status.connected ? "default" : "destructive"}>
-                {status.connected ? "Connected" : "Disconnected"}
-              </Badge>
+              <span
+                className={`px-1.5 py-0.5 font-mono text-[9px] font-bold ${
+                  status.connected
+                    ? "bg-[#00FF8820] text-[#00FF88]"
+                    : "bg-[#FF444420] text-[#FF4444]"
+                }`}
+              >
+                {status.connected ? "CONNECTED" : "DISCONNECTED"}
+              </span>
               {status.authenticated && (
-                <Badge variant="secondary">Authenticated</Badge>
+                <span className="bg-[#6a9fff20] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#6a9fff]">
+                  AUTHENTICATED
+                </span>
               )}
             </div>
 
-            <div className="text-sm">
-              <span className="text-zinc-500">Channels:</span>{" "}
-              <span className="font-medium">{status.channelCount}</span>
+            <div className="font-mono text-[11px] text-[#8a8a8a]">
+              Channels:{" "}
+              <span className="font-bold text-white">{status.channelCount}</span>
             </div>
 
             {Object.keys(status.balances).length > 0 && (
               <div className="space-y-1">
-                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                  Balances
-                </p>
+                <span className="font-mono text-[9px] font-bold tracking-wider text-[#8a8a8a]">
+                  BALANCES
+                </span>
                 {Object.entries(status.balances).map(([asset, amount]) => (
-                  <div key={asset} className="flex justify-between text-sm">
-                    <span className="text-zinc-600 dark:text-zinc-400">{asset}</span>
-                    <span className="font-mono font-medium">{amount}</span>
+                  <div key={asset} className="flex justify-between font-mono text-[11px]">
+                    <span className="text-[#8a8a8a]">{asset}</span>
+                    <span className="font-bold text-white">{amount}</span>
                   </div>
                 ))}
               </div>
             )}
 
             {status.error && (
-              <p className="text-xs text-red-500 break-all">{status.error}</p>
+              <p className="break-all font-mono text-[11px] text-[#FF4444]">
+                {status.error}
+              </p>
             )}
-          </>
+          </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -2,23 +2,14 @@
 
 import { useMemo } from "react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   LineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
-import { BarChart3 } from "lucide-react";
 
 interface ChainSnapshot {
   chain: string;
@@ -31,16 +22,19 @@ interface Props {
 }
 
 const COLORS: Record<string, string> = {
-  "Sepolia": "#6366f1",
-  "Base Sepolia": "#f59e0b",
-  "Unichain Sepolia": "#10b981",
+  "Sepolia": "#6a9fff",
+  "Base Sepolia": "#00FF88",
+  "Unichain Sepolia": "#FF8800",
 };
 
 export function PriceChart({ history }: Props) {
   const data = useMemo(() => {
     return history.map((snap) => {
       const point: Record<string, string | number | null> = {
-        time: new Date(snap.timestamp).toLocaleTimeString(),
+        time: new Date(snap.timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
       };
       for (const c of snap.chains) {
         point[c.label] = c.price;
@@ -55,42 +49,64 @@ export function PriceChart({ history }: Props) {
   }, [history]);
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-zinc-400" />
-          <div>
-            <CardTitle className="text-base">CPT Price History</CardTitle>
-            <CardDescription>
-              Price snapshots across chains (auto-refreshes)
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {data.length < 2 ? (
-          <p className="text-sm text-zinc-400">
-            Collecting data points... ({data.length}/2 minimum)
+    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4">
+        <div>
+          <span className="font-sans text-base font-semibold text-white">
+            CPT PRICE HISTORY
+          </span>
+          <p className="mt-0.5 font-mono text-[11px] text-[#8a8a8a]">
+            Price snapshots across chains (auto-refreshes)
           </p>
+        </div>
+        <div className="flex items-center gap-4">
+          {labels.map((label) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <div
+                className="h-2 w-2"
+                style={{ backgroundColor: COLORS[label] ?? "#888" }}
+              />
+              <span className="font-mono text-[10px] font-medium text-[#8a8a8a]">
+                {label.toUpperCase()}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Chart */}
+      <div className="border-t border-[#2f2f2f] px-6 py-5">
+        {data.length < 2 ? (
+          <div className="flex h-[200px] items-center justify-center">
+            <span className="font-mono text-xs text-[#8a8a8a]">
+              Collecting data points... ({data.length}/2 minimum)
+            </span>
+          </div>
         ) : (
-          <ResponsiveContainer width="100%" height={240}>
+          <ResponsiveContainer width="100%" height={200}>
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-              <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="#71717a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+              <XAxis
+                dataKey="time"
+                tick={{ fontSize: 10, fill: "#8a8a8a", fontFamily: "monospace" }}
+                stroke="#2f2f2f"
+              />
               <YAxis
-                tick={{ fontSize: 10 }}
-                stroke="#71717a"
+                tick={{ fontSize: 10, fill: "#8a8a8a", fontFamily: "monospace" }}
+                stroke="#2f2f2f"
                 tickFormatter={(v: number) => v.toFixed(4)}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#18181b",
-                  border: "1px solid #3f3f46",
-                  borderRadius: 8,
-                  fontSize: 12,
+                  backgroundColor: "#0A0A0A",
+                  border: "1px solid #2f2f2f",
+                  borderRadius: 0,
+                  fontSize: 11,
+                  fontFamily: "monospace",
+                  color: "#fff",
                 }}
               />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
               {labels.map((label) => (
                 <Line
                   key={label}
@@ -105,7 +121,7 @@ export function PriceChart({ history }: Props) {
             </LineChart>
           </ResponsiveContainer>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

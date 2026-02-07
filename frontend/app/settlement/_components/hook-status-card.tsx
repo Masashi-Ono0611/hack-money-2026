@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Gauge } from "lucide-react";
 
 interface ChainData {
@@ -22,72 +14,85 @@ interface Props {
   chains: ChainData[];
 }
 
-function tierColor(feeBps: number | null): string {
-  if (feeBps === null) return "bg-zinc-200 dark:bg-zinc-700";
-  if (feeBps <= 500) return "bg-emerald-500";
-  if (feeBps >= 10000) return "bg-red-500";
-  return "bg-amber-500";
+function tierBarColor(feeBps: number | null): string {
+  if (feeBps === null) return "bg-[#8a8a8a]";
+  if (feeBps <= 500) return "bg-[#00FF88]";
+  if (feeBps >= 10000) return "bg-[#FF4444]";
+  return "bg-[#FF8800]";
 }
 
-function tierVariant(feeBps: number | null): "default" | "secondary" | "destructive" {
-  if (feeBps === null) return "secondary";
-  if (feeBps <= 500) return "default";
-  if (feeBps >= 10000) return "destructive";
-  return "secondary";
+function tierBadge(feeBps: number | null): { bg: string; text: string } {
+  if (feeBps === null) return { bg: "bg-[#ffffff10]", text: "text-[#8a8a8a]" };
+  if (feeBps <= 500) return { bg: "bg-[#00FF8820]", text: "text-[#00FF88]" };
+  if (feeBps >= 10000) return { bg: "bg-[#FF444420]", text: "text-[#FF4444]" };
+  return { bg: "bg-[#FF880020]", text: "text-[#FF8800]" };
 }
 
 export function HookStatusCard({ chains }: Props) {
   return (
-    <Card className="col-span-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <Gauge className="h-4 w-4 text-zinc-400" />
-          <div>
-            <CardTitle className="text-base">Hook Status</CardTitle>
-            <CardDescription>
-              L2 utilization rate &rarr; dynamic fee tier (UtilizationHook)
-            </CardDescription>
-          </div>
+    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-6 py-4">
+        <Gauge size={14} className="text-[#8a8a8a]" />
+        <div>
+          <span className="font-sans text-base font-semibold text-white">
+            HOOK STATUS
+          </span>
+          <p className="mt-0.5 font-mono text-[11px] text-[#8a8a8a]">
+            L2 utilization rate → dynamic fee tier (UtilizationHook)
+          </p>
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+
+      {/* Content */}
+      <div className="border-t border-[#2f2f2f] px-6 py-5">
         {chains.length === 0 ? (
-          <p className="text-sm text-zinc-400">Load chain data first</p>
+          <span className="font-mono text-xs text-[#8a8a8a]">
+            Load chain data first
+          </span>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-3">
-            {chains.map((c) => (
-              <div key={c.chain} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{c.label}</span>
-                  {c.fee && (
-                    <Badge variant={tierVariant(c.feeBps)} className="text-[10px]">
-                      {c.fee}
-                    </Badge>
+          <div className="grid grid-cols-3 gap-3">
+            {chains.map((c) => {
+              const badge = tierBadge(c.feeBps);
+              return (
+                <div key={c.chain} className="border border-[#2f2f2f] bg-[#0A0A0A] p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[11px] font-medium tracking-wider text-[#8a8a8a]">
+                      {c.label.toUpperCase()}
+                    </span>
+                    {c.fee && (
+                      <span className={`px-1.5 py-0.5 font-mono text-[9px] font-bold ${badge.bg} ${badge.text}`}>
+                        {c.fee.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+
+                  {c.utilization !== null ? (
+                    <>
+                      <div className="mt-3 h-1.5 w-full overflow-hidden bg-[#1a1a1a]">
+                        <div
+                          className={`h-full transition-all ${tierBarColor(c.feeBps)}`}
+                          style={{ width: `${c.utilization}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 font-mono text-[11px] text-[#8a8a8a]">
+                        Utilization:{" "}
+                        <span className="font-bold text-white">{c.utilization}%</span>
+                        {c.utilization < 30 && " — idle, low fees"}
+                        {c.utilization >= 70 && " — busy, high fees"}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-3 font-mono text-[11px] text-[#8a8a8a]">
+                      No oracle data
+                    </p>
                   )}
                 </div>
-
-                {c.utilization !== null ? (
-                  <>
-                    <div className="relative h-3 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                      <div
-                        className={`absolute inset-y-0 left-0 rounded-full transition-all ${tierColor(c.feeBps)}`}
-                        style={{ width: `${c.utilization}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-zinc-500">
-                      Utilization: <span className="font-mono font-medium">{c.utilization}%</span>
-                      {c.utilization < 30 && " — idle, low fees attract arbitrage"}
-                      {c.utilization >= 70 && " — busy, high fees protect LPs"}
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-xs text-zinc-400">No oracle data</p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

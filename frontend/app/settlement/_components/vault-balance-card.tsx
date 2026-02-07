@@ -1,14 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Vault, RefreshCw } from "lucide-react";
 
 interface Props {
@@ -48,35 +40,50 @@ export function VaultBalanceCard({ onLog }: Props) {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <div className="flex flex-col border border-[#2f2f2f] bg-[#0A0A0A]">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4">
         <div>
-          <CardTitle className="text-base">Arc Vault</CardTitle>
-          <CardDescription>Operator vault balance</CardDescription>
+          <span className="font-sans text-base font-semibold text-white">
+            ARC VAULT
+          </span>
+          <p className="mt-0.5 font-mono text-[11px] text-[#8a8a8a]">
+            Operator vault balance
+          </p>
         </div>
-        <Button variant="outline" size="icon" onClick={fetchBalance} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-3">
+        <button
+          onClick={fetchBalance}
+          disabled={loading}
+          className="flex items-center justify-center border border-[#2f2f2f] bg-[#0A0A0A] p-2 text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 border-t border-[#2f2f2f] px-6 py-5">
         {!status ? (
-          <p className="text-sm text-zinc-400">Click refresh to check balance</p>
+          <span className="font-mono text-xs text-[#8a8a8a]">
+            Click refresh to check balance
+          </span>
         ) : status.ok && status.balance ? (
           <div className="flex items-center gap-3">
-            <Vault className="h-5 w-5 text-blue-500" />
+            <Vault size={18} className="text-[#6a9fff]" />
             <div>
-              <p className="text-2xl font-semibold font-mono tabular-nums">
-                {status.balance}
+              <p className="font-mono text-[28px] font-bold tabular-nums text-white">
+                ${status.balance}
               </p>
-              <p className="text-xs text-zinc-500">{status.token ?? "USDC"}</p>
+              <span className="inline-block bg-[#00FF8820] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#00FF88]">
+                {status.token ?? "USDC"}
+              </span>
             </div>
           </div>
         ) : (
-          <p className="text-xs text-red-500 break-all">
+          <p className="break-all font-mono text-[11px] text-[#FF4444]">
             {status.error ?? "Could not fetch balance"}
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

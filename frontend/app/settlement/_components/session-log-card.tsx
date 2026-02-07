@@ -1,14 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Zap } from "lucide-react";
 
 interface Trade {
@@ -61,56 +53,74 @@ export function SessionLogCard() {
     .reduce((sum, t) => sum + parseFloat(t.pnl), 0);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">
-          <Zap className="h-4 w-4 text-yellow-500" />
+          <Zap size={14} className="text-[#FF8800]" />
           <div>
-            <CardTitle className="text-base">Yellow Session (Demo)</CardTitle>
-            <CardDescription>Gasless arbitrage execution log</CardDescription>
+            <span className="font-sans text-base font-semibold text-white">
+              YELLOW SESSION
+            </span>
+            <p className="mt-0.5 font-mono text-[11px] text-[#8a8a8a]">
+              Gasless arbitrage execution log
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {running && (
-            <Badge variant="default" className="animate-pulse bg-yellow-500">
+            <span className="inline-block animate-pulse bg-[#FF880020] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#FF8800]">
               LIVE
-            </Badge>
+            </span>
           )}
           <button
             onClick={startDemo}
             disabled={running}
-            className="rounded-md bg-yellow-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-yellow-600 disabled:opacity-50"
+            className={`px-4 py-2 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-60 ${
+              running
+                ? "bg-[#FF8800] text-[#0C0C0C]"
+                : "bg-[#00FF88] text-[#0C0C0C]"
+            }`}
           >
-            {running ? "Running..." : "Run Demo"}
+            {running ? "RUNNING..." : "RUN DEMO"}
           </button>
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+
+      {/* Content */}
+      <div className="border-t border-[#2f2f2f] px-6 py-4">
         {trades.length === 0 ? (
-          <p className="text-sm text-zinc-400">
-            Click &quot;Run Demo&quot; to simulate a gasless arbitrage session
-          </p>
+          <span className="font-mono text-xs text-[#8a8a8a]">
+            Click RUN DEMO to simulate a gasless arbitrage session
+          </span>
         ) : (
-          <div className="space-y-2">
-            <div className="max-h-52 overflow-y-auto rounded bg-zinc-50 p-2 font-mono text-xs dark:bg-zinc-900">
+          <div className="space-y-3">
+            <div className="max-h-52 overflow-y-auto">
               {trades.map((t) => (
-                <div key={t.id} className="flex items-center gap-2 py-0.5">
-                  <span className="text-zinc-400 w-16">{t.time}</span>
-                  <Badge
-                    variant={t.action === "BUY" ? "default" : "secondary"}
-                    className={`w-10 justify-center text-[10px] ${
+                <div key={t.id} className="flex items-center gap-3 py-1">
+                  <span className="font-mono text-[10px] text-[#8a8a8a]">
+                    {t.time}
+                  </span>
+                  <span
+                    className={`inline-block w-10 text-center px-1 py-0 font-mono text-[9px] font-bold ${
                       t.action === "BUY"
-                        ? "bg-blue-500 text-white"
-                        : "bg-emerald-500 text-white"
+                        ? "bg-[#00FF8820] text-[#00FF88]"
+                        : "bg-[#FF880020] text-[#FF8800]"
                     }`}
                   >
                     {t.action}
-                  </Badge>
-                  <span className="text-zinc-600 dark:text-zinc-400 w-24">{t.pair}</span>
-                  <span className="w-12 text-right">{t.amount}</span>
-                  <span className="w-20 text-right">@{t.price}</span>
+                  </span>
+                  <span className="w-24 font-mono text-[11px] text-[#8a8a8a]">
+                    {t.pair}
+                  </span>
+                  <span className="w-12 text-right font-mono text-[11px] text-white">
+                    {t.amount}
+                  </span>
+                  <span className="w-20 text-right font-mono text-[11px] text-[#8a8a8a]">
+                    @{t.price}
+                  </span>
                   {t.pnl && (
-                    <span className="ml-auto text-emerald-600 font-medium">
+                    <span className="ml-auto font-mono text-[11px] font-bold text-[#00FF88]">
                       {t.pnl} USDC
                     </span>
                   )}
@@ -118,18 +128,18 @@ export function SessionLogCard() {
               ))}
             </div>
             {totalPnl > 0 && (
-              <div className="flex justify-between rounded bg-emerald-50 px-3 py-1.5 text-sm dark:bg-emerald-950/30">
-                <span className="text-zinc-600 dark:text-zinc-400">
+              <div className="flex items-center justify-between border border-[#00FF8840] bg-[#00FF8810] px-4 py-2">
+                <span className="font-mono text-[11px] text-[#8a8a8a]">
                   Session PnL ({trades.filter((t) => t.pnl).length} arb rounds)
                 </span>
-                <span className="font-mono font-semibold text-emerald-600">
+                <span className="font-mono text-sm font-bold text-[#00FF88]">
                   +{totalPnl.toFixed(4)} USDC
                 </span>
               </div>
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
