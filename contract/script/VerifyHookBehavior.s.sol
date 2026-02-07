@@ -10,6 +10,7 @@ import {PoolKey} from "v4-core/types/PoolKey.sol";
 import {Currency} from "v4-core/types/Currency.sol";
 import {LPFeeLibrary} from "v4-core/libraries/LPFeeLibrary.sol";
 import {TickMath} from "v4-core/libraries/TickMath.sol";
+import {StateLibrary} from "v4-core/libraries/StateLibrary.sol";
 import {PoolId, PoolIdLibrary} from "v4-core/types/PoolId.sol";
 import {PoolSwapTest} from "v4-core/test/PoolSwapTest.sol";
 import {IMockOracle} from "../src/MockOracle.sol";
@@ -60,10 +61,14 @@ contract VerifyHookBehavior is Script {
         console.log("PoolId:", vm.toString(cfg.configuredPoolId));
         console.log("SwapInputAmount:", cfg.swapInputAmount);
 
-        _verifyOne(cfg.deployerPrivateKey, swapRouter, key, cfg.oracle, cfg.utilLow, 500, cfg.cpt, cfg.swapInputAmount);
-        _verifyOne(cfg.deployerPrivateKey, swapRouter, key, cfg.oracle, cfg.utilMid, 3000, cfg.cpt, cfg.swapInputAmount);
         _verifyOne(
-            cfg.deployerPrivateKey, swapRouter, key, cfg.oracle, cfg.utilHigh, 10000, cfg.cpt, cfg.swapInputAmount
+            cfg.deployerPrivateKey, swapRouter, key, cfg.poolManager, cfg.oracle, cfg.utilLow, 500, cfg.cpt, cfg.swapInputAmount
+        );
+        _verifyOne(
+            cfg.deployerPrivateKey, swapRouter, key, cfg.poolManager, cfg.oracle, cfg.utilMid, 3000, cfg.cpt, cfg.swapInputAmount
+        );
+        _verifyOne(
+            cfg.deployerPrivateKey, swapRouter, key, cfg.poolManager, cfg.oracle, cfg.utilHigh, 10000, cfg.cpt, cfg.swapInputAmount
         );
         _verifyStale(cfg, swapRouter, key);
 
@@ -113,6 +118,7 @@ contract VerifyHookBehavior is Script {
         uint256 deployerPrivateKey,
         address swapRouter,
         PoolKey memory key,
+        address poolManager,
         address oracle,
         uint256 utilization,
         uint24 expectedFee,
@@ -123,15 +129,15 @@ contract VerifyHookBehavior is Script {
 
         vm.startBroadcast(deployerPrivateKey);
         IMockOracle(oracle).setUtilization(utilization);
+        bool zeroForOne = Currency.unwrap(key.currency0) == cpt;
+        uint160 sqrtPriceLimitX96 = _resolveSqrtPriceLimit(poolManager, key, zeroForOne);
         PoolSwapTest(swapRouter)
             .swap(
                 key,
                 IPoolManager.SwapParams({
-                    zeroForOne: Currency.unwrap(key.currency0) == cpt,
+                    zeroForOne: zeroForOne,
                     amountSpecified: -int256(swapInputAmount),
-                    sqrtPriceLimitX96: Currency.unwrap(key.currency0) == cpt
-                        ? TickMath.MIN_SQRT_PRICE + 1
-                        : TickMath.MAX_SQRT_PRICE - 1
+                    sqrtPriceLimitX96: sqrtPriceLimitX96
                 }),
                 PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false}),
                 ""
@@ -160,15 +166,15 @@ contract VerifyHookBehavior is Script {
         IMockOracle(cfg.oracle).setStaleTtl(cfg.staleTtlSeconds);
         IMockOracle(cfg.oracle).setUtilization(cfg.utilStale);
         vm.warp(block.timestamp + cfg.staleWarpSeconds);
+        bool zeroForOne = Currency.unwrap(key.currency0) == cfg.cpt;
+        uint160 sqrtPriceLimitX96 = _resolveSqrtPriceLimit(cfg.poolManager, key, zeroForOne);
         PoolSwapTest(swapRouter)
             .swap(
                 key,
                 IPoolManager.SwapParams({
-                    zeroForOne: Currency.unwrap(key.currency0) == cfg.cpt,
+                    zeroForOne: zeroForOne,
                     amountSpecified: -int256(cfg.swapInputAmount),
-                    sqrtPriceLimitX96: Currency.unwrap(key.currency0) == cfg.cpt
-                        ? TickMath.MIN_SQRT_PRICE + 1
-                        : TickMath.MAX_SQRT_PRICE - 1
+                    sqrtPriceLimitX96: sqrtPriceLimitX96
                 }),
                 PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false}),
                 ""
@@ -199,6 +205,22 @@ contract VerifyHookBehavior is Script {
             tickSpacing: DEFAULT_TICK_SPACING,
             hooks: IHooks(hook)
         });
+    }
+
+    function _resolveSqrtPriceLimit(address poolManager, PoolKey memory key, bool zeroForOne)
+        internal
+        view
+        returns (uint160)
+    {
+        (uint160 currentSqrtPriceX96,,,) = StateLibrary.getSlot0(IPoolManager(poolManager), key.toId());
+
+        if (zeroForOne) {
+            require(currentSqrtPriceX96 > TickMath.MIN_SQRT_PRICE + 1, "VerifyHookBehavior: price near min boundary");
+            return currentSqrtPriceX96 - 1;
+        }
+
+        require(currentSqrtPriceX96 < TickMath.MAX_SQRT_PRICE - 1, "VerifyHookBehavior: price near max boundary");
+        return currentSqrtPriceX96 + 1;
     }
 
     function _readAddress(string memory path, string memory chainName) internal view returns (address) {

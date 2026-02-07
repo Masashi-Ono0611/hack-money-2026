@@ -805,7 +805,7 @@ forge script script/DeployHook.s.sol:DeployHook \
 --broadcast -vvv
 ```
 
-CPTをmintする場合（deployerがCPT ownerである必要あり）
+#### CPTをmintする場合（deployerがCPT ownerである必要あり）
 
 ```bash
 source .env
@@ -835,7 +835,9 @@ forge script script/MintCpt.s.sol:MintCpt \
 --broadcast -vvv
 ```
 
-Poolを初期化する場合（`INITIAL_PRICE_NUMERATOR / INITIAL_PRICE_DENOMINATOR` は「1 CPT あたり USDC 価格」）
+#### Poolを初期化する場合
+
+`INITIAL_PRICE_NUMERATOR / INITIAL_PRICE_DENOMINATOR` は「1 CPT あたり USDC 価格」
 
 ```bash
 # 例: 1 CPT = 1 USDC(以下の値は .envでもセットすればOK!)
@@ -863,7 +865,7 @@ forge script script/InitializePool.s.sol:InitializePool \
 --broadcast -vvv
 ```
 
-Poolへ流動性を追加する場合（Pool初期化後に実行）
+#### Poolへ流動性を追加する場合（Pool初期化後に実行）
 
 ```bash
 source .env
@@ -896,7 +898,7 @@ forge script script/AddLiquidity.s.sol:AddLiquidity \
 --broadcast -vvv
 ```
 
-Hook動作を検証する場合（Pool初期化・流動性追加後に実行）
+#### Hook動作を検証する場合（Pool初期化・流動性追加後に実行）
 
 ```bash
 source .env
