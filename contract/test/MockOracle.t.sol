@@ -33,4 +33,23 @@ contract MockOracleTest is Test {
         emit MockOracle.UtilizationUpdated(77);
         oracle.setUtilization(77);
     }
+
+    function test_GetUtilizationWithMeta_ReturnsCurrentUtilization() public {
+        oracle.setUtilization(66);
+        (uint256 utilization,,,) = oracle.getUtilizationWithMeta();
+        assertEq(utilization, 66);
+    }
+
+    function test_NewUpdateMethods_AreCallable() public {
+        oracle.setUtilizationFromBot(45, block.timestamp);
+        assertEq(oracle.getUtilization(), 45);
+
+        oracle.setUtilizationFromFunctions(55, block.timestamp, bytes32("req-1"));
+        assertEq(oracle.getUtilization(), 55);
+    }
+
+    function test_NewAdminMethods_AreCallable() public {
+        oracle.setStaleTtl(1200);
+        oracle.setAuthorizedUpdater(address(this), true);
+    }
 }

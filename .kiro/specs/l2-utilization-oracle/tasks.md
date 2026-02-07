@@ -15,7 +15,7 @@
 
 - [ ] 1. Oracleコントラクト拡張（P0）
 
-- [ ] 1.1 `IMockOracle` の公開インターフェースを拡張する
+- [x] 1.1 `IMockOracle` の公開インターフェースを拡張する
   - `getUtilizationWithMeta()` を追加
   - `setUtilizationFromBot()` / `setUtilizationFromFunctions()` を追加
   - `setStaleTtl()` / `setAuthorizedUpdater()` を追加
