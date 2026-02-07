@@ -969,3 +969,24 @@ pnpm settle:vault -- --amount 5
 - `--token-symbol <symbol>` : トークンシンボル（デフォルト: `USDC-TESTNET`）
 - `--idempotency-key <uuid>` : 冪等性キー（省略時は自動生成）
 - `--dry-run` : 送金せずに確認のみ
+
+#### 自動決済パイプライン（Session → Vault）
+
+Yellowセッション完了後、セッションIDを指定するだけで profit 判定 → Arc送金 → Vault残高確認まで一気通貫で実行します。
+
+```bash
+source .env
+
+# dry-run
+pnpm settle:auto -- --session <sessionId> --dry-run
+
+# 本番実行
+pnpm settle:auto -- --session <sessionId>
+```
+
+- `--session <id>` : Yellowセッション ID（必須）
+- `--vault-wallet <walletId>` : Vault ウォレット ID（省略時は `ARC_WALLET_ID_OPERATOR_VAULT`）
+- `--token-symbol <symbol>` : トークンシンボル（デフォルト: `USDC`）
+- `--dry-run` : 送金せずに確認のみ
+
+冪等性キーはセッションIDから決定論的に生成されるため、同じセッションIDで再実行しても二重送金は発生しません。

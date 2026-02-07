@@ -3,9 +3,8 @@
 	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
-		"transfer": "tsx scripts/arc-transfer.ts",
-		"settle": "tsx scripts/settle-to-vault.ts",
 		"settle:vault": "tsx scripts/settlement/settle-to-vault.ts",
+		"settle:auto": "tsx scripts/settlement/auto-settle.ts",
 		"vault:balance": "tsx scripts/settlement/check-vault-balance.ts"
 	},
 	"devDependencies": {
