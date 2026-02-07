@@ -26,7 +26,7 @@ contract MockOracleTest is Test {
     }
 
     function test_SetUtilization_RevertsIfOutOfRange() public {
-        vm.expectRevert(bytes("MockOracle: utilization out of range"));
+        vm.expectRevert(MockOracle.UtilizationOutOfRange.selector);
         oracle.setUtilization(101);
     }
 
@@ -46,8 +46,8 @@ contract MockOracleTest is Test {
         oracle.setUtilizationFromBot(45, block.timestamp);
         assertEq(oracle.getUtilization(), 45);
 
-        oracle.setUtilizationFromFunctions(55, block.timestamp, bytes32("req-1"));
-        assertEq(oracle.getUtilization(), 55);
+        oracle.setUtilizationFromFunctions(70, block.timestamp, bytes32("req-1"));
+        assertEq(oracle.getUtilization(), 70);
     }
 
     function test_NewAdminMethods_AreCallable() public {
@@ -79,7 +79,7 @@ contract MockOracleTest is Test {
         (,,, uint8 botSource) = oracle.getUtilizationWithMeta();
         assertEq(botSource, oracle.SOURCE_BOT());
 
-        oracle.setUtilizationFromFunctions(61, block.timestamp, bytes32("req-2"));
+        oracle.setUtilizationFromFunctions(40, block.timestamp, bytes32("req-2"));
         (,,, uint8 functionsSource) = oracle.getUtilizationWithMeta();
         assertEq(functionsSource, oracle.SOURCE_FUNCTIONS());
     }
@@ -102,14 +102,14 @@ contract MockOracleTest is Test {
 
     function test_SetUtilizationFromBot_RevertsIfTimestampInFuture() public {
         uint256 futureDrift = oracle.MAX_TIMESTAMP_FUTURE_DRIFT();
-        vm.expectRevert(bytes("MockOracle: timestamp in future"));
+        vm.expectRevert(MockOracle.TimestampInFuture.selector);
         oracle.setUtilizationFromBot(70, block.timestamp + futureDrift + 1);
     }
 
     function test_SetUtilizationFromFunctions_RevertsIfTimestampTooOld() public {
         uint256 maxAge = oracle.MAX_TIMESTAMP_AGE();
         vm.warp(maxAge + 100);
-        vm.expectRevert(bytes("MockOracle: timestamp too old"));
+        vm.expectRevert(MockOracle.TimestampTooOld.selector);
         oracle.setUtilizationFromFunctions(70, block.timestamp - maxAge - 1, bytes32("req-old"));
     }
 
@@ -129,8 +129,26 @@ contract MockOracleTest is Test {
     function test_SetUtilizationFromBot_RevertsIfTimestampAlreadyStaleAtWrite() public {
         uint256 staleTtl = oracle.DEFAULT_STALE_TTL();
         vm.warp(staleTtl + 100);
-        vm.expectRevert(bytes("MockOracle: timestamp already stale"));
+        vm.expectRevert(MockOracle.TimestampAlreadyStale.selector);
         oracle.setUtilizationFromBot(70, block.timestamp - staleTtl - 1);
+    }
+
+    function test_SetUtilizationFromFunctions_PrioritizesWhenDivergenceExceedsThreshold() public {
+        oracle.setUtilizationFromBot(80, block.timestamp);
+        oracle.setUtilizationFromFunctions(50, block.timestamp, bytes32("req-diverge"));
+
+        (uint256 utilization,, , uint8 source) = oracle.getUtilizationWithMeta();
+        assertEq(utilization, 50);
+        assertEq(source, oracle.SOURCE_FUNCTIONS());
+    }
+
+    function test_SetUtilizationFromFunctions_DoesNotOverrideWhenWithinThreshold() public {
+        oracle.setUtilizationFromBot(80, block.timestamp);
+        oracle.setUtilizationFromFunctions(70, block.timestamp, bytes32("req-within"));
+
+        (uint256 utilization,, , uint8 source) = oracle.getUtilizationWithMeta();
+        assertEq(utilization, 80);
+        assertEq(source, oracle.SOURCE_BOT());
     }
 
     function test_SetAuthorizedUpdater_RevertsForNonOwner() public {
@@ -141,19 +159,30 @@ contract MockOracleTest is Test {
 
     function test_SetUtilization_Legacy_RevertsForUnauthorizedUpdater() public {
         vm.prank(attacker);
-        vm.expectRevert(bytes("MockOracle: unauthorized updater"));
+        vm.expectRevert(MockOracle.UnauthorizedUpdater.selector);
         oracle.setUtilization(55);
     }
 
     function test_SetUtilizationFromBot_RevertsForUnauthorizedUpdater() public {
         vm.prank(attacker);
-        vm.expectRevert(bytes("MockOracle: unauthorized updater"));
+        vm.expectRevert(MockOracle.UnauthorizedUpdater.selector);
         oracle.setUtilizationFromBot(55, block.timestamp);
     }
 
     function test_SetUtilizationFromFunctions_RevertsForUnauthorizedUpdater() public {
         vm.prank(attacker);
-        vm.expectRevert(bytes("MockOracle: unauthorized updater"));
+        vm.expectRevert(MockOracle.UnauthorizedUpdater.selector);
         oracle.setUtilizationFromFunctions(55, block.timestamp, bytes32("req-unauth"));
+    }
+
+    function test_CustomErrorSelector_UtilizationOutOfRange() public {
+        vm.expectRevert(MockOracle.UtilizationOutOfRange.selector);
+        oracle.setUtilization(101);
+    }
+
+    function test_CustomErrorSelector_UnauthorizedUpdater() public {
+        vm.prank(attacker);
+        vm.expectRevert(MockOracle.UnauthorizedUpdater.selector);
+        oracle.setUtilization(55);
     }
 }

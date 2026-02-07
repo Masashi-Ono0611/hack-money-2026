@@ -73,8 +73,16 @@ contract MockOracle is IMockOracle, Ownable {
     event UpdaterAuthorizationChanged(address indexed updater, bool allowed);
     event TtlUpdated(uint256 ttlSeconds);
 
+    error UnauthorizedUpdater();
+    error UtilizationOutOfRange();
+    error TimestampInFuture();
+    error TimestampTooOld();
+    error TimestampAlreadyStale();
+
     modifier onlyAuthorizedUpdater() {
-        require(_authorizedUpdaters[msg.sender], "MockOracle: unauthorized updater");
+        if (!_authorizedUpdaters[msg.sender]) {
+            revert UnauthorizedUpdater();
+        }
         _;
     }
 
@@ -112,7 +120,18 @@ contract MockOracle is IMockOracle, Ownable {
     {
         lastFunctionsRequestId = requestId;
         _lastFunctionsUtilization = utilization;
-        _setUtilization(utilization, timestamp, SOURCE_FUNCTIONS);
+
+        bool shouldApplyFunctionsValue = _lastBotUtilization == 0;
+        if (!shouldApplyFunctionsValue) {
+            uint256 divergence = _lastBotUtilization > utilization
+                ? _lastBotUtilization - utilization
+                : utilization - _lastBotUtilization;
+            shouldApplyFunctionsValue = divergence > DIVERGENCE_THRESHOLD;
+        }
+
+        if (shouldApplyFunctionsValue) {
+            _setUtilization(utilization, timestamp, SOURCE_FUNCTIONS);
+        }
     }
 
     function setStaleTtl(uint256 ttlSeconds) external onlyOwner {
@@ -126,7 +145,9 @@ contract MockOracle is IMockOracle, Ownable {
     }
 
     function _setUtilization(uint256 utilization, uint256 timestamp, uint8 source) internal {
-        require(utilization <= 100, "MockOracle: utilization out of range");
+        if (utilization > 100) {
+            revert UtilizationOutOfRange();
+        }
         _validateTimestamp(timestamp);
         _utilization = utilization;
         _updatedAt = timestamp;
@@ -135,8 +156,14 @@ contract MockOracle is IMockOracle, Ownable {
     }
 
     function _validateTimestamp(uint256 timestamp) internal view {
-        require(timestamp <= block.timestamp + MAX_TIMESTAMP_FUTURE_DRIFT, "MockOracle: timestamp in future");
-        require(timestamp + MAX_TIMESTAMP_AGE >= block.timestamp, "MockOracle: timestamp too old");
-        require(timestamp + _staleTtl >= block.timestamp, "MockOracle: timestamp already stale");
+        if (timestamp > block.timestamp + MAX_TIMESTAMP_FUTURE_DRIFT) {
+            revert TimestampInFuture();
+        }
+        if (timestamp + MAX_TIMESTAMP_AGE < block.timestamp) {
+            revert TimestampTooOld();
+        }
+        if (timestamp + _staleTtl < block.timestamp) {
+            revert TimestampAlreadyStale();
+        }
     }
 }
