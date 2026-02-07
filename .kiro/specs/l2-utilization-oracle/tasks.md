@@ -67,7 +67,7 @@
 
 - [ ] 2. UtilizationHook 連携更新（P0）
 
-- [ ] 2.1 オラクル参照をメタ情報付きAPIへ切り替える
+- [x] 2.1 オラクル参照をメタ情報付きAPIへ切り替える
   - `getUtilizationWithMeta()` を利用
   - _Requirements: 5.1_
 

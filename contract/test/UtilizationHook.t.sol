@@ -15,6 +15,26 @@ import {PoolManager} from "v4-core/PoolManager.sol";
 import {UtilizationHook} from "../src/hooks/UtilizationHook.sol";
 import {IMockOracle, MockOracle} from "../src/MockOracle.sol";
 
+contract MetaOnlyOracle is IMockOracle {
+    function getUtilization() external pure returns (uint256) {
+        revert("legacy api disabled");
+    }
+
+    function setUtilization(uint256) external pure {}
+
+    function getUtilizationWithMeta() external pure returns (uint256 utilization, uint256 updatedAt, bool stale, uint8 source) {
+        return (10, 0, false, 1);
+    }
+
+    function setUtilizationFromBot(uint256, uint256) external pure {}
+
+    function setUtilizationFromFunctions(uint256, uint256, bytes32) external pure {}
+
+    function setStaleTtl(uint256) external pure {}
+
+    function setAuthorizedUpdater(address, bool) external pure {}
+}
+
 /// @title UtilizationHookTest
 /// @notice Task 2.1: UtilizationHook コントラクトスケルトンのテスト
 contract UtilizationHookTest is Test {
@@ -259,6 +279,23 @@ contract UtilizationHookTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(UtilizationHook.UnauthorizedCaller.selector, address(this)));
         hook.beforeSwap(address(this), key, _makeSwapParams(), "");
+    }
+
+    function test_beforeSwap_usesMetaApiWhenLegacyGetterUnavailable() public {
+        MetaOnlyOracle metaOracle = new MetaOnlyOracle();
+        UtilizationHook metaHook = new UtilizationHook(poolManager, IMockOracle(address(metaOracle)));
+
+        PoolKey memory key = PoolKey({
+            currency0: Currency.wrap(address(1)),
+            currency1: Currency.wrap(address(2)),
+            fee: 3000,
+            tickSpacing: 60,
+            hooks: IHooks(address(metaHook))
+        });
+
+        vm.prank(address(poolManager));
+        (,, uint24 feeWithFlag) = metaHook.beforeSwap(address(this), key, _makeSwapParams(), "");
+        assertEq(feeWithFlag, 500 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
     /// @notice 未使用フック（beforeInitialize）が未実装として revert することを検証
