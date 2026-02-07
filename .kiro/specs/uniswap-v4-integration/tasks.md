@@ -121,7 +121,7 @@
 
 ### 6. 統合テスト実装
 
-- [ ] 6.1 Pool + Hook 統合テストを作成する（Task 2, 4 に依存）
+- [x] 6.1 Pool + Hook 統合テストを作成する（Task 2, 4 に依存）
   - Mock Oracle をデプロイする
   - UtilizationHook を CREATE2 でデプロイする
   - CPT/USDC Pool を初期化する
