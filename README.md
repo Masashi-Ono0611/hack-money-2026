@@ -4,7 +4,7 @@
 
 ## short description
 
-Zombie L2 Clearinghouse は 低稼働なEthereum L2チェーンの計算リソースをトークン化し、ガスレス裁定によってL2運営者にUSDC収益を生み出す財務レイヤーです。
+Ghost Yield は 低稼働なEthereum L2チェーンの計算リソースをトークン化し、ガスレス裁定によってL2運営者にUSDC収益を生み出す財務レイヤーです。
 
 ## Overview
 
@@ -12,7 +12,7 @@ EthereumのLayer 2エコシステムでは、多くのチェーンが「ユー�
 
 この結果、有望なL2であっても、キラーdAppが現れる前にチェーン停止や撤退に追い込まれてしまいます。
 
-Zombie L2 Clearinghouse はこの問題を「ユーザーが来るまで耐える」のではなく「ユーザーがいなくても収益が回る」仕組みで解決します。
+Ghost Yield はこの問題を「ユーザーが来るまで耐える」のではなく「ユーザーがいなくても収益が回る」仕組みで解決します。
 
 本プロダクトでは、各L2の計算コストを **Compute Token（CPT）** としてトークン化し、Uniswap v4 を用いて CPT / USDC の基準価格市場を構築します。
 
@@ -22,7 +22,7 @@ Zombie L2 Clearinghouse はこの問題を「ユーザーが来るまで耐え�
 
 このUSDCはL2運営者のVaultに集約され、ノード運用やシーケンサーなどの固定費を直接補填します。
 
-Zombie L2 Clearinghouse は、死にかけたL2を復活させるプロジェクトではありません。
+Ghost Yield は、死にかけたL2を復活させるプロジェクトではありません。
 
 需要が戻るまでチェーンを生かし続けるための新しいL2財務インフラです。
 
@@ -169,7 +169,7 @@ L2運営はユーザーがいない間も、
 
   * 価格差・稼働率の変化を収益化
   * CPTを売買する流動性提供者
-* **Zombie L2 Clearinghouse**
+* **Ghost Yield**
 
   * 市場設計・裁定・USDC決済を担う財務レイヤー
 
@@ -181,7 +181,7 @@ flowchart LR
   OP[L2 Operator]
   DEV[Developer / App]
   TR[Trader / Bot]
-  CL[Zombie L2 Clearinghouse]
+  CL[Ghost Yield]
   UNI[Uniswap v4\nCPT / USDC Pool]
   YEL[Yellow Session]
   ARC[Arc + USDC]
@@ -232,9 +232,9 @@ L2は今や、Ethereumとさまざまな距離感で接続された**独立し�
 
 これらはすべて、「Ethereumを直接スケールしない」からこそ実現できる価値です。
 
-### Zombie L2 Clearinghouse が L2 を使う理由
+### Ghost Yield が L2 を使う理由
 
-Zombie L2 Clearinghouse は、L2をスケーリング手段として使っていません。
+Ghost Yield は、L2をスケーリング手段として使っていません。
 
 私たちが L2 を使う理由は明確です。
 
@@ -243,7 +243,7 @@ Zombie L2 Clearinghouse は、L2をスケーリング手段として使ってい
 多くのL2はユーザー不足により取引量が少なく、結果として計算コストが極端に安くなっています。
 しかしその価値は、これまで経済的に活用されてきませんでした。
 
-Zombie L2 Clearinghouse は、この「使われなさ」を欠点ではなく**未評価の資産**として扱います。
+Ghost Yield は、この「使われなさ」を欠点ではなく**未評価の資産**として扱います。
 
 ### Ethereumとの「適切な距離感」
 
@@ -265,7 +265,7 @@ Zombie L2 Clearinghouse は、この「使われなさ」を欠点ではなく**
 
 ### L2は「生き残るためのインフラ」になる
 
-Zombie L2 Clearinghouse は、L2を復活させるプロジェクトではありません。
+Ghost Yield は、L2を復活させるプロジェクトではありません。
 
 L2がキラーアプリを見つけるまで、あるいは役割を再定義するまで**経済的に生き延びるための時間を提供する**プロジェクトです。
 
@@ -274,11 +274,11 @@ L2がキラーアプリを見つけるまで、あるいは役割を再定義す
 
 2026年のL2に必要なのは、スケーリングではなく **持続可能性** です。
 
-Zombie L2 Clearinghouse は、そのための財務レイヤーです。
+Ghost Yield は、そのための財務レイヤーです。
 
 ## このプロダクトの解決アプローチ
 
-Zombie L2 Clearinghouse は、**ユーザー需要に依存しない収益モデル**をL2運営に提供します。
+Ghost Yield は、**ユーザー需要に依存しない収益モデル**をL2運営に提供します。
 
 ### 1. 計算リソースを資産化する
 
@@ -709,7 +709,7 @@ sequenceDiagram
 
 ### TL;DR
 
-Zombie L2 Clearinghouse は、**使われていないL2を「失敗」ではなく「安価な計算資源」として再定義し、Uniswap v4・Yellow・USDC を組み合わせて、L2運営に現実的な収益をもたらす財務インフラ** です。
+Ghost Yield は、**使われていないL2を「失敗」ではなく「安価な計算資源」として再定義し、Uniswap v4・Yellow・USDC を組み合わせて、L2運営に現実的な収益をもたらす財務インフラ** です。
 
 ## 動かし方
 
@@ -924,4 +924,132 @@ CHAIN_NAME=unichain-sepolia \
 forge script script/VerifyHookBehavior.s.sol:VerifyHookBehavior \
 --rpc-url $UNICHAIN_SEPOLIA_RPC_URL \
 --broadcast -vvv
+```
+
+### 2-7. 最終決済（Arc + USDC → Operator Vault）
+
+裁定利益を Arc 経由で USDC として Operator Vault へ送金するフローです。
+
+#### 前提条件
+
+- ルートの `.env` に以下が設定されていること
+
+```
+ARC_API_KEY=<your-api-key>
+ARC_WALLET_ID_SOURCE=<source-wallet-id>
+ARC_WALLET_ID_OPERATOR_VAULT=<vault-wallet-id>
+ENTITY_SECRET_HEX=<entity-secret-hex>
+```
+
+- SOURCE ウォレットに USDC-TESTNET 残高があること
+
+#### Vault 残高確認
+
+```bash
+source .env
+pnpm vault:balance
+```
+
+#### 決済実行（Vault へ USDC 送金）
+
+```bash
+source .env
+
+# dry-run（実際には送金しない）
+pnpm settle:vault -- --amount 5 --dry-run
+
+# 本番実行
+pnpm settle:vault -- --amount 5
+```
+
+#### オプション
+
+- `--amount <USDC>` : 送金額（必須）
+- `--vault-wallet <walletId>` : Vault ウォレット ID（省略時は `ARC_WALLET_ID_OPERATOR_VAULT`）
+- `--token-symbol <symbol>` : トークンシンボル（デフォルト: `USDC-TESTNET`）
+- `--idempotency-key <uuid>` : 冪等性キー（省略時は自動生成）
+- `--dry-run` : 送金せずに確認のみ
+
+#### 自動決済パイプライン（Session → Vault）
+
+Yellowセッション完了後、セッションIDを指定するだけで profit 判定 → Arc送金 → Vault残高確認まで一気通貫で実行します。
+
+```bash
+source .env
+
+# dry-run
+pnpm settle:auto -- --session <sessionId> --dry-run
+
+# 本番実行
+pnpm settle:auto -- --session <sessionId>
+```
+
+- `--session <id>` : Yellowセッション ID（必須）
+- `--vault-wallet <walletId>` : Vault ウォレット ID（省略時は `ARC_WALLET_ID_OPERATOR_VAULT`）
+- `--token-symbol <symbol>` : トークンシンボル（デフォルト: `USDC`）
+- `--dry-run` : 送金せずに確認のみ
+
+冪等性キーはセッションIDから決定論的に生成されるため、同じセッションIDで再実行しても二重送金は発生しません。
+
+### 2-8. Yellow SDK 統合（ClearNode Sandbox）
+
+Yellow Protocol の ClearNode Sandbox に接続し、State Channel 経由のオフチェーン決済残高を取得します。
+
+#### 前提条件
+
+- ルートの `.env` に以下が設定されていること
+
+```
+YELLOW_PRIVATE_KEY=0x...   # メインウォレットの秘密鍵
+YELLOW_ASSET=ytest.usd     # Sandbox用テストアセット
+SEPOLIA_RPC_URL=https://rpc.sepolia.org  # チャネル開設時のみ必要
+```
+
+#### Faucet（テストトークン取得）
+
+```bash
+curl -XPOST https://clearnet-sandbox.yellow.com/faucet/requestTokens \
+  -H "Content-Type: application/json" \
+  -d '{"userAddress":"<your-wallet-address>"}'
+```
+
+#### 接続テスト
+
+```bash
+source .env
+pnpm test:yellow
+```
+
+認証・チャネル取得・残高取得の3ステップを検証します。
+
+#### チャネル開設（Sepolia オンチェーン）
+
+```bash
+source .env
+pnpm yellow:open-channel
+```
+
+Sepolia ETH（ガス代）が必要です。ClearNode にチャネル作成をリクエストし、オンチェーンTxを送信後、Unified Balance から資金を投入します。
+
+#### アーキテクチャ
+
+```
+┌─────────────┐    WebSocket     ┌──────────────┐
+│ YellowClient├──────────────────┤ ClearNode    │
+│ (off-chain) │  EIP-712 Auth    │ Sandbox      │
+└──────┬──────┘                  └──────┬───────┘
+       │                                │
+       │  get_ledger_balances           │
+       │  → ytest.usd: 10000000        │
+       │                                │
+┌──────┴──────┐                  ┌──────┴───────┐
+│SessionClient│                  │ Custody.sol  │
+│ → netProfit │                  │ (Sepolia)    │
+└──────┬──────┘                  └──────────────┘
+       │
+       ▼
+┌─────────────┐    Arc API       ┌──────────────┐
+│ auto-settle │──────────────────┤ Operator     │
+│ pipeline    │  USDC transfer   │ Vault        │
+└─────────────┘                  └──────────────┘
 ```
