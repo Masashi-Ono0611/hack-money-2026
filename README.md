@@ -955,6 +955,12 @@ forge script script/AuthorizeFunctionsReceiver.s.sol:AuthorizeFunctionsReceiver 
 --broadcast -vvv
 ```
 
+#### L2 Utilization Oracle の運用監視・障害対応
+
+イベント監視クエリ、staleアラート条件、LINK残高監視、障害時Runbookは以下を参照。
+
+- `/Users/harukikondo/git/hack-money-2026/docs/l2-oracle-ops-runbook.md`
+
 ### 2-7. 最終決済（Arc + USDC → Operator Vault）
 
 裁定利益を Arc 経由で USDC として Operator Vault へ送金するフローです。

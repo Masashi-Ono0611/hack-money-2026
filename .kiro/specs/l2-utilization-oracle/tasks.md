@@ -186,45 +186,45 @@
 
 ---
 
-- [ ] 7. テスト実装（P0）
+- [x] 7. テスト実装（P0）
 
-- [ ] 7.1 `MockOracle.t.sol` を拡張する
+- [x] 7.1 `MockOracle.t.sol` を拡張する
   - 範囲外/権限/timestamp/stale/source/乖離/互換APIのテストを追加
   - _Requirements: 1, 2, 3, 4, 8, 9, 10_
 
-- [ ] 7.2 `UtilizationHook.t.sol` に staleケースを追加する
+- [x] 7.2 `UtilizationHook.t.sol` に staleケースを追加する
   - stale時DEFAULT_FEEを検証
   - _Requirements: 5.2, 9.1_
 
-- [ ] 7.3 `PoolHookIntegration.t.sol` に stale E2E を追加する
+- [x] 7.3 `PoolHookIntegration.t.sol` に stale E2E を追加する
   - 実swapで安全側feeを検証
   - _Requirements: 5.2, 9.1_
 
-- [ ] 7.4 `FunctionsReceiver.t.sol` を追加する
+- [x] 7.4 `FunctionsReceiver.t.sol` を追加する
   - fulfill正常/異常、router認可、interval挙動を検証
   - _Requirements: 7.3, 7.5_
 
-- [ ] 7.5 botロジックのユニットテストを追加する
+- [x] 7.5 botロジックのユニットテストを追加する
   - EMA/clamp/fallback/retry
   - _Requirements: 6.2, 6.4, 6.5_
 
 ---
 
-- [ ] 8. 運用・監査導線整備（P1）
+- [x] 8. 運用・監査導線整備（P1）
 
-- [ ] 8.1 イベント監視クエリ例を整備する
+- [x] 8.1 イベント監視クエリ例を整備する
   - source別追跡
   - _Requirements: 8.1, 8.4_
 
-- [ ] 8.2 stale検知アラート条件を定義する
+- [x] 8.2 stale検知アラート条件を定義する
   - TTL超過時アラート
   - _Requirements: 4.2, 9.1_
 
-- [ ] 8.3 LINK残高監視手順を整備する
+- [x] 8.3 LINK残高監視手順を整備する
   - Functions/Automationの枯渇防止
   - _Requirements: 7.5_
 
-- [ ] 8.4 障害時Runbookを整備する
+- [x] 8.4 障害時Runbookを整備する
   - bot停止 / functions停止 / 両停止
   - _Requirements: 2.4, 9.1, 9.4_
 
