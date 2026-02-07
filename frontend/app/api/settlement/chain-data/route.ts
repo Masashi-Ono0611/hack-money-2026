@@ -1,14 +1,28 @@
 import { NextResponse } from "next/server";
 import { clients, DEPLOYED, CHAIN_LABELS, type ChainKey } from "@/lib/chains";
-import { MockOracleAbi, PoolManagerAbi } from "@/lib/abis";
+import { MockOracleAbi, StateViewAbi } from "@/lib/abis";
 
-function sqrtPriceX96ToPrice(sqrtPriceX96: bigint): number {
-  // price = (sqrtPriceX96 / 2^96)^2
+/**
+ * Convert sqrtPriceX96 to human-readable "USDC per 1 CPT" price.
+ *
+ * In all our pools: token0 = USDC (6 dec), token1 = CPT (18 dec).
+ * sqrtPriceX96 encodes price = token1_raw / token0_raw.
+ * rawPrice = (sqrtPriceX96 / 2^96)^2
+ *
+ * To get USDC per CPT:
+ *   usdc_per_cpt = (1 / rawPrice) * 10^(token1_dec - token0_dec)
+ *                = (1 / rawPrice) * 10^12
+ */
+function sqrtPriceX96ToUsdcPerCpt(sqrtPriceX96: bigint): number {
   const Q96 = 2n ** 96n;
+  // rawPrice = num / denom  where num = sqrtPrice^2, denom = Q96^2
   const num = sqrtPriceX96 * sqrtPriceX96;
   const denom = Q96 * Q96;
-  // Use floating point for display
-  return Number(num * 10n ** 18n / denom) / 1e18;
+  // usdc_per_cpt = denom / num * 10^12
+  // Use scaled integer math: result = denom * 10^(12+18) / num, then / 10^18
+  const SCALE = 10n ** 30n; // 10^(12+18)
+  const scaled = denom * SCALE / num;
+  return Number(scaled) / 1e18;
 }
 
 function feeLabel(utilization: number): string {
@@ -33,8 +47,8 @@ export async function GET() {
 
       const [slot0Result, utilizationResult] = await Promise.allSettled([
         client.readContract({
-          address: addrs.poolManager as `0x${string}`,
-          abi: PoolManagerAbi,
+          address: addrs.stateView as `0x${string}`,
+          abi: StateViewAbi,
           functionName: "getSlot0",
           args: [addrs.poolId as `0x${string}`],
         }),
@@ -58,7 +72,7 @@ export async function GET() {
           ? Number(utilizationResult.value as bigint)
           : null;
 
-      const price = sqrtPriceX96 ? sqrtPriceX96ToPrice(sqrtPriceX96) : null;
+      const price = sqrtPriceX96 ? sqrtPriceX96ToUsdcPerCpt(sqrtPriceX96) : null;
 
       return {
         chain: key,

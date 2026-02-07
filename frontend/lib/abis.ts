@@ -10,9 +10,9 @@ export const MockOracleAbi = [
   },
 ] as const;
 
-export const PoolManagerAbi = [
+export const StateViewAbi = [
   {
-    inputs: [{ name: "id", type: "bytes32" }],
+    inputs: [{ name: "poolId", type: "bytes32" }],
     name: "getSlot0",
     outputs: [
       { name: "sqrtPriceX96", type: "uint160" },
@@ -20,6 +20,13 @@ export const PoolManagerAbi = [
       { name: "protocolFee", type: "uint24" },
       { name: "lpFee", type: "uint24" },
     ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ name: "poolId", type: "bytes32" }],
+    name: "getLiquidity",
+    outputs: [{ name: "liquidity", type: "uint128" }],
     stateMutability: "view",
     type: "function",
   },
