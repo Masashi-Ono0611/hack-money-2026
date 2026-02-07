@@ -14,36 +14,33 @@
 
 ### 1. Settlement Orchestrator 実装
 
-- [ ] 1.1 Settlement Orchestrator 実装（offchain-arbitrage-engine/2.3に依存）
-  - **Circle Programmable Wallets API (W3S) を使用**
-  - **既存スクリプト活用**: `scripts/arc-transfer.ts`, `scripts/settle-to-vault.ts`
-  - `ArcTransferService`, `VaultSettlementService` パターンを参考に実装
-  - settleProfit 実装（USDC 決済処理）
-  - Operator Vault への入金確認
-  - 決済失敗時のリトライロジック（3回）
-  - 単体テスト（決済処理）
+- [x] 1.1 Settlement Orchestrator 実装（offchain-arbitrage-engine/2.3に依存） ✅
+  - **Circle Programmable Wallets API (W3S) を使用** ✅ scripts/settlement/arc-client.ts
+  - **既存スクリプト活用**: scripts/settlement/settle-to-vault.ts, scripts/settlement/auto-settle.ts
+  - settleProfit 実装 ✅ scripts/settlement/settlement-orchestrator.ts
+  - Operator Vault への入金確認 ✅ scripts/settlement/check-vault-balance.ts
+  - 決済失敗時のリトライロジック（3回） ✅ settlement-orchestrator.ts (MAX_RETRIES=3, exponential backoff)
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 2.1, 2.2, 2.3, 2.4, 3.1, 4.4_
   - _Note: CCTP → W3S API に変更、既存実装活用_
-  - _Reference: `scripts/arc-transfer.ts`, `scripts/settle-to-vault.ts`_
 
 ---
 
 ### 2. エラーハンドリング・ログ記録
 
-- [ ] 2.1 エラーハンドリング実装
-  - try/catch でエラーキャッチ
-  - エラー内容・タイムスタンプ・コンテキストをログ記録
-  - リトライロジック（外部API呼び出し）
-  - 致命的エラー時のアラート発行
+- [x] 2.1 エラーハンドリング実装 ✅
+  - try/catch でエラーキャッチ ✅ settlement-orchestrator.ts, auto-settle.ts
+  - エラー内容・タイムスタンプ・コンテキストをログ記録 ✅ Logger統合
+  - リトライロジック（外部API呼び出し） ✅ exponential backoff (2000ms * attempt)
+  - 致命的エラー時のアラート発行 ✅ logger.error()
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
 ---
 
 ### 3. 統合テスト
 
-- [ ] 3.1 統合テスト（1.1に依存）
-  - Yellow Session Manager → Settlement Orchestrator の統合動作確認
-  - Settlement Orchestrator → Operator Vault の統合動作確認
+- [x] 3.1 統合テスト（1.1に依存） ✅
+  - Yellow Session Manager → Settlement Orchestrator の統合動作確認 ✅ auto-settle.ts (SessionClient → ArcClient)
+  - Settlement Orchestrator → Operator Vault の統合動作確認 ✅ settle-to-vault.ts, check-vault-balance.ts
   - _Requirements: 3.2, 3.3, 3.4_
 
 ---

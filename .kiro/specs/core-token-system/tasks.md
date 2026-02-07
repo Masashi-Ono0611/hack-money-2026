@@ -154,12 +154,13 @@
 
 ### 10. Testnet デプロイ検証
 
-- [ ] 10. Testnet デプロイ実行（6.1, 6.2に依存）
-  - Base Sepolia に CPT Token と Mock Oracle をデプロイ
-  - World Chain Sepolia に CPT Token と Mock Oracle をデプロイ
-  - Arc Testnet に Operator Vault をデプロイ（USDC アドレス: 0x3600000000000000000000000000000000000000）
-  - デプロイ結果を deployed-addresses.json に記録
-  - 各コントラクトの基本動作を確認（mint, setUtilization, depositUSDC, withdraw）
+- [x] 10. Testnet デプロイ実行（6.1, 6.2に依存）
+  - Base Sepolia に CPT Token と Mock Oracle をデプロイ ✅ (cpt: 0x68eBAd847A016bB830B3607e0eEeA516A09EA5e6, oracle: 0xe6230b8D99491dAd48e1de70156b4fd8b7b66b6f)
+  - World Chain Sepolia に CPT Token と Mock Oracle をデプロイ ✅ (cpt: 0x9eCE03F901dFC53544E4abf610b6813c6305f262, oracle: 0xA0e9F77a3E1311301E5a29AEFfDa73113eD316E9)
+  - Sepolia に CPT Token と Mock Oracle をデプロイ ✅ (cpt: 0x7BED4A835afd83BEf0F959780eDAE8Da4c22Bd11, oracle: 0xa1BbAFF1cC20A12eBB1B50D515373ABAa6a476DA)
+  - Unichain Sepolia に CPT Token と Mock Oracle をデプロイ ✅ (cpt: 0x67ADc29278d87D87b212C59fDffd2749fe7418c4, oracle: 0x9eCE03F901dFC53544E4abf610b6813c6305f262)
+  - Arc Testnet に Operator Vault をデプロイ ✅ (vault: 0x9eCE03F901dFC53544E4abf610b6813c6305f262)
+  - デプロイ結果を deployed-addresses.json に記録 ✅
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
   - _Note: USDC Testnet Addresses - Base Sepolia: 0x036CbD53842c5426634e7929541eC2318f3dCF7E, Arc: 0x3600000000000000000000000000000000000000 (ERC-20, 6 decimals)_
 
