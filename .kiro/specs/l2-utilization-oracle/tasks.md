@@ -91,23 +91,23 @@
   - Oracle本体とChainlink通信責務を分離
   - _Requirements: 7.3, 7.5_
 
-- [ ] 3.2 `performUpkeep()` で request送信を実装する
+- [x] 3.2 `performUpkeep()` で request送信を実装する
   - interval制御、Router送信を実装
   - _Requirements: 7.2, 7.4_
 
-- [ ] 3.3 `fulfillRequest()` でレスポンス検証とOracle更新を実装する
+- [x] 3.3 `fulfillRequest()` でレスポンス検証とOracle更新を実装する
   - 正常時: `setUtilizationFromFunctions()`
   - 失敗時: イベント記録のみで継続
   - _Requirements: 7.3, 7.5_
 
-- [ ] 3.4 Receiver を Oracle allowlist に接続する
+- [x] 3.4 Receiver を Oracle allowlist に接続する
   - デプロイ後に authorized updater として登録
   - _Requirements: 3.1, 7.3_
 
-- [ ] 3.5 Base Sepolia向け Router / DON 設定を定義する
+- [x] 3.5 Base Sepolia向け Router / DON 設定を定義する
   - _Requirements: 7.4, 11.2_
 
-- [ ] 3.6 Functions障害時に継続可能な挙動を検証する
+- [x] 3.6 Functions障害時に継続可能な挙動を検証する
   - _Requirements: 2.4, 7.5, 9.4_
 
 ---
