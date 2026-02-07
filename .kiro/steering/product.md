@@ -1,6 +1,6 @@
 # Product Overview
 
-**Zombie L2 Clearinghouse** は、低稼働なEthereum L2チェーンの計算リソースをトークン化し、ガスレス裁定によってUSDC収益を生み出す財務レイヤーです。
+**Ghost Yield** は、低稼働なEthereum L2チェーンの計算リソースをトークン化し、ガスレス裁定によってUSDC収益を生み出す財務レイヤーです。
 
 ## Core Capabilities
 

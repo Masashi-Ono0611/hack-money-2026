@@ -71,7 +71,7 @@ export class YellowClient extends EventEmitter {
     this.wsUrl = config.wsUrl ?? DEFAULT_WS_URL;
     this.privateKey = config.privateKey;
     this.address = privateKeyToAccount(config.privateKey).address;
-    this.application = config.application ?? 'zombie-l2-clearinghouse';
+    this.application = config.application ?? 'ghost-yield';
     this.connectionTimeoutMs = config.connectionTimeoutMs ?? 15_000;
   }
 

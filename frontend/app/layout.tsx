@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bagel Finance",
+  title: "Ghost Yield",
   description: "Cross-chain settlement dashboard",
 };
 
@@ -31,7 +31,7 @@ export default function RootLayout({
         <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-black/80">
           <div className="mx-auto flex h-14 max-w-5xl items-center gap-6 px-6">
             <Link href="/" className="text-base font-semibold tracking-tight">
-              Bagel Finance
+              Ghost Yield
             </Link>
             <nav className="flex items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
               <Link href="/" className="transition-colors hover:text-zinc-900 dark:hover:text-zinc-50">

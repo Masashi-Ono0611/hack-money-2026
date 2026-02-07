@@ -4,7 +4,7 @@
 
 ## short description
 
-Zombie L2 Clearinghouse は 低稼働なEthereum L2チェーンの計算リソースをトークン化し、ガスレス裁定によってL2運営者にUSDC収益を生み出す財務レイヤーです。
+Ghost Yield は 低稼働なEthereum L2チェーンの計算リソースをトークン化し、ガスレス裁定によってL2運営者にUSDC収益を生み出す財務レイヤーです。
 
 ## Overview
 
@@ -12,7 +12,7 @@ EthereumのLayer 2エコシステムでは、多くのチェーンが「ユー�
 
 この結果、有望なL2であっても、キラーdAppが現れる前にチェーン停止や撤退に追い込まれてしまいます。
 
-Zombie L2 Clearinghouse はこの問題を「ユーザーが来るまで耐える」のではなく「ユーザーがいなくても収益が回る」仕組みで解決します。
+Ghost Yield はこの問題を「ユーザーが来るまで耐える」のではなく「ユーザーがいなくても収益が回る」仕組みで解決します。
 
 本プロダクトでは、各L2の計算コストを **Compute Token（CPT）** としてトークン化し、Uniswap v4 を用いて CPT / USDC の基準価格市場を構築します。
 
@@ -22,7 +22,7 @@ Zombie L2 Clearinghouse はこの問題を「ユーザーが来るまで耐え�
 
 このUSDCはL2運営者のVaultに集約され、ノード運用やシーケンサーなどの固定費を直接補填します。
 
-Zombie L2 Clearinghouse は、死にかけたL2を復活させるプロジェクトではありません。
+Ghost Yield は、死にかけたL2を復活させるプロジェクトではありません。
 
 需要が戻るまでチェーンを生かし続けるための新しいL2財務インフラです。
 
@@ -169,7 +169,7 @@ L2運営はユーザーがいない間も、
 
   * 価格差・稼働率の変化を収益化
   * CPTを売買する流動性提供者
-* **Zombie L2 Clearinghouse**
+* **Ghost Yield**
 
   * 市場設計・裁定・USDC決済を担う財務レイヤー
 
@@ -181,7 +181,7 @@ flowchart LR
   OP[L2 Operator]
   DEV[Developer / App]
   TR[Trader / Bot]
-  CL[Zombie L2 Clearinghouse]
+  CL[Ghost Yield]
   UNI[Uniswap v4\nCPT / USDC Pool]
   YEL[Yellow Session]
   ARC[Arc + USDC]
@@ -232,9 +232,9 @@ L2は今や、Ethereumとさまざまな距離感で接続された**独立し�
 
 これらはすべて、「Ethereumを直接スケールしない」からこそ実現できる価値です。
 
-### Zombie L2 Clearinghouse が L2 を使う理由
+### Ghost Yield が L2 を使う理由
 
-Zombie L2 Clearinghouse は、L2をスケーリング手段として使っていません。
+Ghost Yield は、L2をスケーリング手段として使っていません。
 
 私たちが L2 を使う理由は明確です。
 
@@ -243,7 +243,7 @@ Zombie L2 Clearinghouse は、L2をスケーリング手段として使ってい
 多くのL2はユーザー不足により取引量が少なく、結果として計算コストが極端に安くなっています。
 しかしその価値は、これまで経済的に活用されてきませんでした。
 
-Zombie L2 Clearinghouse は、この「使われなさ」を欠点ではなく**未評価の資産**として扱います。
+Ghost Yield は、この「使われなさ」を欠点ではなく**未評価の資産**として扱います。
 
 ### Ethereumとの「適切な距離感」
 
@@ -265,7 +265,7 @@ Zombie L2 Clearinghouse は、この「使われなさ」を欠点ではなく**
 
 ### L2は「生き残るためのインフラ」になる
 
-Zombie L2 Clearinghouse は、L2を復活させるプロジェクトではありません。
+Ghost Yield は、L2を復活させるプロジェクトではありません。
 
 L2がキラーアプリを見つけるまで、あるいは役割を再定義するまで**経済的に生き延びるための時間を提供する**プロジェクトです。
 
@@ -274,11 +274,11 @@ L2がキラーアプリを見つけるまで、あるいは役割を再定義す
 
 2026年のL2に必要なのは、スケーリングではなく **持続可能性** です。
 
-Zombie L2 Clearinghouse は、そのための財務レイヤーです。
+Ghost Yield は、そのための財務レイヤーです。
 
 ## このプロダクトの解決アプローチ
 
-Zombie L2 Clearinghouse は、**ユーザー需要に依存しない収益モデル**をL2運営に提供します。
+Ghost Yield は、**ユーザー需要に依存しない収益モデル**をL2運営に提供します。
 
 ### 1. 計算リソースを資産化する
 
@@ -709,7 +709,7 @@ sequenceDiagram
 
 ### TL;DR
 
-Zombie L2 Clearinghouse は、**使われていないL2を「失敗」ではなく「安価な計算資源」として再定義し、Uniswap v4・Yellow・USDC を組み合わせて、L2運営に現実的な収益をもたらす財務インフラ** です。
+Ghost Yield は、**使われていないL2を「失敗」ではなく「安価な計算資源」として再定義し、Uniswap v4・Yellow・USDC を組み合わせて、L2運営に現実的な収益をもたらす財務インフラ** です。
 
 ## 動かし方
 
