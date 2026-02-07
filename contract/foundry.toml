@@ -12,6 +12,7 @@ remappings = [
 ]
 fs_permissions = [
   { access = "read-write", path = "./deployed-addresses.json" },
+  { access = "read-write", path = "./tmp-deployed-addresses.json" },
   { access = "read", path = "./usdc-addresses.json" },
   { access = "read", path = "./uniswap-v4-addresses.json" }
 ]

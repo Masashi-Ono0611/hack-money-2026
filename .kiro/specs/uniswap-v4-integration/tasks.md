@@ -88,7 +88,7 @@
   - PoolManager.initialize を呼び出す
   - _Requirements: 3.2, 3.3, 3.4, 3.6_
 
-- [ ] 4.3 デプロイ結果を JSON ファイルに記録する機能を追加する
+- [x] 4.3 デプロイ結果を JSON ファイルに記録する機能を追加する
   - deployed-addresses.json を作成・更新する
   - チェーン別にアドレスを記録する
   - Hook アドレスと Pool ID を保存する

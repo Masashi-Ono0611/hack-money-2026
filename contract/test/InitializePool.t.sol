@@ -43,4 +43,25 @@ contract InitializePoolTest is Test {
         assertEq(address(hooks), hook, "hook should match");
         assertEq(poolManager.lastSqrtPriceX96(), sqrtPriceX96, "sqrtPriceX96 should match");
     }
+
+    function test_recordDeployment_writesHookAndPoolId() public {
+        InitializePool script = new InitializePool();
+        string memory path = string.concat(vm.projectRoot(), "/tmp-deployed-addresses.json");
+        string memory chainName = "base-sepolia";
+
+        address cpt = address(0x1111);
+        address oracle = address(0x2222);
+        address hook = address(0x3333);
+        bytes32 poolId = bytes32(uint256(0x1234));
+
+        vm.writeFile(path, '{"base-sepolia":{"cpt":"0x0000000000000000000000000000000000001111","oracle":"0x0000000000000000000000000000000000002222"}}');
+
+        script.recordDeployment(path, chainName, hook, poolId);
+
+        string memory json = vm.readFile(path);
+        assertEq(vm.parseJsonAddress(json, ".base-sepolia.cpt"), cpt, "cpt should be preserved");
+        assertEq(vm.parseJsonAddress(json, ".base-sepolia.oracle"), oracle, "oracle should be preserved");
+        assertEq(vm.parseJsonAddress(json, ".base-sepolia.hook"), hook, "hook should be written");
+        assertEq(vm.parseJsonBytes32(json, ".base-sepolia.poolId"), poolId, "poolId should be written");
+    }
 }
