@@ -98,7 +98,7 @@
 
 ### 5. 単体テスト実装
 
-- [ ] 5.1 (P) calculateDynamicFee 関数のテストを作成する
+- [x] 5.1 (P) calculateDynamicFee 関数のテストを作成する
   - 低稼働時（utilization < 30）で LOW_FEE が返されることを検証する
   - 中稼働時（30 <= utilization < 70）で DEFAULT_FEE が返されることを検証する
   - 高稼働時（utilization >= 70）で HIGH_FEE が返されることを検証する
@@ -106,12 +106,12 @@
   - 境界値（0, 30, 70, 100）のテストを含める
   - _Requirements: 4.1_
 
-- [ ] 5.2 (P) getHookPermissions 関数のテストを作成する
+- [x] 5.2 (P) getHookPermissions 関数のテストを作成する
   - beforeSwap が true であることを検証する
   - 他のすべてのフックが false であることを検証する
   - _Requirements: 4.1_
 
-- [ ] 5.3 HookMiner のテストを作成する（Task 3.1 に依存）
+- [x] 5.3 HookMiner のテストを作成する（Task 3.1 に依存）
   - 有効なソルトが発見されることを検証する
   - 発見されたアドレスが正しいビットパターンを持つことを検証する
   - 最大反復回数を超えた場合に revert することを検証する
