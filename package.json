@@ -7,14 +7,19 @@
 		"settle:auto": "tsx scripts/settlement/auto-settle.ts",
 		"vault:balance": "tsx scripts/settlement/check-vault-balance.ts",
 		"test:yellow": "tsx scripts/settlement/test-yellow-connection.ts",
-		"yellow:open-channel": "tsx scripts/settlement/open-channel.ts"
+		"yellow:open-channel": "tsx scripts/settlement/open-channel.ts",
+		"arbitrage": "tsx scripts/arbitrage/index.ts",
+		"test:arbitrage": "vitest run",
+		"test:arbitrage:watch": "vitest"
 	},
 	"devDependencies": {
 		"@types/node": "^25.2.0",
 		"@types/ws": "^8.18.1",
+		"@vitest/coverage-v8": "^4.0.18",
 		"jose": "^6.1.3",
 		"tsx": "^4.21.0",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.18"
 	},
 	"dependencies": {
 		"@erc7824/nitrolite": "^0.5.3",
