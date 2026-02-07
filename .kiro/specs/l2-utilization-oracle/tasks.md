@@ -13,7 +13,7 @@
 
 ## タスクリスト
 
-- [ ] 1. Oracleコントラクト拡張（P0）
+- [x] 1. Oracleコントラクト拡張（P0）
 
 - [x] 1.1 `IMockOracle` の公開インターフェースを拡張する
   - `getUtilizationWithMeta()` を追加
@@ -65,7 +65,7 @@
 
 ---
 
-- [ ] 2. UtilizationHook 連携更新（P0）
+- [x] 2. UtilizationHook 連携更新（P0）
 
 - [x] 2.1 オラクル参照をメタ情報付きAPIへ切り替える
   - `getUtilizationWithMeta()` を利用
@@ -75,11 +75,11 @@
   - stale=true の場合は利用率を無視
   - _Requirements: 5.2, 9.1_
 
-- [ ] 2.3 非stale時の既存動的手数料ロジックを維持する
+- [x] 2.3 非stale時の既存動的手数料ロジックを維持する
   - 既存の LOW/DEFAULT/HIGH 閾値動作を維持
   - _Requirements: 5.3, 5.4_
 
-- [ ] 2.4 staleフォールバックを監査可能にする
+- [x] 2.4 staleフォールバックを監査可能にする
   - 必要に応じて補助イベントを追加
   - _Requirements: 8.1, 8.4_
 

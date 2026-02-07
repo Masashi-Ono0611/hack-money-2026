@@ -30,6 +30,8 @@ contract UtilizationHook is IHooks {
 
     /// @notice Emitted when dynamic fee is applied during a swap
     event FeeOverridden(PoolId indexed poolId, uint256 utilization, uint24 fee);
+    /// @notice Emitted when stale oracle data forces DEFAULT_FEE fallback
+    event StaleFallbackApplied(PoolId indexed poolId, uint256 utilization, uint8 source, uint24 fee);
     error UnauthorizedCaller(address caller);
 
     IPoolManager public immutable poolManager;
@@ -133,8 +135,11 @@ contract UtilizationHook is IHooks {
         if (msg.sender != address(poolManager)) {
             revert UnauthorizedCaller(msg.sender);
         }
-        (uint256 utilization,, bool stale,) = oracle.getUtilizationWithMeta();
+        (uint256 utilization,, bool stale, uint8 source) = oracle.getUtilizationWithMeta();
         uint24 fee = stale ? DEFAULT_FEE : calculateDynamicFee(utilization);
+        if (stale) {
+            emit StaleFallbackApplied(key.toId(), utilization, source, fee);
+        }
         emit FeeOverridden(key.toId(), utilization, fee);
         return (IHooks.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }

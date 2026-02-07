@@ -55,6 +55,34 @@ contract StaleMetaOracle is IMockOracle {
     function setAuthorizedUpdater(address, bool) external pure {}
 }
 
+contract ConfigurableMetaOracle is IMockOracle {
+    uint256 private _utilization;
+    bool private _stale;
+
+    constructor(uint256 utilization_, bool stale_) {
+        _utilization = utilization_;
+        _stale = stale_;
+    }
+
+    function getUtilization() external pure returns (uint256) {
+        revert("legacy api disabled");
+    }
+
+    function setUtilization(uint256) external pure {}
+
+    function getUtilizationWithMeta() external view returns (uint256 utilization, uint256 updatedAt, bool stale, uint8 source) {
+        return (_utilization, block.timestamp, _stale, 1);
+    }
+
+    function setUtilizationFromBot(uint256, uint256) external pure {}
+
+    function setUtilizationFromFunctions(uint256, uint256, bytes32) external pure {}
+
+    function setStaleTtl(uint256) external pure {}
+
+    function setAuthorizedUpdater(address, bool) external pure {}
+}
+
 /// @title UtilizationHookTest
 /// @notice Task 2.1: UtilizationHook コントラクトスケルトンのテスト
 contract UtilizationHookTest is Test {
@@ -333,6 +361,69 @@ contract UtilizationHookTest is Test {
         vm.prank(address(poolManager));
         (,, uint24 feeWithFlag) = staleHook.beforeSwap(address(this), key, _makeSwapParams(), "");
         assertEq(feeWithFlag, 3000 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+    }
+
+    function test_beforeSwap_staleOracleEmitsStaleFallbackAppliedEvent() public {
+        StaleMetaOracle staleOracle = new StaleMetaOracle();
+        UtilizationHook staleHook = new UtilizationHook(poolManager, IMockOracle(address(staleOracle)));
+        PoolKey memory key = PoolKey({
+            currency0: Currency.wrap(address(1)),
+            currency1: Currency.wrap(address(2)),
+            fee: 3000,
+            tickSpacing: 60,
+            hooks: IHooks(address(staleHook))
+        });
+        PoolId poolId = key.toId();
+
+        vm.expectEmit(true, false, false, true);
+        emit UtilizationHook.StaleFallbackApplied(poolId, 10, 1, 3000);
+
+        vm.prank(address(poolManager));
+        staleHook.beforeSwap(address(this), key, _makeSwapParams(), "");
+    }
+
+    function test_beforeSwap_nonStaleKeepsExistingDynamicFeeTiers() public {
+        ConfigurableMetaOracle lowOracle = new ConfigurableMetaOracle(29, false);
+        UtilizationHook lowHook = new UtilizationHook(poolManager, IMockOracle(address(lowOracle)));
+        PoolKey memory lowKey = PoolKey({
+            currency0: Currency.wrap(address(1)),
+            currency1: Currency.wrap(address(2)),
+            fee: 3000,
+            tickSpacing: 60,
+            hooks: IHooks(address(lowHook))
+        });
+
+        ConfigurableMetaOracle midOracle = new ConfigurableMetaOracle(50, false);
+        UtilizationHook midHook = new UtilizationHook(poolManager, IMockOracle(address(midOracle)));
+        PoolKey memory midKey = PoolKey({
+            currency0: Currency.wrap(address(1)),
+            currency1: Currency.wrap(address(2)),
+            fee: 3000,
+            tickSpacing: 60,
+            hooks: IHooks(address(midHook))
+        });
+
+        ConfigurableMetaOracle highOracle = new ConfigurableMetaOracle(85, false);
+        UtilizationHook highHook = new UtilizationHook(poolManager, IMockOracle(address(highOracle)));
+        PoolKey memory highKey = PoolKey({
+            currency0: Currency.wrap(address(1)),
+            currency1: Currency.wrap(address(2)),
+            fee: 3000,
+            tickSpacing: 60,
+            hooks: IHooks(address(highHook))
+        });
+
+        vm.prank(address(poolManager));
+        (,, uint24 lowFeeWithFlag) = lowHook.beforeSwap(address(this), lowKey, _makeSwapParams(), "");
+        assertEq(lowFeeWithFlag, 500 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+
+        vm.prank(address(poolManager));
+        (,, uint24 midFeeWithFlag) = midHook.beforeSwap(address(this), midKey, _makeSwapParams(), "");
+        assertEq(midFeeWithFlag, 3000 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+
+        vm.prank(address(poolManager));
+        (,, uint24 highFeeWithFlag) = highHook.beforeSwap(address(this), highKey, _makeSwapParams(), "");
+        assertEq(highFeeWithFlag, 10000 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
     /// @notice 未使用フック（beforeInitialize）が未実装として revert することを検証
