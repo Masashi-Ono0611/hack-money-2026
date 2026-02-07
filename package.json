@@ -5,12 +5,20 @@
 	"scripts": {
 		"settle:vault": "tsx scripts/settlement/settle-to-vault.ts",
 		"settle:auto": "tsx scripts/settlement/auto-settle.ts",
-		"vault:balance": "tsx scripts/settlement/check-vault-balance.ts"
+		"vault:balance": "tsx scripts/settlement/check-vault-balance.ts",
+		"test:yellow": "tsx scripts/settlement/test-yellow-connection.ts"
 	},
 	"devDependencies": {
 		"@types/node": "^25.2.0",
+		"@types/ws": "^8.18.1",
 		"jose": "^6.1.3",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"@erc7824/nitrolite": "^0.5.3",
+		"ethers": "^6.16.0",
+		"viem": "^2.45.1",
+		"ws": "^8.19.0"
 	}
 }
