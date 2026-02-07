@@ -5,6 +5,8 @@ paginate: true
 backgroundColor: "#0f172a"
 color: "#f8fafc"
 size: 16:9
+html: true
+header: ''
 style: |
   /* Custom Palette */
   :root {
@@ -18,8 +20,8 @@ style: |
   section {
     font-family: 'Inter', system-ui, sans-serif;
     letter-spacing: -0.01em;
-    font-size: 28px; /* Slightly smaller base font to prevent overflow */
-    padding: 30px 50px; /* More padding */
+    font-size: 28px;
+    padding: 30px 50px;
   }
   
   h1, h2, h3 {
@@ -43,9 +45,9 @@ style: |
   /* Tables */
   table {
     width: 100%;
-    font-size: 0.8em; /* Prevent table overflow */
+    font-size: 0.8em;
     border-collapse: separate;
-    border-spacing: 0 8px; /* Row spacing */
+    border-spacing: 0 8px;
   }
   th, td {
     padding: 12px 20px;
@@ -61,10 +63,10 @@ style: |
   tr td:first-child { border-radius: 8px 0 0 8px; }
   tr td:last-child { border-radius: 0 8px 8px 0; }
   
-  /* Layouts with safer gaps */
+  /* Layouts */
   section.split {
     display: grid;
-    grid-template-columns: 48% 48%; /* Explicit width to prevent overflow */
+    grid-template-columns: 48% 48%;
     gap: 4%;
     align-items: center;
   }
@@ -83,7 +85,7 @@ style: |
     border-radius: 16px;
     padding: 1.5rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    height: 100%; /* Fill container */
+    height: 100%;
     box-sizing: border-box;
   }
   div.card h3 {
@@ -93,15 +95,46 @@ style: |
     border-bottom: 1px solid rgba(255,255,255,0.1);
     padding-bottom: 0.5em;
   }
+
+  /* Flowchart CSS (CSS only, no JS) */
+  .flow-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 2rem;
+  }
+  .flow-node {
+    background: rgba(30, 41, 59, 0.95);
+    border: 2px solid var(--highlight);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    flex: 1;
+    font-size: 0.85em;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 120px;
+  }
+  .flow-arrow {
+    font-size: 2em;
+    color: var(--highlight);
+    opacity: 0.8;
+  }
   
   /* Utilities */
   .text-center { text-align: center; }
-  .text-right { text-align: right; }
-  .small { font-size: 0.7em; opacity: 0.8; }
-  .center-content { align-content: center; justify-items: center; }
-
-  /* Diagram fixes */
-  .mermaid svg { max-height: 400px; }
+  .small { font-size: 0.75em; opacity: 0.8; font-weight: 400; display: block; margin-top: 0.5rem; }
+  
+  /* Vertical Center Class */
+  section.vertical-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 
 ---
 
@@ -145,7 +178,7 @@ style: |
 
 # <!-- fit --> The Solution: **Financialize L2 Compute**
 
-Zombie L2 Clearinghouse creates a market where:
+## Zombie L2 Clearinghouse creates a market where:
 
 1.  **L2s** mint idle capacity as **Compute Tokens (CPT)**.
 2.  **Uniswap v4** prices CPT dynamically based on utilization.
@@ -165,7 +198,7 @@ Zombie L2 Clearinghouse creates a market where:
 <br>
 CPT / USDC Pools
 <br><br>
-<span class="small">Dynamic fees via Hooks adjust spread based on real-time chain utilization signaling.</span>
+<span class="small">Dynamic fees via Hooks adjust spread/fees based on L2 utilization signals.</span>
 
 </div>
 
@@ -193,29 +226,52 @@ USDC Vaults
 
 ---
 
+<!-- _class: vertical-center -->
+
 ## Token Flow Architecture
 
-```mermaid
-flowchart LR
-    L2[L2 Operator] -->|Mint CPT| UNI[Uniswap v4]
-    TRADER[Traders] -->|Speculate| UNI
-    
-    UNI -.->|Arb Signal| YELLOW[Yellow Session]
-    
-    YELLOW -->|Gasless Trade| UNI
-    YELLOW -->|Net Profit| ARC[Arc Settlement]
-    ARC -->|USDC| VAULT[Operator Vault]
-    
-    style UNI fill:#ff007a,stroke:#fff
-    style YELLOW fill:#facc15,stroke:#fff,color:#000
-    style ARC fill:#3b82f6,stroke:#fff
-```
+<div class="flow-container">
+  
+  <div class="flow-node">
+    <strong>Supply & Demand</strong>
+    <span class="small">L2 Operators (Mint)<br/>Traders (Speculate)</span>
+  </div>
+
+  <div class="flow-arrow">➜</div>
+
+  <div class="flow-node" style="border-color: #ff007a;">
+    <strong>Uniswap v4</strong>
+    <span class="small">Pricing Pool<br/>(Discovery)</span>
+  </div>
+
+  <div class="flow-arrow">➜</div>
+
+  <div class="flow-node" style="border-color: #facc15; color: #facc15;">
+    <strong>Yellow</strong>
+    <span class="small">Gasless Session<br/>(Execution)</span>
+  </div>
+
+  <div class="flow-arrow">➜</div>
+  
+  <div class="flow-node" style="border-color: #3b82f6;">
+    <strong>Arc + Circle</strong>
+    <span class="small">Settlement<br/>(Value Capture)</span>
+  </div>
+  
+  <div class="flow-arrow">➜</div>
+
+  <div class="flow-node">
+    <strong>Vault</strong>
+    <span class="small">Revenue<br/>(L2 Ops Fund)</span>
+  </div>
+
+</div>
 
 ---
 
 <div class="card">
 
-### Why Tokenize Compute?
+## Why Tokenize Compute?
 **From "Cloud" to "Commodity"**
 
 Just like oil or wheat, **blockspace** is a resource. <br/> Standardizing it as **CPT (1M Gas Units)** enables:
@@ -225,6 +281,7 @@ Just like oil or wheat, **blockspace** is a resource. <br/> Standardizing it as 
 *   **For L2s**: Monetize empty blocks immediately
 
 </div>
+
 
 ---
 
@@ -256,25 +313,25 @@ Just like oil or wheat, **blockspace** is a resource. <br/> Standardizing it as 
 
 # Impact
 
-<div class="split">
-
 <div class="card">
 
-### For L2 Operators
+## For L2 Operators
 *   **Immediate Revenue** from idle hardware.
 *   Extends runway during "Zombie" phases.
 *   Turns fixed costs into variable assets.
 
 </div>
 
+---
+
+# Impact
+
 <div class="card">
 
-### For Ethereum
+## For Ethereum
 *   Prevents L2 centralization/death.
 *   Creates a decentralized compute market.
 *   **Values Diversity** over raw throughput.
-
-</div>
 
 </div>
 
@@ -284,8 +341,3 @@ Just like oil or wheat, **blockspace** is a resource. <br/> Standardizing it as 
 <!-- _footer: "ETH Global HackMoney 2026" -->
 
 # Thank You
-**Zombie L2 Clearinghouse**
-
-*Code & Demo Available on Github*
-
-![bg opacity:0.1](https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80)
