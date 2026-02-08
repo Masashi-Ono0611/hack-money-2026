@@ -106,7 +106,11 @@ export default function DashboardPage() {
     addLog("INFO", "Connecting to on-chain pools + Yellow ClearNode + Arc...");
 
     try {
-      const res = await fetch("/api/arbitrage/run", { method: "POST" });
+      const res = await fetch("/api/arbitrage/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tradeAmountUsdc }),
+      });
       const data = await res.json();
 
       if (!data.ok) {
