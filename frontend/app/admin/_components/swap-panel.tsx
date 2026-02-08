@@ -70,7 +70,7 @@ export function SwapPanel({ chain, label, onSuccess, onLog }: SwapPanelProps) {
   const directionLabel = zeroForOne ? "USDC → CPT" : "CPT → USDC";
 
   return (
-    <div className="border border-[#1f1f1f] bg-[#080808] p-4">
+    <div className="rounded-lg border border-[#1f1f1f] bg-[#080808] p-4">
       <div className="mb-3 flex items-center gap-2">
         <ArrowLeftRight size={14} className="text-[#FF8800]" />
         <span className="font-mono text-[11px] font-semibold tracking-wider text-[#a0a0a0]">
@@ -91,7 +91,7 @@ export function SwapPanel({ chain, label, onSuccess, onLog }: SwapPanelProps) {
                 return next;
               });
             }}
-            className="w-full border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1.5 font-mono text-[11px] font-bold text-white transition-colors hover:border-[#00FF88]"
+            className="w-full rounded-lg border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1.5 font-mono text-[11px] font-bold text-white transition-colors hover:border-[#00FF88]"
           >
             {directionLabel}
           </button>
@@ -104,7 +104,7 @@ export function SwapPanel({ chain, label, onSuccess, onLog }: SwapPanelProps) {
             type="text"
             value={swapAmount}
             onChange={(e) => setSwapAmount(e.target.value)}
-            className="w-full border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1.5 font-mono text-[11px] text-white focus:border-[#00FF88] focus:outline-none"
+            className="w-full rounded-lg border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1.5 font-mono text-[11px] text-white focus:border-[#00FF88] focus:outline-none"
             placeholder={zeroForOne ? DEFAULTS.usdc.label : DEFAULTS.cpt.label}
           />
         </div>
@@ -113,7 +113,7 @@ export function SwapPanel({ chain, label, onSuccess, onLog }: SwapPanelProps) {
       <button
         onClick={handleSwap}
         disabled={isSubmitting}
-        className="flex items-center gap-1.5 bg-[#FF8800] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="flex items-center gap-1.5 rounded-lg bg-[#FF8800] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-all duration-200 hover:brightness-110 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-50"
       >
         {isSubmitting ? "SWAPPING..." : `SWAP ${directionLabel}`}
       </button>

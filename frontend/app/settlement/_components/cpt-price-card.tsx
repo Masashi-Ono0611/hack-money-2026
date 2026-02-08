@@ -52,7 +52,7 @@ export function CptPriceCard({ onLog }: Props) {
   const spread = maxPrice - minPrice;
 
   return (
-    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4">
         <div>
@@ -66,7 +66,7 @@ export function CptPriceCard({ onLog }: Props) {
         <button
           onClick={fetchData}
           disabled={loading}
-          className="flex items-center justify-center border border-[#2f2f2f] bg-[#0A0A0A] p-2 text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+          className="flex items-center justify-center rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] p-2 text-white transition-all duration-200 hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-50"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
         </button>
@@ -89,7 +89,7 @@ export function CptPriceCard({ onLog }: Props) {
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {chains.map((c) => {
                 const isMax = c.price === maxPrice && prices.length > 1;
                 const isMin = c.price === minPrice && prices.length > 1;

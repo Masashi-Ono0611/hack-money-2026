@@ -11,7 +11,7 @@ interface DemoResultProps {
 
 export function DemoResult({ profit, sessions, durationMs, mode }: DemoResultProps) {
   return (
-    <div className="border border-[#00FF8840] bg-[#0A0A0A]">
+    <div className="rounded-xl border border-[#00FF8840] bg-[#0A0A0A]">
       <div className="flex items-center justify-between px-6 py-4">
         <span className="font-sans text-base font-semibold text-white">
           RESULT

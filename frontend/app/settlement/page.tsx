@@ -73,11 +73,11 @@ export default function SettlementPage() {
 
 
   return (
-    <div className="flex flex-col gap-8 px-12 py-10">
+    <div className="flex flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-sans text-4xl font-bold tracking-tight text-white">
+          <h1 className="font-sans text-2xl sm:text-4xl font-bold tracking-tight text-white">
             SETTLEMENT
           </h1>
           <p className="mt-1.5 font-mono text-[13px] text-[#a0a0a0]">
@@ -87,7 +87,7 @@ export default function SettlementPage() {
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="flex items-center gap-2 border border-[#2f2f2f] bg-[#0A0A0A] px-4 py-2.5 font-mono text-[11px] font-semibold text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-4 py-2.5 font-mono text-[11px] font-semibold text-white transition-all duration-200 hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-50"
         >
           <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
           REFRESH
@@ -95,7 +95,7 @@ export default function SettlementPage() {
       </div>
 
       {/* Vault Balance */}
-      <div className="flex items-center gap-4 border border-[#2f2f2f] bg-[#0A0A0A] px-6 py-5">
+      <div className="flex items-center gap-4 rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-6 py-5">
         <Vault size={24} className="text-[#6a9fff]" />
         <div>
           <span className="font-mono text-[9px] font-bold tracking-wider text-[#a0a0a0]">

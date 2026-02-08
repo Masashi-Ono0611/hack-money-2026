@@ -54,7 +54,7 @@ export function AutoSettleCard({ onLog }: Props) {
   };
 
   return (
-    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4">
         <div>
@@ -80,7 +80,7 @@ export function AutoSettleCard({ onLog }: Props) {
               type="text"
               value={sessionId}
               onChange={(e) => setSessionId(e.target.value)}
-              className="w-full border border-[#2f2f2f] bg-[#0C0C0C] px-3 py-2 font-mono text-[11px] text-white outline-none transition-colors focus:border-[#00FF8860] placeholder:text-[#a0a0a0]"
+              className="w-full rounded-lg border border-[#2f2f2f] bg-[#0C0C0C] px-3 py-2 font-mono text-[11px] text-white outline-none transition-colors focus:border-[#00FF8860] placeholder:text-[#a0a0a0]"
               placeholder="e.g. demo-session-001"
             />
           </div>
@@ -96,7 +96,7 @@ export function AutoSettleCard({ onLog }: Props) {
           <button
             onClick={runSettle}
             disabled={loading || !sessionId}
-            className="flex items-center gap-2 bg-[#00FF88] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="flex items-center gap-2 rounded-lg bg-[#00FF88] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-all duration-200 hover:brightness-110 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-60"
           >
             {loading ? (
               <Loader2 size={14} className="animate-spin" />
@@ -174,7 +174,7 @@ export function AutoSettleCard({ onLog }: Props) {
                   <summary className="cursor-pointer text-[#a0a0a0] hover:text-white">
                     Raw output
                   </summary>
-                  <pre className="mt-2 max-h-48 overflow-auto border border-[#2f2f2f] bg-[#0C0C0C] p-3 text-[10px] text-[#a0a0a0]">
+                  <pre className="mt-2 max-h-48 overflow-auto rounded-lg border border-[#2f2f2f] bg-[#0C0C0C] p-3 text-[10px] text-[#a0a0a0]">
                     {result.raw}
                   </pre>
                 </details>

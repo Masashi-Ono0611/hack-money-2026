@@ -71,7 +71,7 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
   };
 
   return (
-    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       <div className="flex items-center justify-between px-6 py-4">
         <div>
           <span className="font-sans text-base font-semibold text-white">
@@ -94,7 +94,7 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
               type="text"
               value={profitUsdc}
               onChange={(e) => setProfitUsdc(e.target.value)}
-              className="w-full border border-[#2f2f2f] bg-[#0C0C0C] px-3 py-2 font-mono text-[11px] text-white outline-none focus:border-[#00FF8860]"
+              className="w-full rounded-lg border border-[#2f2f2f] bg-[#0C0C0C] px-3 py-2 font-mono text-[11px] text-white outline-none focus:border-[#00FF8860]"
               placeholder="1.5"
             />
           </div>
@@ -102,7 +102,7 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
             <button
               onClick={runSettle}
               disabled={loading}
-              className="flex items-center gap-2 bg-[#00FF88] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-lg bg-[#00FF88] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-all duration-200 hover:brightness-110 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-60"
             >
               {loading ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
               {loading ? "SETTLING..." : "SETTLE"}

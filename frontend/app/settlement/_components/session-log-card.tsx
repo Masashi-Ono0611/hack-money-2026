@@ -53,7 +53,7 @@ export function SessionLogCard() {
     .reduce((sum, t) => sum + parseFloat(t.pnl), 0);
 
   return (
-    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">
@@ -76,7 +76,7 @@ export function SessionLogCard() {
           <button
             onClick={startDemo}
             disabled={running}
-            className={`px-4 py-2 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-60 ${
+            className={`px-4 py-2 font-mono text-[11px] font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-60 ${
               running
                 ? "bg-[#FF8800] text-[#0C0C0C]"
                 : "bg-[#00FF88] text-[#0C0C0C]"
@@ -128,7 +128,7 @@ export function SessionLogCard() {
               ))}
             </div>
             {totalPnl > 0 && (
-              <div className="flex items-center justify-between border border-[#00FF8840] bg-[#00FF8810] px-4 py-2">
+              <div className="flex items-center justify-between rounded-xl border border-[#00FF8840] bg-[#00FF8810] px-4 py-2">
                 <span className="font-mono text-[11px] text-[#a0a0a0]">
                   Session PnL ({trades.filter((t) => t.pnl).length} arb rounds)
                 </span>

@@ -4,7 +4,7 @@ import { Settings, Cpu } from "lucide-react";
 
 export function DemoConfig() {
   return (
-    <div className="border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-4">
+    <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-4">
       <div className="flex items-center gap-2">
         <Settings size={14} className="text-[#a0a0a0]" />
         <span className="font-mono text-[11px] font-medium tracking-wider text-[#a0a0a0]">

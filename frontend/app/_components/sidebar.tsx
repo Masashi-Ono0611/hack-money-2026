@@ -21,15 +21,19 @@ const NAV_ITEMS = [
   { href: "/dashboard/settings", label: "SETTINGS", icon: Settings },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-60 flex-col justify-between border-r border-[#2f2f2f] bg-[#080808]">
+    <aside className="flex w-60 shrink-0 flex-col justify-between border-r border-[#2f2f2f] bg-[#080808]">
       {/* Top */}
       <div>
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-6">
+        <div className="flex items-center gap-3 px-5 py-8">
           <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#00FF8830] bg-[#00FF880d]">
             <Image
               src="/ghost_yield_icon_nobg.png"
@@ -41,7 +45,7 @@ export function Sidebar() {
               priority
             />
           </div>
-          <span className="font-mono text-sm font-semibold tracking-wider text-white">
+          <span className="font-mono text-base font-semibold tracking-wider text-white">
             GHOST YIELD
           </span>
         </div>
@@ -55,10 +59,11 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-5 py-3 font-mono text-xs font-medium tracking-wider transition-colors ${
+                onClick={onNavigate}
+                className={`flex items-center gap-3 px-5 py-3.5 font-mono text-xs font-medium tracking-wider transition-all duration-200 ${
                   isActive
                     ? "border-l-2 border-[#00FF88] bg-[#00FF8810] text-white"
-                    : "border-l-2 border-transparent text-[#a0a0a0] hover:bg-[#ffffff08] hover:text-white"
+                    : "border-l-2 border-transparent text-[#a0a0a0] hover:bg-[#ffffff08] hover:text-white hover:translate-x-0.5"
                 }`}
               >
                 <Icon
@@ -109,7 +114,7 @@ export function Sidebar() {
 
         {/* User */}
         <div className="flex items-center gap-3 border-t border-[#2f2f2f] px-5 py-4">
-          <div className="flex h-9 w-9 items-center justify-center border border-[#3f3f3f] bg-[#1A1A1A]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#3f3f3f] bg-[#1A1A1A]">
             <span className="font-mono text-xs font-semibold text-[#00FF88]">
               OP
             </span>

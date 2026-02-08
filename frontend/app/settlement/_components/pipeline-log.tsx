@@ -16,7 +16,7 @@ export function PipelineLog({ logs, onClear }: Props) {
   }, [logs]);
 
   return (
-    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">

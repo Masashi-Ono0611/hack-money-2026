@@ -98,11 +98,11 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 px-12 py-10">
+    <div className="flex flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-sans text-4xl font-bold tracking-tight text-white">
+          <h1 className="font-sans text-2xl sm:text-4xl font-bold tracking-tight text-white">
             DEMO
           </h1>
           <p className="mt-1.5 font-mono text-[13px] text-[#a0a0a0]">
@@ -112,7 +112,7 @@ export default function DemoPage() {
         <button
           onClick={handleRun}
           disabled={isRunning}
-          className={`flex items-center gap-2 px-5 py-2.5 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-60 ${
+          className={`flex items-center gap-2 px-5 py-2.5 font-mono text-[11px] font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-60 ${
             isRunning
               ? "bg-[#FF8800] text-[#0C0C0C]"
               : "bg-[#00FF88] text-[#0C0C0C]"
@@ -124,8 +124,8 @@ export default function DemoPage() {
       </div>
 
       {/* Config + Timeline */}
-      <div className="grid grid-cols-5 gap-5">
-        <div className="col-span-2 flex flex-col gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
+        <div className="col-span-1 md:col-span-2 flex flex-col gap-5">
           <DemoConfig />
           {result && (
             <DemoResult
@@ -136,7 +136,7 @@ export default function DemoPage() {
             />
           )}
         </div>
-        <div className="col-span-3">
+        <div className="col-span-1 md:col-span-3">
           <StepTimeline
             steps={steps}
             isRunning={isRunning}
@@ -146,7 +146,7 @@ export default function DemoPage() {
       </div>
 
       {/* History */}
-      <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+      <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
         <div className="flex items-center gap-2 px-6 py-4">
           <History size={14} className="text-[#a0a0a0]" />
           <div>

@@ -83,11 +83,11 @@ export default function AnalyticsPage() {
       : 0;
 
   return (
-    <div className="flex flex-col gap-8 px-12 py-10">
+    <div className="flex flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-sans text-4xl font-bold tracking-tight text-white">
+          <h1 className="font-sans text-2xl sm:text-4xl font-bold tracking-tight text-white">
             ANALYTICS
           </h1>
           <p className="mt-1.5 font-mono text-[13px] text-[#a0a0a0]">
@@ -97,7 +97,7 @@ export default function AnalyticsPage() {
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="flex items-center gap-2 border border-[#2f2f2f] bg-[#0A0A0A] px-4 py-2.5 font-mono text-[11px] font-semibold text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-4 py-2.5 font-mono text-[11px] font-semibold text-white transition-all duration-200 hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-50"
         >
           <RefreshCw
             size={14}
@@ -116,17 +116,17 @@ export default function AnalyticsPage() {
       />
 
       {/* Charts */}
-      <div className="grid grid-cols-5 gap-5">
-        <div className="col-span-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
+        <div className="col-span-1 md:col-span-3">
           <ProfitHistoryChart priceHistory={priceHistory} />
         </div>
-        <div className="col-span-2">
+        <div className="col-span-1 md:col-span-3 lg:col-span-2">
           <UtilizationChart chainData={chainData} />
         </div>
       </div>
 
       {/* Profit History Table */}
-      <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+      <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
         <div className="px-6 py-4">
           <span className="font-sans text-base font-semibold text-white">
             DEMO EXECUTION HISTORY

@@ -39,7 +39,7 @@ export function PriceSpreadChart({ priceHistory, thresholdBps }: PriceSpreadChar
   );
 
   return (
-    <div className="flex h-[300px] flex-col border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="flex h-[300px] flex-col rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 pt-5 pb-3">
         <span className="font-sans text-base font-semibold text-white">

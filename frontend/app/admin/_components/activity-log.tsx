@@ -43,7 +43,7 @@ export function ActivityLog({ logs }: ActivityLogProps) {
   }, [logs]);
 
   return (
-    <div className="flex h-[320px] flex-col border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="flex h-[320px] flex-col rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       <div className="flex items-center justify-between border-b border-[#2f2f2f] px-5 py-4">
         <span className="font-sans text-base font-semibold text-white">
           ACTIVITY LOG

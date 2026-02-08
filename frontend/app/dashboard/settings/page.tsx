@@ -53,10 +53,10 @@ export default function SettingsPage() {
   const chains = Object.keys(DEPLOYED) as ChainKey[];
 
   return (
-    <div className="flex flex-col gap-8 px-12 py-10">
+    <div className="flex flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
       {/* Header */}
       <div>
-        <h1 className="font-sans text-4xl font-bold tracking-tight text-white">
+        <h1 className="font-sans text-2xl sm:text-4xl font-bold tracking-tight text-white">
           SETTINGS
         </h1>
         <p className="mt-1.5 font-mono text-[13px] text-[#a0a0a0]">
@@ -65,8 +65,8 @@ export default function SettingsPage() {
       </div>
 
       {/* System Status */}
-      <div className="grid grid-cols-3 gap-5">
-        <div className="border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-4">
           <div className="flex items-center gap-2">
             <Wifi size={14} className="text-[#a0a0a0]" />
             <span className="font-mono text-[11px] font-medium tracking-wider text-[#a0a0a0]">
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-4">
+        <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-4">
           <div className="flex items-center gap-2">
             <Cpu size={14} className="text-[#a0a0a0]" />
             <span className="font-mono text-[11px] font-medium tracking-wider text-[#a0a0a0]">
@@ -116,7 +116,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-4">
+        <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-4">
           <div className="flex items-center gap-2">
             <Link2 size={14} className="text-[#a0a0a0]" />
             <span className="font-mono text-[11px] font-medium tracking-wider text-[#a0a0a0]">
@@ -135,7 +135,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Environment */}
-      <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+      <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
         <div className="flex items-center gap-2 px-6 py-4">
           <Shield size={14} className="text-[#a0a0a0]" />
           <div>
@@ -179,7 +179,7 @@ export default function SettingsPage() {
       {chains.map((chainKey) => {
         const contracts = DEPLOYED[chainKey];
         return (
-          <div key={chainKey} className="border border-[#2f2f2f] bg-[#0A0A0A]">
+          <div key={chainKey} className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
             <div className="flex items-center justify-between px-6 py-4">
               <div className="flex items-center gap-3">
                 <div

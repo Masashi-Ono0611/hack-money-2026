@@ -30,7 +30,7 @@ function tierBadge(feeBps: number | null): { bg: string; text: string } {
 
 export function HookStatusCard({ chains }: Props) {
   return (
-    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       {/* Header */}
       <div className="flex items-center gap-2 px-6 py-4">
         <Gauge size={14} className="text-[#a0a0a0]" />
@@ -51,11 +51,11 @@ export function HookStatusCard({ chains }: Props) {
             Load chain data first
           </span>
         ) : (
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {chains.map((c) => {
               const badge = tierBadge(c.feeBps);
               return (
-                <div key={c.chain} className="border border-[#2f2f2f] bg-[#0A0A0A] p-4">
+                <div key={c.chain} className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] p-4">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-[11px] font-medium tracking-wider text-[#a0a0a0]">
                       {c.label.toUpperCase()}

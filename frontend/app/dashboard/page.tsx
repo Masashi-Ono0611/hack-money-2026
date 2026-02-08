@@ -175,11 +175,11 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 px-12 py-10">
+    <div className="flex flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-sans text-4xl font-bold tracking-tight text-white">
+          <h1 className="font-sans text-2xl sm:text-4xl font-bold tracking-tight text-white">
             OVERVIEW
           </h1>
           <p className="mt-1.5 font-mono text-[13px] text-[#a0a0a0]">
@@ -189,7 +189,7 @@ export default function DashboardPage() {
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="flex items-center gap-2 border border-[#2f2f2f] bg-[#0A0A0A] px-3 py-2 font-mono text-[11px] font-semibold text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-3 py-2 font-mono text-[11px] font-semibold text-white transition-all duration-200 hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-50"
         >
           <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
           REFRESH
@@ -197,7 +197,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Arbitrage Controls */}
-      <div className="flex items-center gap-3 border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-3">
+      <div className="flex items-center gap-3 rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-3">
         {/* Threshold */}
         <div className="flex items-center gap-1.5">
           <span className="font-mono text-[10px] font-semibold tracking-wider text-[#a0a0a0]">THRESHOLD</span>
@@ -207,7 +207,7 @@ export default function DashboardPage() {
             max={500}
             value={thresholdBps}
             onChange={(e) => setThresholdBps(Math.max(1, Math.min(500, parseInt(e.target.value) || 10)))}
-            className="w-14 border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1 text-center font-mono text-[12px] font-bold text-white focus:border-[#00FF88] focus:outline-none"
+            className="w-14 rounded-lg border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1 text-center font-mono text-[12px] font-bold text-white focus:border-[#00FF88] focus:outline-none"
           />
           <span className="font-mono text-[10px] text-[#a0a0a0]">bps</span>
         </div>
@@ -223,7 +223,7 @@ export default function DashboardPage() {
             max={100000}
             value={tradeAmountUsdc}
             onChange={(e) => setTradeAmountUsdc(Math.max(1, Math.min(100000, parseInt(e.target.value) || 1000)))}
-            className="w-20 border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1 text-center font-mono text-[12px] font-bold text-white focus:border-[#00FF88] focus:outline-none"
+            className="w-20 rounded-lg border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1 text-center font-mono text-[12px] font-bold text-white focus:border-[#00FF88] focus:outline-none"
           />
           <span className="font-mono text-[10px] text-[#a0a0a0]">USDC</span>
         </div>
@@ -250,7 +250,7 @@ export default function DashboardPage() {
           onClick={handleExecuteArbitrage}
           disabled={isExecuting || !hasOpportunity}
           title={!hasOpportunity ? `Spread (${currentSpreadBps.toFixed(1)} bps) below threshold (${thresholdBps} bps)` : `Execute arbitrage with ${tradeAmountUsdc} USDC`}
-          className={`flex items-center gap-2 px-5 py-2 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-40 ${
+          className={`flex items-center gap-2 px-5 py-2 font-mono text-[11px] font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-40 ${
             isExecuting
               ? "bg-[#FF8800] text-[#0C0C0C]"
               : hasOpportunity
@@ -267,11 +267,11 @@ export default function DashboardPage() {
       <MetricsRow chainData={chainData} priceHistory={priceHistory} thresholdBps={thresholdBps} vaultBalance={vaultBalance} />
 
       {/* Middle Row: Chart + Session Log */}
-      <div className="grid grid-cols-5 gap-5">
-        <div className="col-span-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
+        <div className="col-span-1 md:col-span-3">
           <PriceSpreadChart priceHistory={priceHistory} thresholdBps={thresholdBps} />
         </div>
-        <div className="col-span-2">
+        <div className="col-span-1 md:col-span-3 lg:col-span-2">
           <SessionLog logs={sessionLogs} isRunning={isExecuting} />
         </div>
       </div>

@@ -23,7 +23,7 @@ function PriceCard({
 }) {
   const isPositive = changePercent >= 0;
   return (
-    <div className="flex flex-col gap-3 border border-[#2f2f2f] bg-[#0A0A0A] p-6">
+    <div className="flex flex-col gap-3 rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] p-6">
       <span className="font-mono text-[11px] font-medium tracking-wider text-[#a0a0a0]">
         {label}
       </span>
@@ -91,7 +91,7 @@ function VaultCard({ balance }: { balance: string | null }) {
     ? `$${parseFloat(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`
     : "—";
   return (
-    <div className="flex flex-col gap-3 border border-[#2f2f2f] bg-[#0A0A0A] p-6">
+    <div className="flex flex-col gap-3 rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] p-6">
       <span className="font-mono text-[11px] font-medium tracking-wider text-[#a0a0a0]">
         VAULT BALANCE
       </span>
@@ -126,7 +126,7 @@ export function MetricsRow({ chainData, priceHistory, thresholdBps, vaultBalance
   const spreadBps = avg > 0 ? (spreadValue / avg) * 10000 : 0;
 
   return (
-    <div className="grid grid-cols-4 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       <PriceCard
         label="CPT-A / USDC"
         chainBadge="BASE SEPOLIA"

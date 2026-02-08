@@ -40,7 +40,7 @@ export function VaultBalanceCard({ onLog }: Props) {
   };
 
   return (
-    <div className="flex flex-col border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="flex flex-col rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4">
         <div>
@@ -54,7 +54,7 @@ export function VaultBalanceCard({ onLog }: Props) {
         <button
           onClick={fetchBalance}
           disabled={loading}
-          className="flex items-center justify-center border border-[#2f2f2f] bg-[#0A0A0A] p-2 text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+          className="flex items-center justify-center rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] p-2 text-white transition-all duration-200 hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-50"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
         </button>

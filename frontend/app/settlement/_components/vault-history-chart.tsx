@@ -32,7 +32,7 @@ export function VaultHistoryChart({ history }: Props) {
   }, [history]);
 
   return (
-    <div className="border border-[#2f2f2f] bg-[#0A0A0A]">
+    <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A]">
       <div className="flex items-center justify-between px-6 py-4">
         <div>
           <span className="font-sans text-base font-semibold text-white">

@@ -123,11 +123,11 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 px-12 py-10">
+    <div className="flex flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-sans text-4xl font-bold tracking-tight text-white">
+          <h1 className="font-sans text-2xl sm:text-4xl font-bold tracking-tight text-white">
             L2 ADMIN
           </h1>
           <p className="mt-1.5 font-mono text-[13px] text-[#a0a0a0]">
@@ -137,7 +137,7 @@ export default function AdminPage() {
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="flex items-center gap-2 border border-[#2f2f2f] bg-[#0A0A0A] px-4 py-2.5 font-mono text-[11px] font-semibold text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] px-4 py-2.5 font-mono text-[11px] font-semibold text-white transition-all duration-200 hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-50"
         >
           <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
           REFRESH
@@ -148,7 +148,7 @@ export default function AdminPage() {
       {chains.map((c) => (
         <div
           key={c.chain}
-          className="border border-[#2f2f2f] bg-[#0A0A0A] p-6"
+          className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] p-6"
         >
           {/* Chain Header */}
           <div className="mb-5 flex items-center gap-3">
@@ -195,7 +195,7 @@ export default function AdminPage() {
 
           {/* Oracle Details */}
           <div className="mb-5 grid grid-cols-2 gap-4">
-            <div className="border border-[#1f1f1f] bg-[#080808] p-4">
+            <div className="rounded-lg border border-[#1f1f1f] bg-[#080808] p-4">
               <div className="mb-3 flex items-center gap-2">
                 <Gauge size={14} className="text-[#00FF88]" />
                 <span className="font-mono text-[11px] font-semibold tracking-wider text-[#a0a0a0]">
@@ -229,7 +229,7 @@ export default function AdminPage() {
             </div>
 
             {/* Oracle Update Form */}
-            <div className="border border-[#1f1f1f] bg-[#080808] p-4">
+            <div className="rounded-lg border border-[#1f1f1f] bg-[#080808] p-4">
               <div className="mb-3 flex items-center gap-2">
                 <Send size={14} className="text-[#00FF88]" />
                 <span className="font-mono text-[11px] font-semibold tracking-wider text-[#a0a0a0]">
@@ -253,13 +253,13 @@ export default function AdminPage() {
                       }))
                     }
                     placeholder={String(c.utilization ?? 50)}
-                    className="w-full border border-[#2f2f2f] bg-[#0C0C0C] px-3 py-2 font-mono text-[13px] text-white placeholder:text-[#555] focus:border-[#00FF88] focus:outline-none"
+                    className="w-full rounded-lg border border-[#2f2f2f] bg-[#0C0C0C] px-3 py-2 font-mono text-[13px] text-white placeholder:text-[#555] focus:border-[#00FF88] focus:outline-none"
                   />
                 </div>
                 <button
                   onClick={() => handleOracleUpdate(c.chain)}
                   disabled={oracleSubmitting[c.chain]}
-                  className="flex items-center gap-1.5 bg-[#00FF88] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-opacity hover:opacity-90 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#00FF88] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-all duration-200 hover:brightness-110 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#00FF88] focus-visible:outline-none disabled:opacity-50"
                 >
                   {oracleSubmitting[c.chain] ? "..." : "UPDATE"}
                 </button>
@@ -323,7 +323,7 @@ export default function AdminPage() {
       <ActivityLog logs={activityLogs} />
 
       {chains.length === 0 && (
-        <div className="border border-[#2f2f2f] bg-[#0A0A0A] p-12 text-center">
+        <div className="rounded-xl border border-[#2f2f2f] bg-[#0A0A0A] p-12 text-center">
           <p className="font-mono text-[13px] text-[#a0a0a0]">
             Loading pool state...
           </p>
@@ -345,7 +345,7 @@ function MetricBox({
   alert?: boolean;
 }) {
   return (
-    <div className="border border-[#1f1f1f] bg-[#080808] p-3">
+    <div className="rounded-lg border border-[#1f1f1f] bg-[#080808] p-3">
       <p className="font-mono text-[10px] font-semibold tracking-wider text-[#a0a0a0]">
         {label}
       </p>
