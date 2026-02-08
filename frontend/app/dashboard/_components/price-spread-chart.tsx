@@ -40,52 +40,57 @@ export function PriceSpreadChart({ priceHistory }: PriceSpreadChartProps) {
       </div>
 
       {/* Chart Area */}
-      <div className="flex min-h-0 flex-1 items-end gap-2 overflow-hidden border-t border-[#2f2f2f] px-6 pb-5 pt-4">
+      <div className="relative min-h-0 flex-1 border-t border-[#2f2f2f] px-6 pb-5 pt-4">
         {displayData.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center">
+          <div className="flex h-full items-center justify-center">
             <span className="font-mono text-xs text-[#8a8a8a]">
               Waiting for price data...
             </span>
           </div>
         ) : (
-          displayData.map((point, i) => {
-            const pctA = point.priceA
-              ? Math.max((point.priceA / maxPrice) * 45, 4)
-              : 0;
-            const pctB = point.priceB
-              ? Math.max((point.priceB / maxPrice) * 45, 4)
-              : 0;
-            const time = new Date(point.timestamp).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-            const opacity = 0.3 + (i / displayData.length) * 0.5;
+          <div className="flex h-full items-end gap-2">
+            {displayData.map((point, i) => {
+              const barMax = 140; // max bar height in px
+              const hA = point.priceA
+                ? Math.max(Math.round((point.priceA / maxPrice) * barMax), 6)
+                : 0;
+              const hB = point.priceB
+                ? Math.max(Math.round((point.priceB / maxPrice) * barMax), 6)
+                : 0;
+              const time = new Date(point.timestamp).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              const opacity = 0.4 + (i / displayData.length) * 0.5;
 
-            return (
-              <div
-                key={point.timestamp}
-                className="flex flex-1 flex-col items-center justify-end gap-1"
-              >
+              return (
                 <div
-                  className="w-full"
-                  style={{
-                    height: `${pctA}%`,
-                    backgroundColor: `rgba(0, 255, 136, ${opacity})`,
-                  }}
-                />
-                <div
-                  className="w-full"
-                  style={{
-                    height: `${pctB}%`,
-                    backgroundColor: `rgba(255, 136, 0, ${opacity})`,
-                  }}
-                />
-                <span className="shrink-0 font-mono text-[10px] font-medium text-[#8a8a8a]">
-                  {time}
-                </span>
-              </div>
-            );
-          })
+                  key={point.timestamp}
+                  className="flex flex-1 flex-col items-center justify-end"
+                >
+                  <div className="flex w-full items-end justify-center gap-0.5">
+                    <div
+                      className="flex-1"
+                      style={{
+                        height: `${hA}px`,
+                        backgroundColor: `rgba(0, 255, 136, ${opacity})`,
+                      }}
+                    />
+                    <div
+                      className="flex-1"
+                      style={{
+                        height: `${hB}px`,
+                        backgroundColor: `rgba(255, 136, 0, ${opacity})`,
+                      }}
+                    />
+                  </div>
+                  <span className="mt-2 shrink-0 font-mono text-[10px] font-medium text-[#8a8a8a]">
+                    {time}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
