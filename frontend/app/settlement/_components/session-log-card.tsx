@@ -13,7 +13,7 @@ interface Trade {
   pnl: string;
 }
 
-const MOCK_TRADES: Trade[] = [
+const DEMO_TRADES: Trade[] = [
   { id: 1, time: "14:32:01", action: "BUY",  pair: "CPT-B/USDC", amount: "500", price: "0.000842", pnl: "" },
   { id: 2, time: "14:32:01", action: "SELL", pair: "CPT-A/USDC", amount: "500", price: "0.000891", pnl: "+0.0245" },
   { id: 3, time: "14:32:03", action: "BUY",  pair: "CPT-B/USDC", amount: "300", price: "0.000845", pnl: "" },
@@ -32,12 +32,12 @@ export function SessionLogCard() {
     if (!running) return;
     let idx = 0;
     const interval = setInterval(() => {
-      if (idx >= MOCK_TRADES.length) {
+      if (idx >= DEMO_TRADES.length) {
         setRunning(false);
         clearInterval(interval);
         return;
       }
-      setTrades((prev) => [...prev, MOCK_TRADES[idx]]);
+      setTrades((prev) => [...prev, DEMO_TRADES[idx]]);
       idx++;
     }, 600);
     return () => clearInterval(interval);

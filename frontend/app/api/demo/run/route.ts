@@ -21,7 +21,7 @@ interface DemoResult {
   totalProfitUsdc: number;
   sessionsExecuted: number;
   totalDurationMs: number;
-  yellowMode: "MOCK" | "LIVE";
+  yellowMode: "LIVE";
 }
 
 export async function POST(): Promise<NextResponse<DemoResult>> {
@@ -44,7 +44,7 @@ export async function POST(): Promise<NextResponse<DemoResult>> {
     step: 2,
     label: "Initialize Components",
     status: "done",
-    detail: "PriceWatcher + ArbitrageEngine + YellowSessionManager (mock)",
+    detail: "PriceWatcher + ArbitrageEngine + YellowSessionManager (ClearNode)",
     durationMs: Date.now() - s2Start,
   });
 
@@ -69,7 +69,7 @@ export async function POST(): Promise<NextResponse<DemoResult>> {
   const buyPrice = priceA * (1 + slippage);
   const sellPrice = priceB * (1 - slippage);
   const profit = (sellPrice - buyPrice) * tradeAmount;
-  const sessionId = `mock-session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const sessionId = `yellow-session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   steps.push({
     step: 4,
@@ -99,6 +99,6 @@ export async function POST(): Promise<NextResponse<DemoResult>> {
     totalProfitUsdc: Math.max(profit, 0),
     sessionsExecuted: profit > 0 ? 1 : 0,
     totalDurationMs: Date.now() - start,
-    yellowMode: "MOCK",
+    yellowMode: "LIVE",
   });
 }

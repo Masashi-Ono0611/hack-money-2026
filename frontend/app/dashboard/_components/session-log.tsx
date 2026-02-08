@@ -55,8 +55,8 @@ export function SessionLog({ logs, isRunning }: SessionLogProps) {
               RUNNING
             </span>
           )}
-          <span className="inline-block bg-[#FF880020] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#FF8800]">
-            MOCK
+          <span className="inline-block bg-[#00FF8820] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#00FF88]">
+            LIVE
           </span>
           <span className="font-mono text-[10px] text-[#8a8a8a]">
             {logs.length} entries

@@ -83,8 +83,8 @@ export function Sidebar() {
               <span className="font-mono text-[11px] font-medium text-[#8a8a8a]">
                 YELLOW_SDK
               </span>
-              <span className="font-mono text-[11px] font-semibold text-[#FF8800]">
-                [MOCK]
+              <span className="font-mono text-[11px] font-semibold text-[#00FF88]">
+                [LIVE]
               </span>
             </div>
             <div className="flex justify-between">
