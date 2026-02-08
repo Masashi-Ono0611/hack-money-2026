@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { RefreshCw, Radio, Gauge, Droplets, Send } from "lucide-react";
+import { LiquidityPanel } from "./_components/liquidity-panel";
+import { SwapPanel } from "./_components/swap-panel";
 
 interface PoolChain {
   chain: string;
@@ -255,6 +257,12 @@ export default function AdminPage() {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Liquidity & Swap */}
+          <div className="mb-5 grid grid-cols-2 gap-4">
+            <LiquidityPanel chain={c.chain} label={c.label} onSuccess={fetchPoolState} />
+            <SwapPanel chain={c.chain} label={c.label} onSuccess={fetchPoolState} />
           </div>
 
           {/* Contract Addresses */}

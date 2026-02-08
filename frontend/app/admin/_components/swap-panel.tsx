@@ -1,0 +1,100 @@
+"use client";
+
+import { useState } from "react";
+import { ArrowLeftRight } from "lucide-react";
+
+interface SwapPanelProps {
+  chain: string;
+  label: string;
+  onSuccess: () => void;
+}
+
+export function SwapPanel({ chain, label, onSuccess }: SwapPanelProps) {
+  const [zeroForOne, setZeroForOne] = useState(true);
+  const [swapAmount, setSwapAmount] = useState("100000");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [result, setResult] = useState("");
+
+  const handleSwap = async () => {
+    setIsSubmitting(true);
+    setResult("");
+    try {
+      const res = await fetch("/api/admin/swap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chain, zeroForOne, swapAmount }),
+      });
+      const data = await res.json();
+      if (data.ok && data.success) {
+        const tickInfo =
+          data.beforeTick != null && data.afterTick != null
+            ? ` tick: ${data.beforeTick} → ${data.afterTick}`
+            : "";
+        setResult(`Swap executed${tickInfo} (tx: ${data.txHash?.slice(0, 14) ?? "confirmed"}...)`);
+        onSuccess();
+      } else {
+        setResult(`Error: ${data.error ?? "Unknown error"}`);
+      }
+    } catch (err) {
+      setResult(`Error: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const directionLabel = zeroForOne ? "USDC → CPT" : "CPT → USDC";
+
+  return (
+    <div className="border border-[#1f1f1f] bg-[#080808] p-4">
+      <div className="mb-3 flex items-center gap-2">
+        <ArrowLeftRight size={14} className="text-[#FF8800]" />
+        <span className="font-mono text-[11px] font-semibold tracking-wider text-[#8a8a8a]">
+          SWAP
+        </span>
+      </div>
+
+      <div className="mb-3 grid grid-cols-2 gap-2">
+        <div>
+          <label className="mb-1 block font-mono text-[10px] text-[#8a8a8a]">
+            DIRECTION
+          </label>
+          <button
+            onClick={() => setZeroForOne((p) => !p)}
+            className="w-full border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1.5 font-mono text-[11px] font-bold text-white transition-colors hover:border-[#00FF88]"
+          >
+            {directionLabel}
+          </button>
+        </div>
+        <div>
+          <label className="mb-1 block font-mono text-[10px] text-[#8a8a8a]">
+            AMOUNT (raw)
+          </label>
+          <input
+            type="text"
+            value={swapAmount}
+            onChange={(e) => setSwapAmount(e.target.value)}
+            className="w-full border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1.5 font-mono text-[11px] text-white focus:border-[#00FF88] focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <button
+        onClick={handleSwap}
+        disabled={isSubmitting}
+        className="flex items-center gap-1.5 bg-[#FF8800] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-opacity hover:opacity-90 disabled:opacity-50"
+      >
+        {isSubmitting ? "SWAPPING..." : `SWAP ${directionLabel}`}
+      </button>
+
+      {result && (
+        <p
+          className={`mt-2 font-mono text-[11px] ${
+            result.startsWith("Error") ? "text-[#FF4444]" : "text-[#00FF88]"
+          }`}
+        >
+          {result}
+        </p>
+      )}
+    </div>
+  );
+}
