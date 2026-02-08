@@ -1,70 +1,76 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { RefreshCw } from "lucide-react";
-import { YellowStatusCard } from "./_components/yellow-status-card";
-import { VaultBalanceCard } from "./_components/vault-balance-card";
-import { AutoSettleCard } from "./_components/auto-settle-card";
-import { PipelineLog } from "./_components/pipeline-log";
-import { CptPriceCard } from "./_components/cpt-price-card";
-import { HookStatusCard } from "./_components/hook-status-card";
-import { SessionLogCard } from "./_components/session-log-card";
-import { PriceChart } from "./_components/price-chart";
-
-interface ChainSnapshot {
-  chain: string;
-  label: string;
-  price: number | null;
-  tick: number | null;
-  utilization: number | null;
-  fee: string | null;
-  feeBps: number | null;
-  error: string | null;
-}
+import { RefreshCw, Vault } from "lucide-react";
+import { SettlePanel, type SettleLogEvent } from "./_components/settle-panel";
+import { SettlementActivityLog, type SettlementLogEntry } from "./_components/settlement-activity-log";
+import { VaultHistoryChart, type VaultSnapshot } from "./_components/vault-history-chart";
 
 export default function SettlementPage() {
-  const [logs, setLogs] = useState<string[]>([]);
-  const [chainData, setChainData] = useState<ChainSnapshot[]>([]);
-  const [priceHistory, setPriceHistory] = useState<
-    { timestamp: number; chains: ChainSnapshot[] }[]
-  >([]);
+  const [activityLogs, setActivityLogs] = useState<SettlementLogEntry[]>([]);
+  const [vaultBalance, setVaultBalance] = useState<string | null>(null);
+  const [vaultHistory, setVaultHistory] = useState<VaultSnapshot[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const logCounter = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const addLog = (msg: string) =>
-    setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+  const addLog = useCallback(
+    (type: SettlementLogEntry["type"], message: string, txHash?: string, chain?: string) => {
+      logCounter.current += 1;
+      const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      setActivityLogs((prev) => [
+        ...prev,
+        { id: String(logCounter.current), timestamp, type, message, txHash, chain },
+      ]);
+    },
+    [],
+  );
 
-  const fetchChainData = useCallback(async () => {
+  const fetchVaultBalance = useCallback(async () => {
     try {
-      const res = await fetch("/api/settlement/chain-data");
+      const res = await fetch("/api/settlement/vault-balance");
       const data = await res.json();
-      if (data.ok) {
-        setChainData(data.chains);
-        setPriceHistory((prev) => [
-          ...prev.slice(-29),
-          { timestamp: data.timestamp, chains: data.chains },
-        ]);
+      if (data.ok && data.balance) {
+        setVaultBalance(data.balance);
+        const bal = parseFloat(data.balance);
+        if (!isNaN(bal)) {
+          setVaultHistory((prev) => [
+            ...prev.slice(-59),
+            { timestamp: Date.now(), balance: bal },
+          ]);
+        }
       }
     } catch {
-      // silent retry on next interval
+      // silent
     }
   }, []);
 
   useEffect(() => {
-    // Safe: initial fetch + interval polling for settlement data
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchChainData();
-    intervalRef.current = setInterval(fetchChainData, 15_000);
+    fetchVaultBalance();
+    intervalRef.current = setInterval(fetchVaultBalance, 30_000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [fetchChainData]);
+  }, [fetchVaultBalance]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await fetchChainData();
+    addLog("INFO", "Refreshing vault balance...");
+    await fetchVaultBalance();
+    addLog("VAULT", `Vault balance: $${vaultBalance ?? "?"} USDC`);
     setIsRefreshing(false);
   };
+
+  const handleSettleLog = (event: SettleLogEvent) => {
+    addLog(event.type, event.message, event.txHash, event.chain);
+  };
+
+  const handleVaultUpdate = () => {
+    addLog("VAULT", "Settlement complete — refreshing vault balance...");
+    fetchVaultBalance();
+  };
+
+
 
   return (
     <div className="flex flex-col gap-6 p-8 px-10">
@@ -75,7 +81,7 @@ export default function SettlementPage() {
             SETTLEMENT
           </h1>
           <p className="mt-1.5 font-mono text-[13px] text-[#8a8a8a]">
-            Monitor CPT prices, Hook state, Yellow sessions, and Arc vault
+            Settle arbitrage profit to Arc operator vault via Yellow ClearNode
           </p>
         </div>
         <button
@@ -83,33 +89,33 @@ export default function SettlementPage() {
           disabled={isRefreshing}
           className="flex items-center gap-2 border border-[#2f2f2f] bg-[#0A0A0A] px-4 py-2.5 font-mono text-[11px] font-semibold text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
         >
-          <RefreshCw
-            size={14}
-            className={isRefreshing ? "animate-spin" : ""}
-          />
+          <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
           REFRESH
         </button>
       </div>
 
-      {/* On-chain data: CPT prices + Hook status */}
-      <CptPriceCard onLog={addLog} />
-      <HookStatusCard chains={chainData} />
-
-      {/* Price chart */}
-      <PriceChart history={priceHistory} />
-
-      {/* Yellow session demo */}
-      <SessionLogCard />
-
-      {/* Settlement controls */}
-      <div className="grid grid-cols-2 gap-3">
-        <YellowStatusCard onLog={addLog} />
-        <VaultBalanceCard onLog={addLog} />
+      {/* Vault Balance */}
+      <div className="flex items-center gap-4 border border-[#2f2f2f] bg-[#0A0A0A] px-6 py-5">
+        <Vault size={24} className="text-[#6a9fff]" />
+        <div>
+          <span className="font-mono text-[9px] font-bold tracking-wider text-[#8a8a8a]">
+            VAULT BALANCE
+          </span>
+          <p className="font-mono text-2xl font-bold tabular-nums text-white">
+            {vaultBalance ? `$${vaultBalance}` : "—"}
+          </p>
+          <span className="font-mono text-[10px] text-[#8a8a8a]">USDC (Arc Operator Vault)</span>
+        </div>
       </div>
 
-      <AutoSettleCard onLog={addLog} />
+      {/* Vault Balance History Chart */}
+      <VaultHistoryChart history={vaultHistory} />
 
-      <PipelineLog logs={logs} onClear={() => setLogs([])} />
+      {/* Settlement Execution */}
+      <SettlePanel onLog={handleSettleLog} onVaultUpdate={handleVaultUpdate} />
+
+      {/* Activity Log */}
+      <SettlementActivityLog logs={activityLogs} />
     </div>
   );
 }

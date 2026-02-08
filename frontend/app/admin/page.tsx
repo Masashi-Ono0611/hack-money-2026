@@ -2,6 +2,9 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { RefreshCw, Radio, Gauge, Droplets, Send } from "lucide-react";
+import { LiquidityPanel } from "./_components/liquidity-panel";
+import { SwapPanel } from "./_components/swap-panel";
+import { ActivityLog, type AdminLogEntry } from "./_components/activity-log";
 
 interface PoolChain {
   chain: string;
@@ -29,7 +32,21 @@ export default function AdminPage() {
   const [oracleValues, setOracleValues] = useState<Record<string, string>>({});
   const [oracleSubmitting, setOracleSubmitting] = useState<Record<string, boolean>>({});
   const [oracleResults, setOracleResults] = useState<Record<string, string>>({});
+  const [activityLogs, setActivityLogs] = useState<AdminLogEntry[]>([]);
+  const logCounter = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const addLog = useCallback(
+    (type: AdminLogEntry["type"], chain: string, message: string, txHash?: string) => {
+      logCounter.current += 1;
+      const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      setActivityLogs((prev) => [
+        ...prev,
+        { id: String(logCounter.current), timestamp, type, chain, message, txHash },
+      ]);
+    },
+    [],
+  );
 
   const fetchPoolState = useCallback(async () => {
     try {
@@ -63,6 +80,7 @@ export default function AdminPage() {
     }
     setOracleSubmitting((p) => ({ ...p, [chain]: true }));
     setOracleResults((p) => ({ ...p, [chain]: "" }));
+    addLog("ORACLE", chain, `Setting utilization to ${val}%...`);
 
     try {
       const res = await fetch("/api/admin/oracle", {
@@ -76,15 +94,18 @@ export default function AdminPage() {
           ...p,
           [chain]: `Updated to ${val}% (tx: ${data.txHash?.slice(0, 14)}...)`,
         }));
+        addLog("ORACLE", chain, `Utilization updated to ${val}%`, data.txHash ?? undefined);
         await fetchPoolState();
       } else {
         setOracleResults((p) => ({ ...p, [chain]: `Error: ${data.error}` }));
+        addLog("ERROR", chain, `Oracle update failed: ${data.error}`);
       }
     } catch (err) {
       setOracleResults((p) => ({
         ...p,
         [chain]: `Error: ${err instanceof Error ? err.message : String(err)}`,
       }));
+      addLog("ERROR", chain, `Oracle update error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setOracleSubmitting((p) => ({ ...p, [chain]: false }));
     }
@@ -257,6 +278,22 @@ export default function AdminPage() {
             </div>
           </div>
 
+          {/* Liquidity & Swap */}
+          <div className="mb-5 grid grid-cols-2 gap-4">
+            <LiquidityPanel
+              chain={c.chain}
+              label={c.label}
+              onSuccess={fetchPoolState}
+              onLog={(e) => addLog(e.type, e.chain, e.message, e.txHash)}
+            />
+            <SwapPanel
+              chain={c.chain}
+              label={c.label}
+              onSuccess={fetchPoolState}
+              onLog={(e) => addLog(e.type, e.chain, e.message, e.txHash)}
+            />
+          </div>
+
           {/* Contract Addresses */}
           <details className="group">
             <summary className="cursor-pointer font-mono text-[11px] font-semibold tracking-wider text-[#8a8a8a] transition-colors hover:text-white">
@@ -281,6 +318,9 @@ export default function AdminPage() {
           </details>
         </div>
       ))}
+
+      {/* Activity Log */}
+      <ActivityLog logs={activityLogs} />
 
       {chains.length === 0 && (
         <div className="border border-[#2f2f2f] bg-[#0A0A0A] p-12 text-center">

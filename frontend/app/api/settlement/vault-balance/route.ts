@@ -11,9 +11,10 @@ export async function GET() {
       { cwd: ROOT, timeout: 15_000, encoding: "utf-8", shell: "/bin/zsh" },
     );
 
-    const balanceMatch = out.match(/Balance:\s*([\d.]+)\s*(\w+)/);
+    // Parse format: "  USDC                      72.015142  (ARC-TESTNET)"
+    const balanceMatch = out.match(/USDC\s+([\d.]+)/);
     const balance = balanceMatch ? balanceMatch[1] : null;
-    const token = balanceMatch ? balanceMatch[2] : null;
+    const token = balance ? "USDC" : null;
 
     return NextResponse.json({
       ok: true,

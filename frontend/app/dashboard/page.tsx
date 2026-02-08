@@ -16,17 +16,20 @@ export default function DashboardPage() {
   const [chainData, setChainData] = useState<ChainPrice[]>([]);
   const [priceHistory, setPriceHistory] = useState<PriceDataPoint[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDemoRunning, setIsDemoRunning] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
   const [sessionLogs, setSessionLogs] = useState<LogEntry[]>([]);
+  const [thresholdBps, setThresholdBps] = useState(10);
+  const [tradeAmountUsdc, setTradeAmountUsdc] = useState(1000);
+  const [vaultBalance, setVaultBalance] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const logCounter = useRef(0);
 
   const addLog = useCallback(
-    (type: LogEntry["type"], message: string, detail?: string) => {
+    (type: LogEntry["type"], message: string, detail?: string, extra?: { txHash?: string; chain?: string }) => {
       logCounter.current += 1;
       setSessionLogs((prev) => [
         ...prev,
-        { id: String(logCounter.current), timestamp: now(), type, message, detail },
+        { id: String(logCounter.current), timestamp: now(), type, message, detail, ...extra },
       ]);
     },
     [],
@@ -55,37 +58,64 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const fetchVaultBalance = useCallback(async () => {
+    try {
+      const res = await fetch("/api/settlement/vault-balance");
+      const data = await res.json();
+      if (data.ok && data.balance) setVaultBalance(data.balance);
+    } catch {
+      // silent
+    }
+  }, []);
+
   useEffect(() => {
     // Safe: fetch once on mount then interval; state updates are expected
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchChainData();
+    fetchVaultBalance();
     intervalRef.current = setInterval(fetchChainData, 5_000);
+    const vaultInterval = setInterval(fetchVaultBalance, 30_000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      clearInterval(vaultInterval);
     };
-  }, [fetchChainData]);
+  }, [fetchChainData, fetchVaultBalance]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await fetchChainData();
+    await Promise.all([fetchChainData(), fetchVaultBalance()]);
     setIsRefreshing(false);
   };
 
-  const handleRunDemo = async () => {
-    if (isDemoRunning) return;
-    setIsDemoRunning(true);
+  const currentSpreadBps = (() => {
+    const priceA = chainData[0]?.price ?? null;
+    const priceB = chainData[1]?.price ?? null;
+    if (!priceA || !priceB) return 0;
+    const avg = (priceA + priceB) / 2;
+    return avg > 0 ? (Math.abs(priceA - priceB) / avg) * 10000 : 0;
+  })();
+
+  const hasOpportunity = currentSpreadBps >= thresholdBps;
+
+  const handleExecuteArbitrage = async () => {
+    if (isExecuting) return;
+    setIsExecuting(true);
     setSessionLogs([]);
 
-    addLog("INFO", "Starting real arbitrage pipeline...");
+    addLog("INFO", `Executing arbitrage (spread: ${currentSpreadBps.toFixed(1)} bps, threshold: ${thresholdBps} bps, amount: ${tradeAmountUsdc} USDC)...`);
     addLog("INFO", "Connecting to on-chain pools + Yellow ClearNode + Arc...");
 
     try {
-      const res = await fetch("/api/arbitrage/run", { method: "POST" });
+      const res = await fetch("/api/arbitrage/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tradeAmountUsdc }),
+      });
       const data = await res.json();
 
       if (!data.ok) {
         addLog("INFO", `Pipeline failed: ${data.error ?? "unknown"}`);
-        setIsDemoRunning(false);
+        setIsExecuting(false);
         return;
       }
 
@@ -106,36 +136,42 @@ export default function DashboardPage() {
       }
 
       // Session & trade details
+      const buyChain = data.direction === "A_CHEAPER" ? "Base Sepolia" : "Unichain Sepolia";
+      const sellChain = data.direction === "A_CHEAPER" ? "Unichain Sepolia" : "Base Sepolia";
+      const buyChainKey = data.direction === "A_CHEAPER" ? "base-sepolia" : "unichain-sepolia";
+      const sellChainKey = data.direction === "A_CHEAPER" ? "unichain-sepolia" : "base-sepolia";
+
       if (data.sessionId) {
         await new Promise((r) => setTimeout(r, 200));
-        addLog("SESSION", "Yellow session created", data.sessionId);
+        addLog("SESSION", `Yellow session: ${data.sessionId}`);
         await new Promise((r) => setTimeout(r, 200));
-        addLog("BUY", "BUY CPT on cheaper chain", "via Yellow ClearNode");
+        addLog("BUY", `BUY ${tradeAmountUsdc} USDC → CPT on ${buyChain}`, `$${data.priceA?.toFixed(6) ?? "?"}/CPT`, { chain: buyChainKey });
         await new Promise((r) => setTimeout(r, 200));
-        addLog("SELL", "SELL CPT on expensive chain", "via Yellow ClearNode");
+        addLog("SELL", `SELL CPT → USDC on ${sellChain}`, `$${data.priceB?.toFixed(6) ?? "?"}/CPT`, { chain: sellChainKey });
       }
 
       // Profit
       if (data.profit) {
         await new Promise((r) => setTimeout(r, 200));
-        addLog("PROFIT", `Net P&L: $${data.profit.toFixed(6)} USDC`);
+        addLog("PROFIT", `Net P&L: +$${data.profit.toFixed(6)} USDC (${tradeAmountUsdc} USDC trade)`);
       }
 
       // Settlement
       if (data.txHash) {
         await new Promise((r) => setTimeout(r, 200));
-        addLog("INFO", `Arc Settlement: ${data.txHash.slice(0, 18)}...`);
+        addLog("INFO", `Arc Settlement — $${(data.profit ?? 0).toFixed(6)} USDC settled`, undefined, { txHash: data.txHash, chain: "arc-testnet" });
         if (data.vaultBefore && data.vaultAfter) {
           addLog("INFO", `Vault: ${data.vaultBefore} → ${data.vaultAfter} USDC`);
         }
       }
 
       addLog("INFO", `Pipeline complete — profit: $${(data.profit ?? 0).toFixed(4)} USDC`);
+      fetchVaultBalance();
     } catch (err) {
       addLog("INFO", `Pipeline error: ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    setIsDemoRunning(false);
+    setIsExecuting(false);
   };
 
   return (
@@ -150,43 +186,93 @@ export default function DashboardPage() {
             Monitor cross-chain CPT arbitrage in real-time
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-2 border border-[#2f2f2f] bg-[#0A0A0A] px-4 py-2.5 font-mono text-[11px] font-semibold text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
-          >
-            <RefreshCw
-              size={14}
-              className={isRefreshing ? "animate-spin" : ""}
-            />
-            REFRESH
-          </button>
-          <button
-            onClick={handleRunDemo}
-            disabled={isDemoRunning}
-            className={`flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-60 ${
-              isDemoRunning
-                ? "bg-[#FF8800] text-[#0C0C0C]"
-                : "bg-[#00FF88] text-[#0C0C0C]"
-            }`}
-          >
-            {isDemoRunning ? <Square size={14} /> : <Play size={14} />}
-            {isDemoRunning ? "RUNNING..." : "RUN DEMO"}
-          </button>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2 border border-[#2f2f2f] bg-[#0A0A0A] px-3 py-2 font-mono text-[11px] font-semibold text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+          REFRESH
+        </button>
+      </div>
+
+      {/* Arbitrage Controls */}
+      <div className="flex items-center gap-3 border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-3">
+        {/* Threshold */}
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] font-semibold tracking-wider text-[#8a8a8a]">THRESHOLD</span>
+          <input
+            type="number"
+            min={1}
+            max={500}
+            value={thresholdBps}
+            onChange={(e) => setThresholdBps(Math.max(1, Math.min(500, parseInt(e.target.value) || 10)))}
+            className="w-14 border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1 text-center font-mono text-[12px] font-bold text-white focus:border-[#00FF88] focus:outline-none"
+          />
+          <span className="font-mono text-[10px] text-[#8a8a8a]">bps</span>
         </div>
+
+        <div className="h-6 w-px bg-[#2f2f2f]" />
+
+        {/* Trade Amount */}
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] font-semibold tracking-wider text-[#8a8a8a]">AMOUNT</span>
+          <input
+            type="number"
+            min={1}
+            max={100000}
+            value={tradeAmountUsdc}
+            onChange={(e) => setTradeAmountUsdc(Math.max(1, Math.min(100000, parseInt(e.target.value) || 1000)))}
+            className="w-20 border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1 text-center font-mono text-[12px] font-bold text-white focus:border-[#00FF88] focus:outline-none"
+          />
+          <span className="font-mono text-[10px] text-[#8a8a8a]">USDC</span>
+        </div>
+
+        <div className="h-6 w-px bg-[#2f2f2f]" />
+
+        {/* Spread indicator */}
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] font-semibold tracking-wider text-[#8a8a8a]">SPREAD</span>
+          <span className={`font-mono text-[12px] font-bold ${hasOpportunity ? "text-[#00FF88]" : "text-[#8a8a8a]"}`}>
+            {currentSpreadBps.toFixed(1)} bps
+          </span>
+          {hasOpportunity && (
+            <span className="bg-[#00FF8820] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#00FF88]">
+              OPPORTUNITY
+            </span>
+          )}
+        </div>
+
+        <div className="flex-1" />
+
+        {/* Execute button */}
+        <button
+          onClick={handleExecuteArbitrage}
+          disabled={isExecuting || !hasOpportunity}
+          title={!hasOpportunity ? `Spread (${currentSpreadBps.toFixed(1)} bps) below threshold (${thresholdBps} bps)` : `Execute arbitrage with ${tradeAmountUsdc} USDC`}
+          className={`flex items-center gap-2 px-5 py-2 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-40 ${
+            isExecuting
+              ? "bg-[#FF8800] text-[#0C0C0C]"
+              : hasOpportunity
+                ? "bg-[#00FF88] text-[#0C0C0C]"
+                : "bg-[#333] text-[#888]"
+          }`}
+        >
+          {isExecuting ? <Square size={14} /> : <Play size={14} />}
+          {isExecuting ? "EXECUTING..." : "EXECUTE ARBITRAGE"}
+        </button>
       </div>
 
       {/* Metrics Row */}
-      <MetricsRow chainData={chainData} priceHistory={priceHistory} />
+      <MetricsRow chainData={chainData} priceHistory={priceHistory} thresholdBps={thresholdBps} vaultBalance={vaultBalance} />
 
       {/* Middle Row: Chart + Session Log */}
       <div className="grid grid-cols-5 gap-3">
         <div className="col-span-3">
-          <PriceSpreadChart priceHistory={priceHistory} />
+          <PriceSpreadChart priceHistory={priceHistory} thresholdBps={thresholdBps} />
         </div>
         <div className="col-span-2">
-          <SessionLog logs={sessionLogs} isRunning={isDemoRunning} />
+          <SessionLog logs={sessionLogs} isRunning={isExecuting} />
         </div>
       </div>
     </div>

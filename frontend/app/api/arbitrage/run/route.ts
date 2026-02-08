@@ -4,9 +4,13 @@ import path from "path";
 
 const ROOT = path.resolve(process.cwd(), "..");
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
-    const cmd = `set -a && source .env && set +a && npx tsx scripts/demo/run-demo.ts 2>&1`;
+    const body = await req.json().catch(() => ({})) as { tradeAmountUsdc?: number };
+    const amountUsdc = body.tradeAmountUsdc ?? 1000;
+    const amountRaw = Math.round(amountUsdc * 1e6);
+
+    const cmd = `set -a && source .env && set +a && MAX_TRADE_AMOUNT_USDC=${amountRaw} npx tsx scripts/demo/run-demo.ts 2>&1`;
 
     const out = execSync(cmd, {
       cwd: ROOT,

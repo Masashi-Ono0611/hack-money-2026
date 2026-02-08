@@ -12,6 +12,7 @@ interface AutoSettleArgs {
   vaultWalletId: string;
   tokenSymbol: string;
   dryRun: boolean;
+  overrideAmount: number | null;
 }
 
 function parseArgs(): AutoSettleArgs {
@@ -39,6 +40,7 @@ function parseArgs(): AutoSettleArgs {
     process.exit(1);
   }
 
+  const amountStr = map.get('amount');
   return {
     sessionId,
     vaultWalletId:
@@ -47,6 +49,7 @@ function parseArgs(): AutoSettleArgs {
       '',
     tokenSymbol: map.get('token-symbol') ?? 'USDC',
     dryRun: map.get('dry-run') === 'true',
+    overrideAmount: amountStr ? parseFloat(amountStr) : null,
   };
 }
 
@@ -56,7 +59,7 @@ function parseArgs(): AutoSettleArgs {
 
 function deriveIdempotencyKey(sessionId: string): string {
   return createHash('sha256')
-    .update(`settle:${sessionId}`)
+    .update(`settle:${sessionId}:${Date.now()}:${Math.random()}`)
     .digest('hex')
     .slice(0, 32);
 }
@@ -131,7 +134,9 @@ async function main(): Promise<SettlementRecord> {
   }
 
   const available = parseFloat(usdcToken.amount);
-  const settleAmount = Math.min(profit, available);
+  const settleAmount = opts.overrideAmount
+    ? Math.min(opts.overrideAmount, available)
+    : Math.min(profit, available);
 
   if (settleAmount <= 0) {
     const err = `Insufficient balance: available=${available}`;

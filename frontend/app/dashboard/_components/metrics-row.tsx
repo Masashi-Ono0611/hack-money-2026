@@ -6,6 +6,8 @@ import type { ChainPrice, PriceDataPoint } from "../_types";
 interface MetricsRowProps {
   chainData: ChainPrice[];
   priceHistory: PriceDataPoint[];
+  thresholdBps: number;
+  vaultBalance: string | null;
 }
 
 function PriceCard({
@@ -53,11 +55,13 @@ function PriceCard({
 function SpreadCard({
   spreadValue,
   spreadBps,
+  thresholdBps,
 }: {
   spreadValue: number;
   spreadBps: number;
+  thresholdBps: number;
 }) {
-  const isOpportunity = spreadBps >= 50;
+  const isOpportunity = spreadBps >= thresholdBps / 100;
   return (
     <div
       className={`flex flex-col gap-3 border bg-[#0A0A0A] p-5 ${
@@ -82,7 +86,10 @@ function SpreadCard({
   );
 }
 
-function VaultCard() {
+function VaultCard({ balance }: { balance: string | null }) {
+  const displayBalance = balance
+    ? `$${parseFloat(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`
+    : "—";
   return (
     <div className="flex flex-col gap-3 border border-[#2f2f2f] bg-[#0A0A0A] p-5">
       <span className="font-mono text-[11px] font-medium tracking-wider text-[#8a8a8a]">
@@ -92,19 +99,16 @@ function VaultCard() {
         ARC OPERATOR VAULT
       </span>
       <span className="font-sans text-[28px] font-bold tracking-tight text-white">
-        $12,847
+        {displayBalance}
       </span>
-      <div className="flex items-center gap-1.5">
-        <TrendingUp size={12} className="text-[#00FF88]" />
-        <span className="font-mono text-[11px] font-medium text-[#00FF88]">
-          +$1,240 TODAY
-        </span>
-      </div>
+      <span className="font-mono text-[10px] text-[#8a8a8a]">
+        {balance ? "USDC (ARC-TESTNET)" : "Loading..."}
+      </span>
     </div>
   );
 }
 
-export function MetricsRow({ chainData, priceHistory }: MetricsRowProps) {
+export function MetricsRow({ chainData, priceHistory, thresholdBps, vaultBalance }: MetricsRowProps) {
   const priceA = chainData[0]?.price ?? null;
   const priceB = chainData[1]?.price ?? null;
 
@@ -135,8 +139,8 @@ export function MetricsRow({ chainData, priceHistory }: MetricsRowProps) {
         price={priceB}
         changePercent={calcChange(1)}
       />
-      <SpreadCard spreadValue={spreadValue} spreadBps={spreadBps / 100} />
-      <VaultCard />
+      <SpreadCard spreadValue={spreadValue} spreadBps={spreadBps / 100} thresholdBps={thresholdBps} />
+      <VaultCard balance={vaultBalance} />
     </div>
   );
 }

@@ -87,7 +87,7 @@ export function YellowStatusCard({ onLog }: Props) {
               >
                 {status.connected ? "CONNECTED" : "DISCONNECTED"}
               </span>
-              {status.authenticated && (
+              {status.connected && status.authenticated && (
                 <span className="bg-[#6a9fff20] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#6a9fff]">
                   AUTHENTICATED
                 </span>
