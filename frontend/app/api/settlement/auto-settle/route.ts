@@ -7,6 +7,7 @@ const ROOT = path.resolve(process.cwd(), "..");
 type AutoSettleRequest = {
   sessionId?: string;
   dryRun?: boolean;
+  profitUsdc?: number;
 };
 
 export async function POST(req: Request) {
@@ -14,8 +15,12 @@ export async function POST(req: Request) {
     const body = (await req.json().catch(() => ({}))) as AutoSettleRequest;
     const sessionId = body.sessionId ?? "demo-session-001";
     const dryRun = body.dryRun !== false;
+    const profitUsdc = body.profitUsdc;
 
-    const flags = dryRun ? "--dry-run" : "";
+    const flags = [
+      dryRun ? "--dry-run" : "",
+      profitUsdc ? `--amount ${profitUsdc}` : "",
+    ].filter(Boolean).join(" ");
     const cmd = `set -a && source .env && set +a && npx tsx scripts/settlement/auto-settle.ts --session ${sessionId} ${flags} 2>&1`;
 
     const out = execSync(cmd, {
