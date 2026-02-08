@@ -15,6 +15,7 @@ import { loadConfig } from '../arbitrage/config.js';
 import { PriceWatcher } from '../arbitrage/price-watcher.js';
 import type { ArbitrageResult, PriceDiscrepancy } from '../arbitrage/types.js';
 import { YellowSessionManager } from '../arbitrage/yellow-session-manager.js';
+import { SettlementOrchestrator } from '../settlement/settlement-orchestrator.js';
 import { Logger } from '../lib/logger.js';
 
 const COMPONENT = 'DemoScript';
@@ -192,18 +193,28 @@ class DemoRunner {
       this.markStep(s4, 'failed', msg);
     }
 
-    // ── Step 5: Settlement (Info) ──
-    const s5 = this.addStep('Settlement Info');
+    // ── Step 5: Settlement via Arc ──
+    const s5 = this.addStep('Settlement via Arc');
     this.printStepHeader(5, 'SETTLEMENT');
     this.markStep(s5, 'running');
 
     if (this.results.length > 0 && this.results[0].success) {
-      const profit = Number(this.results[0].actualProfitUsdc) / 1e6;
-      console.log(`  💰 Profit to settle: $${profit.toFixed(6)} USDC`);
-      console.log('  📋 Settlement would transfer USDC to Operator Vault via Arc');
-      console.log('  📋 Using Circle Programmable Wallets API (W3S)');
-      console.log('  ℹ️  Settlement requires CIRCLE_API_KEY (skipping actual transfer)');
-      this.markStep(s5, 'done', `$${profit.toFixed(6)} USDC ready for settlement`);
+      const profitRaw = this.results[0].actualProfitUsdc;
+      const profit = Number(profitRaw) / 1e6;
+
+      if (profit <= 0) {
+        console.log('  ℹ️  No positive profit to settle');
+        this.markStep(s5, 'skipped', 'No positive profit');
+      } else {
+        console.log(`  💰 Profit to settle: $${profit.toFixed(6)} USDC`);
+        console.log('  📋 Settling to Operator Vault via Arc (Circle Programmable Wallets)');
+
+        await this.executeSettlement(
+          s5,
+          this.results[0].sessionId,
+          profit.toFixed(6),
+        );
+      }
     } else {
       console.log('  ℹ️  No profit to settle');
       this.markStep(s5, 'skipped', 'No profit');
@@ -211,6 +222,48 @@ class DemoRunner {
 
     // ── Summary ──
     this.printSummary();
+  }
+
+  private async executeSettlement(
+    stepIdx: number,
+    sessionId: string,
+    profitUsdc: string,
+  ): Promise<void> {
+    const arcApiKey = process.env.ARC_API_KEY;
+    const vaultWalletId = process.env.ARC_WALLET_ID_OPERATOR_VAULT;
+
+    if (!arcApiKey || !vaultWalletId) {
+      console.log('  ⚠️  ARC_API_KEY or ARC_WALLET_ID_OPERATOR_VAULT not set');
+      console.log('  ℹ️  Skipping actual settlement (credentials missing)');
+      console.log(`  📋 Would settle $${profitUsdc} USDC → Operator Vault`);
+      this.markStep(stepIdx, 'skipped', `$${profitUsdc} USDC (credentials missing)`);
+      return;
+    }
+
+    try {
+      const tokenSymbol = process.env.ARC_TOKEN_SYMBOL ?? 'USDC';
+      const orchestrator = new SettlementOrchestrator(
+        { vaultWalletId, tokenSymbol },
+        this.logger,
+      );
+
+      const record = await orchestrator.settleProfit(sessionId, profitUsdc);
+
+      if (record.settled) {
+        console.log(`  ✅ Settlement completed!`);
+        console.log(`     Tx Hash: ${record.txHash}`);
+        console.log(`     Vault before: ${record.vaultBalanceBefore} USDC`);
+        console.log(`     Vault after:  ${record.vaultBalanceAfter} USDC`);
+        this.markStep(stepIdx, 'done', `$${profitUsdc} USDC settled (tx: ${record.txHash?.slice(0, 10)}...)`);
+      } else {
+        console.log(`  ⚠️  Settlement not completed: ${record.error}`);
+        this.markStep(stepIdx, 'failed', record.error);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.log(`  ❌ Settlement error: ${msg}`);
+      this.markStep(stepIdx, 'failed', msg);
+    }
   }
 
   private async pollOnce(watcher: PriceWatcher): Promise<PriceDiscrepancy | null> {
