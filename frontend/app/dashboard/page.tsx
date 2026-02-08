@@ -136,25 +136,30 @@ export default function DashboardPage() {
       }
 
       // Session & trade details
+      const buyChain = data.direction === "A_CHEAPER" ? "Base Sepolia" : "Unichain Sepolia";
+      const sellChain = data.direction === "A_CHEAPER" ? "Unichain Sepolia" : "Base Sepolia";
+      const buyChainKey = data.direction === "A_CHEAPER" ? "base-sepolia" : "unichain-sepolia";
+      const sellChainKey = data.direction === "A_CHEAPER" ? "unichain-sepolia" : "base-sepolia";
+
       if (data.sessionId) {
         await new Promise((r) => setTimeout(r, 200));
-        addLog("SESSION", "Yellow session created", data.sessionId);
+        addLog("SESSION", `Yellow session: ${data.sessionId}`);
         await new Promise((r) => setTimeout(r, 200));
-        addLog("BUY", "BUY CPT on cheaper chain", "via Yellow ClearNode");
+        addLog("BUY", `BUY ${tradeAmountUsdc} USDC → CPT on ${buyChain}`, `$${data.priceA?.toFixed(6) ?? "?"}/CPT`, { chain: buyChainKey });
         await new Promise((r) => setTimeout(r, 200));
-        addLog("SELL", "SELL CPT on expensive chain", "via Yellow ClearNode");
+        addLog("SELL", `SELL CPT → USDC on ${sellChain}`, `$${data.priceB?.toFixed(6) ?? "?"}/CPT`, { chain: sellChainKey });
       }
 
       // Profit
       if (data.profit) {
         await new Promise((r) => setTimeout(r, 200));
-        addLog("PROFIT", `Net P&L: $${data.profit.toFixed(6)} USDC`);
+        addLog("PROFIT", `Net P&L: +$${data.profit.toFixed(6)} USDC (${tradeAmountUsdc} USDC trade)`);
       }
 
       // Settlement
       if (data.txHash) {
         await new Promise((r) => setTimeout(r, 200));
-        addLog("INFO", `Arc Settlement`, undefined, { txHash: data.txHash, chain: "sepolia" });
+        addLog("INFO", `Arc Settlement — $${(data.profit ?? 0).toFixed(6)} USDC settled`, undefined, { txHash: data.txHash, chain: "sepolia" });
         if (data.vaultBefore && data.vaultAfter) {
           addLog("INFO", `Vault: ${data.vaultBefore} → ${data.vaultAfter} USDC`);
         }
