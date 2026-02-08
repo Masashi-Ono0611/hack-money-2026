@@ -13,11 +13,10 @@ import {
 import Image from "next/image";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "DASHBOARD", icon: LayoutDashboard },
-  { href: "/dashboard/analytics", label: "ANALYTICS", icon: Activity },
-  { href: "/settlement", label: "SETTLEMENT", icon: ArrowLeftRight },
   { href: "/admin", label: "L2 ADMIN", icon: Server },
-  { href: "/dashboard/demo", label: "DEMO", icon: Zap },
+  { href: "/dashboard", label: "TRADE", icon: LayoutDashboard },
+  { href: "/settlement", label: "SETTLEMENT", icon: ArrowLeftRight },
+  { href: "/dashboard/analytics", label: "ANALYTICS", icon: Activity },
   { href: "/dashboard/settings", label: "SETTINGS", icon: Settings },
 ];
 
