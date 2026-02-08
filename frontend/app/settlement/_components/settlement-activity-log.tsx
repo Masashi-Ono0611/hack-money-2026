@@ -10,6 +10,7 @@ export interface SettlementLogEntry {
   type: "SETTLE" | "VAULT" | "INFO" | "ERROR";
   message: string;
   txHash?: string;
+  chain?: string;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -75,7 +76,7 @@ export function SettlementActivityLog({ logs }: Props) {
                   </p>
                   {log.txHash && (
                     <a
-                      href={explorerTxUrl("sepolia", log.txHash)}
+                      href={explorerTxUrl(log.chain ?? "arc-testnet", log.txHash)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-0.5 inline-flex items-center gap-1 font-mono text-[10px] text-[#6a9fff] transition-colors hover:text-[#00FF88]"

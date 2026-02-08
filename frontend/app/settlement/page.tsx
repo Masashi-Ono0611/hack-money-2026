@@ -16,12 +16,12 @@ export default function SettlementPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const addLog = useCallback(
-    (type: SettlementLogEntry["type"], message: string, txHash?: string) => {
+    (type: SettlementLogEntry["type"], message: string, txHash?: string, chain?: string) => {
       logCounter.current += 1;
       const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       setActivityLogs((prev) => [
         ...prev,
-        { id: String(logCounter.current), timestamp, type, message, txHash },
+        { id: String(logCounter.current), timestamp, type, message, txHash, chain },
       ]);
     },
     [],
@@ -63,7 +63,7 @@ export default function SettlementPage() {
   };
 
   const handleSettleLog = (event: SettleLogEvent) => {
-    addLog(event.type, event.message, event.txHash);
+    addLog(event.type, event.message, event.txHash, event.chain);
   };
 
   const handleVaultUpdate = () => {

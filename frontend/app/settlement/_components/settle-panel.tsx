@@ -8,6 +8,7 @@ export interface SettleLogEvent {
   type: "SETTLE" | "VAULT" | "ERROR" | "INFO";
   message: string;
   txHash?: string;
+  chain?: string;
 }
 
 interface Props {
@@ -54,6 +55,7 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
           type: "SETTLE",
           message: `Settlement ${dryRun ? "(DRY-RUN) " : ""}completed — profit: ${data.profit ?? profitUsdc} USDC, transferred: ${data.transferAmount ?? "?"} USDC`,
           txHash: data.transactionId ?? undefined,
+          chain: "arc-testnet",
         });
         if (!dryRun) {
           onVaultUpdate();
@@ -184,7 +186,7 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
                     TRANSACTION
                   </span>
                   <a
-                    href={explorerTxUrl("sepolia", result.transactionId)}
+                    href={explorerTxUrl("arc-testnet", result.transactionId)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-1 flex items-center gap-1.5 font-mono text-[11px] text-[#6a9fff] transition-colors hover:text-[#00FF88]"

@@ -159,7 +159,7 @@ export default function DashboardPage() {
       // Settlement
       if (data.txHash) {
         await new Promise((r) => setTimeout(r, 200));
-        addLog("INFO", `Arc Settlement — $${(data.profit ?? 0).toFixed(6)} USDC settled`, undefined, { txHash: data.txHash, chain: "sepolia" });
+        addLog("INFO", `Arc Settlement — $${(data.profit ?? 0).toFixed(6)} USDC settled`, undefined, { txHash: data.txHash, chain: "arc-testnet" });
         if (data.vaultBefore && data.vaultAfter) {
           addLog("INFO", `Vault: ${data.vaultBefore} → ${data.vaultAfter} USDC`);
         }
