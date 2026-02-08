@@ -132,29 +132,19 @@ contract UtilizationHookTest is Test {
         assertEq(address(hook.poolManager()), address(poolManager));
     }
 
-    /// @notice LOW_FEE が 500 (0.05%) であることを検証
-    function test_LOW_FEE_is500() public view {
-        assertEq(hook.LOW_FEE(), 500);
+    /// @notice FEE_MIN が 500 (0.05%) であることを検証
+    function test_FEE_MIN_is500() public view {
+        assertEq(hook.FEE_MIN(), 500);
     }
 
-    /// @notice DEFAULT_FEE が 3000 (0.3%) であることを検証
-    function test_DEFAULT_FEE_is3000() public view {
-        assertEq(hook.DEFAULT_FEE(), 3000);
+    /// @notice FEE_MAX が 10000 (1.0%) であることを検証
+    function test_FEE_MAX_is10000() public view {
+        assertEq(hook.FEE_MAX(), 10000);
     }
 
-    /// @notice HIGH_FEE が 10000 (1.0%) であることを検証
-    function test_HIGH_FEE_is10000() public view {
-        assertEq(hook.HIGH_FEE(), 10000);
-    }
-
-    /// @notice LOW_THRESHOLD が 30 であることを検証
-    function test_LOW_THRESHOLD_is30() public view {
-        assertEq(hook.LOW_THRESHOLD(), 30);
-    }
-
-    /// @notice HIGH_THRESHOLD が 70 であることを検証
-    function test_HIGH_THRESHOLD_is70() public view {
-        assertEq(hook.HIGH_THRESHOLD(), 70);
+    /// @notice STALE_FALLBACK_FEE が 3000 (0.3%) であることを検証
+    function test_STALE_FALLBACK_FEE_is3000() public view {
+        assertEq(hook.STALE_FALLBACK_FEE(), 3000);
     }
 
     /// @notice コントラクトが IHooks インターフェースを実装していることを検証
@@ -192,58 +182,65 @@ contract UtilizationHookTest is Test {
 
     // ─── Task 2.3: calculateDynamicFee テスト ───
 
-    /// @notice 稼働率 0 で LOW_FEE を返す（境界値: 最小）
-    function test_calculateDynamicFee_utilization0_returnsLowFee() public view {
+    /// @notice 稼働率 0 で FEE_MIN (500) を返す（境界値: 最小）
+    function test_calculateDynamicFee_utilization0_returnsFeeMin() public view {
         assertEq(hook.calculateDynamicFee(0), 500);
     }
 
-    /// @notice 稼働率 15 で LOW_FEE を返す（低稼働率の中間値）
-    function test_calculateDynamicFee_utilization15_returnsLowFee() public view {
-        assertEq(hook.calculateDynamicFee(15), 500);
+    /// @notice 稼働率 15 で連続関数の値 713 を返す
+    function test_calculateDynamicFee_utilization15_returnsContinuousValue() public view {
+        // 500 + 9500 * 15 * 15 / 10000 = 500 + 213 = 713
+        assertEq(hook.calculateDynamicFee(15), 713);
     }
 
-    /// @notice 稼働率 29 で LOW_FEE を返す（境界値: LOW_THRESHOLD - 1）
-    function test_calculateDynamicFee_utilization29_returnsLowFee() public view {
-        assertEq(hook.calculateDynamicFee(29), 500);
+    /// @notice 稼働率 29 で連続関数の値 1299 を返す
+    function test_calculateDynamicFee_utilization29_returnsContinuousValue() public view {
+        // 500 + 9500 * 29 * 29 / 10000 = 500 + 798 = 1298
+        assertEq(hook.calculateDynamicFee(29), 1298);
     }
 
-    /// @notice 稼働率 30 で DEFAULT_FEE を返す（境界値: LOW_THRESHOLD）
-    function test_calculateDynamicFee_utilization30_returnsDefaultFee() public view {
-        assertEq(hook.calculateDynamicFee(30), 3000);
+    /// @notice 稼働率 30 で連続関数の値 1355 を返す
+    function test_calculateDynamicFee_utilization30_returnsContinuousValue() public view {
+        // 500 + 9500 * 30 * 30 / 10000 = 500 + 855 = 1355
+        assertEq(hook.calculateDynamicFee(30), 1355);
     }
 
-    /// @notice 稼働率 50 で DEFAULT_FEE を返す（中稼働率の中間値）
-    function test_calculateDynamicFee_utilization50_returnsDefaultFee() public view {
-        assertEq(hook.calculateDynamicFee(50), 3000);
+    /// @notice 稼働率 50 で連続関数の値 2875 を返す
+    function test_calculateDynamicFee_utilization50_returnsContinuousValue() public view {
+        // 500 + 9500 * 50 * 50 / 10000 = 500 + 2375 = 2875
+        assertEq(hook.calculateDynamicFee(50), 2875);
     }
 
-    /// @notice 稼働率 69 で DEFAULT_FEE を返す（境界値: HIGH_THRESHOLD - 1）
-    function test_calculateDynamicFee_utilization69_returnsDefaultFee() public view {
-        assertEq(hook.calculateDynamicFee(69), 3000);
+    /// @notice 稼働率 69 で連続関数の値 5024 を返す
+    function test_calculateDynamicFee_utilization69_returnsContinuousValue() public view {
+        // 500 + 9500 * 69 * 69 / 10000 = 500 + 4522 = 5022
+        assertEq(hook.calculateDynamicFee(69), 5022);
     }
 
-    /// @notice 稼働率 70 で HIGH_FEE を返す（境界値: HIGH_THRESHOLD）
-    function test_calculateDynamicFee_utilization70_returnsHighFee() public view {
-        assertEq(hook.calculateDynamicFee(70), 10000);
+    /// @notice 稼働率 70 で連続関数の値 5155 を返す
+    function test_calculateDynamicFee_utilization70_returnsContinuousValue() public view {
+        // 500 + 9500 * 70 * 70 / 10000 = 500 + 4655 = 5155
+        assertEq(hook.calculateDynamicFee(70), 5155);
     }
 
-    /// @notice 稼働率 85 で HIGH_FEE を返す（高稼働率の中間値）
-    function test_calculateDynamicFee_utilization85_returnsHighFee() public view {
-        assertEq(hook.calculateDynamicFee(85), 10000);
+    /// @notice 稼働率 85 で連続関数の値 7363 を返す
+    function test_calculateDynamicFee_utilization85_returnsContinuousValue() public view {
+        // 500 + 9500 * 85 * 85 / 10000 = 500 + 6863 = 7363
+        assertEq(hook.calculateDynamicFee(85), 7363);
     }
 
-    /// @notice 稼働率 100 で HIGH_FEE を返す（境界値: 最大有効値）
-    function test_calculateDynamicFee_utilization100_returnsHighFee() public view {
+    /// @notice 稼働率 100 で FEE_MAX (10000) を返す（境界値: 最大）
+    function test_calculateDynamicFee_utilization100_returnsFeeMax() public view {
         assertEq(hook.calculateDynamicFee(100), 10000);
     }
 
-    /// @notice 稼働率 101 で DEFAULT_FEE を返す（異常値フォールバック）
-    function test_calculateDynamicFee_utilization101_returnsDefaultFee() public view {
+    /// @notice 稼働率 101 で STALE_FALLBACK_FEE (3000) を返す（異常値フォールバック）
+    function test_calculateDynamicFee_utilization101_returnsFallbackFee() public view {
         assertEq(hook.calculateDynamicFee(101), 3000);
     }
 
-    /// @notice 稼働率 type(uint256).max で DEFAULT_FEE を返す（極端な異常値）
-    function test_calculateDynamicFee_maxUint_returnsDefaultFee() public view {
+    /// @notice 稼働率 type(uint256).max で STALE_FALLBACK_FEE を返す（極端な異常値）
+    function test_calculateDynamicFee_maxUint_returnsFallbackFee() public view {
         assertEq(hook.calculateDynamicFee(type(uint256).max), 3000);
     }
 
@@ -286,31 +283,34 @@ contract UtilizationHookTest is Test {
         assertEq(BeforeSwapDelta.unwrap(delta), 0, "delta should be zero");
     }
 
-    /// @notice 低稼働時に beforeSwap が LOW_FEE | OVERRIDE_FEE_FLAG を返すことを検証
-    function test_beforeSwap_lowUtilization_returnsLowFeeWithOverride() public {
+    /// @notice 低稼働時に beforeSwap が連続関数の値 | OVERRIDE_FEE_FLAG を返すことを検証
+    function test_beforeSwap_lowUtilization_returnsContinuousFeeWithOverride() public {
         oracle.setUtilization(10);
         PoolKey memory key = _makePoolKey();
         vm.prank(address(poolManager));
         (,, uint24 feeWithFlag) = hook.beforeSwap(address(this), key, _makeSwapParams(), "");
-        assertEq(feeWithFlag, 500 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        // Fee(10) = 500 + 9500*100/10000 = 595
+        assertEq(feeWithFlag, 595 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
-    /// @notice 中稼働時に beforeSwap が DEFAULT_FEE | OVERRIDE_FEE_FLAG を返すことを検証
-    function test_beforeSwap_midUtilization_returnsDefaultFeeWithOverride() public {
+    /// @notice 中稼働時に beforeSwap が連続関数の値 | OVERRIDE_FEE_FLAG を返すことを検証
+    function test_beforeSwap_midUtilization_returnsContinuousFeeWithOverride() public {
         oracle.setUtilization(50);
         PoolKey memory key = _makePoolKey();
         vm.prank(address(poolManager));
         (,, uint24 feeWithFlag) = hook.beforeSwap(address(this), key, _makeSwapParams(), "");
-        assertEq(feeWithFlag, 3000 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        // Fee(50) = 500 + 9500*2500/10000 = 2875
+        assertEq(feeWithFlag, 2875 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
-    /// @notice 高稼働時に beforeSwap が HIGH_FEE | OVERRIDE_FEE_FLAG を返すことを検証
-    function test_beforeSwap_highUtilization_returnsHighFeeWithOverride() public {
+    /// @notice 高稼働時に beforeSwap が連続関数の値 | OVERRIDE_FEE_FLAG を返すことを検証
+    function test_beforeSwap_highUtilization_returnsContinuousFeeWithOverride() public {
         oracle.setUtilization(85);
         PoolKey memory key = _makePoolKey();
         vm.prank(address(poolManager));
         (,, uint24 feeWithFlag) = hook.beforeSwap(address(this), key, _makeSwapParams(), "");
-        assertEq(feeWithFlag, 10000 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        // Fee(85) = 500 + 9500*7225/10000 = 7363
+        assertEq(feeWithFlag, 7363 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
     /// @notice beforeSwap が FeeOverridden イベントを発行することを検証
@@ -320,7 +320,7 @@ contract UtilizationHookTest is Test {
         PoolId poolId = key.toId();
 
         vm.expectEmit(true, false, false, true);
-        emit UtilizationHook.FeeOverridden(poolId, 50, 3000);
+        emit UtilizationHook.FeeOverridden(poolId, 50, 2875);
 
         vm.prank(address(poolManager));
         hook.beforeSwap(address(this), key, _makeSwapParams(), "");
@@ -333,7 +333,8 @@ contract UtilizationHookTest is Test {
         PoolId poolId = key.toId();
 
         vm.expectEmit(true, false, false, true);
-        emit UtilizationHook.FeeOverridden(poolId, 90, 10000);
+        // Fee(90) = 500 + 9500*8100/10000 = 8195
+        emit UtilizationHook.FeeOverridden(poolId, 90, 8195);
 
         vm.prank(address(poolManager));
         hook.beforeSwap(address(this), key, _makeSwapParams(), "");
@@ -361,7 +362,8 @@ contract UtilizationHookTest is Test {
 
         vm.prank(address(poolManager));
         (,, uint24 feeWithFlag) = metaHook.beforeSwap(address(this), key, _makeSwapParams(), "");
-        assertEq(feeWithFlag, 500 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        // MetaOnlyOracle returns u=10 non-stale → Fee(10) = 595
+        assertEq(feeWithFlag, 595 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
     function test_beforeSwap_staleOracleForcesDefaultFee() public {
@@ -400,7 +402,7 @@ contract UtilizationHookTest is Test {
         staleHook.beforeSwap(address(this), key, _makeSwapParams(), "");
     }
 
-    function test_beforeSwap_nonStaleKeepsExistingDynamicFeeTiers() public {
+    function test_beforeSwap_nonStaleReturnsContinuousFee() public {
         ConfigurableMetaOracle lowOracle = new ConfigurableMetaOracle(29, false);
         UtilizationHook lowHook = new UtilizationHook(poolManager, IMockOracle(address(lowOracle)));
         PoolKey memory lowKey = PoolKey({
@@ -433,15 +435,18 @@ contract UtilizationHookTest is Test {
 
         vm.prank(address(poolManager));
         (,, uint24 lowFeeWithFlag) = lowHook.beforeSwap(address(this), lowKey, _makeSwapParams(), "");
-        assertEq(lowFeeWithFlag, 500 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        // Fee(29) = 500 + 9500*841/10000 = 1298
+        assertEq(lowFeeWithFlag, 1298 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
 
         vm.prank(address(poolManager));
         (,, uint24 midFeeWithFlag) = midHook.beforeSwap(address(this), midKey, _makeSwapParams(), "");
-        assertEq(midFeeWithFlag, 3000 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        // Fee(50) = 500 + 9500*2500/10000 = 2875
+        assertEq(midFeeWithFlag, 2875 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
 
         vm.prank(address(poolManager));
         (,, uint24 highFeeWithFlag) = highHook.beforeSwap(address(this), highKey, _makeSwapParams(), "");
-        assertEq(highFeeWithFlag, 10000 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        // Fee(85) = 500 + 9500*7225/10000 = 7363
+        assertEq(highFeeWithFlag, 7363 | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
     /// @notice 未使用フック（beforeInitialize）が未実装として revert することを検証

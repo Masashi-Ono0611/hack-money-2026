@@ -62,7 +62,8 @@ contract PoolHookIntegrationTest is Test {
         );
 
         uint24 fee = _extractLastSwapFee(vm.getRecordedLogs(), address(poolManager));
-        assertEq(fee, 500, "low utilization should apply low fee");
+        // Fee(10) = 500 + 9500*100/10000 = 595
+        assertEq(fee, 595, "low utilization should apply low fee");
     }
 
     function test_swap_highUtilization_appliesHighFee() public {
@@ -82,7 +83,8 @@ contract PoolHookIntegrationTest is Test {
         );
 
         uint24 fee = _extractLastSwapFee(vm.getRecordedLogs(), address(poolManager));
-        assertEq(fee, 10000, "high utilization should apply high fee");
+        // Fee(90) = 500 + 9500*8100/10000 = 8195
+        assertEq(fee, 8195, "high utilization should apply high fee");
     }
 
     function test_swap_emitsFeeOverriddenWithCorrectValues() public {
@@ -108,7 +110,7 @@ contract PoolHookIntegrationTest is Test {
 
         assertEq(poolIdFromEvent, PoolId.unwrap(key.toId()), "poolId should match");
         assertEq(utilizationFromEvent, utilization, "utilization should match");
-        assertEq(feeFromEvent, 10000, "fee should match high utilization tier");
+        assertEq(feeFromEvent, 8195, "fee should match high utilization tier");
 
         uint24 feeFromSwap = _extractLastSwapFee(logs, address(poolManager));
         assertEq(feeFromSwap, feeFromEvent, "Swap fee should equal FeeOverridden fee");
@@ -171,7 +173,8 @@ contract PoolHookIntegrationTest is Test {
         );
 
         uint24 fee = _extractLastSwapFee(vm.getRecordedLogs(), address(poolManager));
-        assertEq(fee, 3000, "deployed hook should apply default fee at utilization 50");
+        // Fee(50) = 500 + 9500*2500/10000 = 2875
+        assertEq(fee, 2875, "deployed hook should apply default fee at utilization 50");
     }
 
     function _deployAndInitPoolWithLiquidity()

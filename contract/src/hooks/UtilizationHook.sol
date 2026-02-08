@@ -16,17 +16,12 @@ import {IMockOracle} from "../MockOracle.sol";
 /// @dev Implements IHooks interface; only beforeSwap is active
 contract UtilizationHook is IHooks {
     using PoolIdLibrary for PoolKey;
-    /// @notice Fee tier for low utilization (0.05%)
-    uint24 public constant LOW_FEE = 500;
-    /// @notice Fee tier for normal utilization (0.3%)
-    uint24 public constant DEFAULT_FEE = 3000;
-    /// @notice Fee tier for high utilization (1.0%)
-    uint24 public constant HIGH_FEE = 10000;
-
-    /// @notice Utilization threshold below which LOW_FEE applies
-    uint256 public constant LOW_THRESHOLD = 30;
-    /// @notice Utilization threshold above which HIGH_FEE applies
-    uint256 public constant HIGH_THRESHOLD = 70;
+    /// @notice Minimum fee at 0% utilization (0.05%)
+    uint24 public constant FEE_MIN = 500;
+    /// @notice Maximum fee at 100% utilization (1.0%)
+    uint24 public constant FEE_MAX = 10000;
+    /// @notice Fallback fee used when oracle data is stale (0.3%)
+    uint24 public constant STALE_FALLBACK_FEE = 3000;
 
     /// @notice Emitted when dynamic fee is applied during a swap
     event FeeOverridden(PoolId indexed poolId, uint256 utilization, uint24 fee);
@@ -62,20 +57,21 @@ contract UtilizationHook is IHooks {
         });
     }
 
-    /// @notice 稼働率に応じた手数料を計算
+    /// @notice Compute dynamic fee as a continuous quadratic function of utilization
+    /// @dev Fee(u) = FEE_MIN + (FEE_MAX - FEE_MIN) × u² / 10000
+    ///      where u = utilization (0-100). This yields:
+    ///        u=0   → 500 bps (0.05%)   u=50 → 2875 bps (0.29%)
+    ///        u=10  → 595 bps (0.06%)   u=70 → 5155 bps (0.52%)
+    ///        u=30  → 1355 bps (0.14%)  u=100 → 10000 bps (1.00%)
     /// @param utilization 稼働率（0-100）
     /// @return fee 手数料（bps）
     function calculateDynamicFee(uint256 utilization) public pure returns (uint24) {
         if (utilization > 100) {
-            return DEFAULT_FEE;
+            return STALE_FALLBACK_FEE;
         }
-        if (utilization < LOW_THRESHOLD) {
-            return LOW_FEE;
-        } else if (utilization >= HIGH_THRESHOLD) {
-            return HIGH_FEE;
-        } else {
-            return DEFAULT_FEE;
-        }
+        // Fee = FEE_MIN + (FEE_MAX - FEE_MIN) * u^2 / 10000
+        // u^2 max = 10000, so result is always in [FEE_MIN, FEE_MAX]
+        return uint24(uint256(FEE_MIN) + (uint256(FEE_MAX - FEE_MIN) * utilization * utilization) / 10000);
     }
 
     // ─── IHooks implementation (only beforeSwap is active) ───
@@ -136,7 +132,7 @@ contract UtilizationHook is IHooks {
             revert UnauthorizedCaller(msg.sender);
         }
         (uint256 utilization,, bool stale, uint8 source) = oracle.getUtilizationWithMeta();
-        uint24 fee = stale ? DEFAULT_FEE : calculateDynamicFee(utilization);
+        uint24 fee = stale ? STALE_FALLBACK_FEE : calculateDynamicFee(utilization);
         if (stale) {
             emit StaleFallbackApplied(key.toId(), utilization, source, fee);
         }
