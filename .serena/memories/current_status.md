@@ -1,36 +1,31 @@
-# Current Status (Updated: 2026-02-08)
+# 現在のステータス（更新日: 2026-02-08）
 
-## Impactful Changes
-- **Project Name**: Updated to "Ghost Yield" (formerly Zombie L2 Clearinghouse).
-- **Implementation Status**:
-  - `scripts/arbitrage/`: Exists and populated (Arbitrage Engine implementation started/in-progress).
-  - `frontend/`: App Router structure set up with `dashboard` and `settlement` pages.
-  - `scripts/settlement/`: Exists (Settlement logic active).
+## 確認済みの構成
+- **プロジェクト名**: Ghost Yield（README/Steeringと一致）
+- **ディレクトリ**: `contract/`, `frontend/`, `scripts/`, `docs/`, `.kiro/steering`, `.kiro/specs`
 
-## Kiro Spec Status (Inferred)
-- `offchain-arbitrage-engine`: Implementation active (`scripts/arbitrage`).
-- `dashboard-demo`: Implementation active (`frontend/dashboard`).
-- `settlement-layer`: Implementation active (`scripts/settlement`).
-- `uniswap-v4-integration`: Contracts deployed/testable (`contract/src/hooks`).
-
-## Codebase Status
+## コードベースの実在確認（存在ベース）
 
 ### Smart Contracts (`contract/`)
-- `ComputeToken.sol`, `OperatorVault.sol`, `UtilizationHook.sol` implemented.
-- Deployment scripts (`DeployCore`, `DeployHook`, `InitializePool`) ready.
-- Tests (Foundry) available for Hooks, Token, and Vault.
-
-### Frontend (`frontend/`)
-- Next.js 16 + Tailwind 4 setup complete.
-- Basic routing for `/dashboard` and `/settlement` exists.
-- Components likely using shadcn/ui.
+- `contract/src/ComputeToken.sol`
+- `contract/src/OperatorVault.sol`
+- `contract/src/MockOracle.sol`
+- `contract/src/hooks/UtilizationHook.sol`
+- テストとスクリプトは `contract/test/`, `contract/script/` に配置
 
 ### Offchain / Scripts (`scripts/`)
-- `arbitrage/`: `arbitrage-engine.ts`, `oracle-updater.ts`, `config.ts` present.
-- `settlement/`: `settle-to-vault.ts`, `check-vault-balance.ts` present.
+- `scripts/arbitrage/`: `arbitrage-engine.ts`, `oracle-updater.ts`, `price-watcher.ts`, `yellow-session-manager.ts`, `real-yellow-session.ts`, `index.ts` ほか
+- `scripts/settlement/`: `settle-to-vault.ts`, `auto-settle.ts`, `open-channel.ts`, `test-yellow-connection.ts`, `settlement-orchestrator.ts` ほか
 
-## Priorities
-1.  **Arbitrage Engine Completion**: Ensure `arbitrage-engine.ts` is fully functional and tested.
-2.  **Dashboard UI**: Flesh out the dashboard pages to visualize CPT prices and Vault status.
-3.  **Yellow Integration**: Confirm integration status of Yellow Network SDK (mock or real).
-4.  **End-to-End Test**: Verify the full loop: Price Change -> Hook Update -> Arbitrage -> Settlement -> Vault.
+### Frontend (`frontend/`)
+- App Router: `app/dashboard`, `app/settlement`, `app/admin`, `app/api`, `app/_components` が存在
+- `app/layout.tsx`, `app/page.tsx`, `app/globals.css` 確認
+
+## Kiro Specs（ディレクトリ確認）
+- `core-token-system/`, `dashboard-demo/`, `l2-utilization-oracle/`, `offchain-arbitrage-engine/`, `settlement-layer/`, `uniswap-v4-integration/`
+- 旧仕様は `_archived-zombie-l2-clearinghouse/` に保存
+
+## 直近の優先事項（推定）
+- オフチェーン裁定フローの検証（`scripts/arbitrage/`）
+- Yellow セッション + Arc 決済の通し確認（`scripts/settlement/`）
+- Dashboard の可視化拡充（`frontend/app/dashboard`）

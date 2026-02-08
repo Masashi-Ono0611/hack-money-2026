@@ -1,25 +1,30 @@
-# Technology Stack & Architecture
+# 技術スタック（最新）
 
-## Architecture
-- **Contracts**: Solidity (Foundry) in `contract/`
-  - CPT Token, Operator Vault, Uniswap v4 utilization hooks.
-- **Frontend**: Next.js 16 (App Router), React 19, Tailwind 4 in `frontend/`
-  - Uses Biome for linting/formatting.
-  - Shadcn/ui for components.
-- **Scripts**: TypeScript (`tsx`, `viem`, `jose`) in `scripts/`
-  - Arbitrage logic, Arc transfer, Setup scripts.
-- **Documentation**: `.kiro/steering/` (Source of Truth).
+## アーキテクチャ
+- **Contracts**: Solidity + Foundry（`contract/`）
+- **Frontend**: Next.js App Router（`frontend/`）
+- **Scripts**: TypeScript（`scripts/`）
 
-## Key Technologies
-- **Protocol**: Uniswap v4 (Hooks), Yellow Network (State Channels), Circle/Arc (USDC/CCTP)
-- **Dev Tools**: Foundry, Biome, Bun (Frontend package manager), Jose (JWE/JWS)
+## 主要ライブラリ / ツール
 
-## Development Standards
-- **Language**: English for internal thought/code, Japanese for Markdown output (docs).
-- **Workflow**: Kiro Spec Driven Development (Steering -> Specs -> Implementation).
-  - 3-phase approval: Requirements -> Design -> Tasks.
-- **Code Style**: 
-  - Strict TypeScript.
-  - Conventional Commits.
-  - NatSpec for Solidity.
-  - `biome` for frontend, `forge fmt` for contracts.
+### Root（Scripts）
+- **Runtime/Tooling**: `tsx`, `vitest`, `typescript`
+- **Chain/Network**: `viem`, `ethers`, `ws`
+- **Security/Encoding**: `jose`
+- **Yellow**: `@erc7824/nitrolite`
+
+### Frontend
+- **Framework**: Next.js 16.1.6
+- **UI**: React 19.2.4
+- **Styling**: Tailwind CSS 4.1.18
+- **Charts**: Recharts
+- **UI Primitives**: Radix UI（`radix-ui`）
+- **Tooling**: Biome 2.3.14, ESLint 9.17.0
+
+### Contracts
+- **Framework**: Foundry
+- **Protocols**: Uniswap v4 Hooks, Yellow Network, Circle/Arc（設計要件）
+
+## パッケージ管理
+- **Root**: pnpm（`pnpm-lock.yaml`）
+- **Frontend**: bun（`bun.lockb`）
