@@ -19,6 +19,8 @@ export default function DashboardPage() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [sessionLogs, setSessionLogs] = useState<LogEntry[]>([]);
   const [thresholdBps, setThresholdBps] = useState(10);
+  const [tradeAmountUsdc, setTradeAmountUsdc] = useState(1000);
+  const [vaultBalance, setVaultBalance] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const logCounter = useRef(0);
 
@@ -56,19 +58,32 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const fetchVaultBalance = useCallback(async () => {
+    try {
+      const res = await fetch("/api/settlement/vault-balance");
+      const data = await res.json();
+      if (data.ok && data.balance) setVaultBalance(data.balance);
+    } catch {
+      // silent
+    }
+  }, []);
+
   useEffect(() => {
     // Safe: fetch once on mount then interval; state updates are expected
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchChainData();
+    fetchVaultBalance();
     intervalRef.current = setInterval(fetchChainData, 5_000);
+    const vaultInterval = setInterval(fetchVaultBalance, 30_000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      clearInterval(vaultInterval);
     };
-  }, [fetchChainData]);
+  }, [fetchChainData, fetchVaultBalance]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await fetchChainData();
+    await Promise.all([fetchChainData(), fetchVaultBalance()]);
     setIsRefreshing(false);
   };
 
@@ -87,7 +102,7 @@ export default function DashboardPage() {
     setIsExecuting(true);
     setSessionLogs([]);
 
-    addLog("INFO", `Executing arbitrage (spread: ${currentSpreadBps.toFixed(1)} bps, threshold: ${thresholdBps} bps)...`);
+    addLog("INFO", `Executing arbitrage (spread: ${currentSpreadBps.toFixed(1)} bps, threshold: ${thresholdBps} bps, amount: ${tradeAmountUsdc} USDC)...`);
     addLog("INFO", "Connecting to on-chain pools + Yellow ClearNode + Arc...");
 
     try {
@@ -142,6 +157,7 @@ export default function DashboardPage() {
       }
 
       addLog("INFO", `Pipeline complete — profit: $${(data.profit ?? 0).toFixed(4)} USDC`);
+      fetchVaultBalance();
     } catch (err) {
       addLog("INFO", `Pipeline error: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -161,52 +177,85 @@ export default function DashboardPage() {
             Monitor cross-chain CPT arbitrage in real-time
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Threshold control */}
-          <div className="flex items-center gap-1.5 border border-[#2f2f2f] bg-[#0A0A0A] px-3 py-1.5">
-            <span className="font-mono text-[10px] font-medium text-[#8a8a8a]">THRESHOLD</span>
-            <input
-              type="number"
-              min={1}
-              max={500}
-              value={thresholdBps}
-              onChange={(e) => setThresholdBps(Math.max(1, Math.min(500, parseInt(e.target.value) || 10)))}
-              className="w-12 border-none bg-transparent text-center font-mono text-[12px] font-bold text-white focus:outline-none"
-            />
-            <span className="font-mono text-[10px] text-[#8a8a8a]">bps</span>
-          </div>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2 border border-[#2f2f2f] bg-[#0A0A0A] px-3 py-2 font-mono text-[11px] font-semibold text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+          REFRESH
+        </button>
+      </div>
 
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-2 border border-[#2f2f2f] bg-[#0A0A0A] px-4 py-2.5 font-mono text-[11px] font-semibold text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
-          >
-            <RefreshCw
-              size={14}
-              className={isRefreshing ? "animate-spin" : ""}
-            />
-            REFRESH
-          </button>
-          <button
-            onClick={handleExecuteArbitrage}
-            disabled={isExecuting || !hasOpportunity}
-            title={!hasOpportunity ? `Spread (${currentSpreadBps.toFixed(1)} bps) below threshold (${thresholdBps} bps)` : "Execute arbitrage"}
-            className={`flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-40 ${
-              isExecuting
-                ? "bg-[#FF8800] text-[#0C0C0C]"
-                : hasOpportunity
-                  ? "bg-[#00FF88] text-[#0C0C0C]"
-                  : "bg-[#333] text-[#888]"
-            }`}
-          >
-            {isExecuting ? <Square size={14} /> : <Play size={14} />}
-            {isExecuting ? "EXECUTING..." : "EXECUTE ARBITRAGE"}
-          </button>
+      {/* Arbitrage Controls */}
+      <div className="flex items-center gap-3 border border-[#2f2f2f] bg-[#0A0A0A] px-5 py-3">
+        {/* Threshold */}
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] font-semibold tracking-wider text-[#8a8a8a]">THRESHOLD</span>
+          <input
+            type="number"
+            min={1}
+            max={500}
+            value={thresholdBps}
+            onChange={(e) => setThresholdBps(Math.max(1, Math.min(500, parseInt(e.target.value) || 10)))}
+            className="w-14 border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1 text-center font-mono text-[12px] font-bold text-white focus:border-[#00FF88] focus:outline-none"
+          />
+          <span className="font-mono text-[10px] text-[#8a8a8a]">bps</span>
         </div>
+
+        <div className="h-6 w-px bg-[#2f2f2f]" />
+
+        {/* Trade Amount */}
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] font-semibold tracking-wider text-[#8a8a8a]">AMOUNT</span>
+          <input
+            type="number"
+            min={1}
+            max={100000}
+            value={tradeAmountUsdc}
+            onChange={(e) => setTradeAmountUsdc(Math.max(1, Math.min(100000, parseInt(e.target.value) || 1000)))}
+            className="w-20 border border-[#2f2f2f] bg-[#0C0C0C] px-2 py-1 text-center font-mono text-[12px] font-bold text-white focus:border-[#00FF88] focus:outline-none"
+          />
+          <span className="font-mono text-[10px] text-[#8a8a8a]">USDC</span>
+        </div>
+
+        <div className="h-6 w-px bg-[#2f2f2f]" />
+
+        {/* Spread indicator */}
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] font-semibold tracking-wider text-[#8a8a8a]">SPREAD</span>
+          <span className={`font-mono text-[12px] font-bold ${hasOpportunity ? "text-[#00FF88]" : "text-[#8a8a8a]"}`}>
+            {currentSpreadBps.toFixed(1)} bps
+          </span>
+          {hasOpportunity && (
+            <span className="bg-[#00FF8820] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#00FF88]">
+              OPPORTUNITY
+            </span>
+          )}
+        </div>
+
+        <div className="flex-1" />
+
+        {/* Execute button */}
+        <button
+          onClick={handleExecuteArbitrage}
+          disabled={isExecuting || !hasOpportunity}
+          title={!hasOpportunity ? `Spread (${currentSpreadBps.toFixed(1)} bps) below threshold (${thresholdBps} bps)` : `Execute arbitrage with ${tradeAmountUsdc} USDC`}
+          className={`flex items-center gap-2 px-5 py-2 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-40 ${
+            isExecuting
+              ? "bg-[#FF8800] text-[#0C0C0C]"
+              : hasOpportunity
+                ? "bg-[#00FF88] text-[#0C0C0C]"
+                : "bg-[#333] text-[#888]"
+          }`}
+        >
+          {isExecuting ? <Square size={14} /> : <Play size={14} />}
+          {isExecuting ? "EXECUTING..." : "EXECUTE ARBITRAGE"}
+        </button>
       </div>
 
       {/* Metrics Row */}
-      <MetricsRow chainData={chainData} priceHistory={priceHistory} thresholdBps={thresholdBps} />
+      <MetricsRow chainData={chainData} priceHistory={priceHistory} thresholdBps={thresholdBps} vaultBalance={vaultBalance} />
 
       {/* Middle Row: Chart + Session Log */}
       <div className="grid grid-cols-5 gap-3">
