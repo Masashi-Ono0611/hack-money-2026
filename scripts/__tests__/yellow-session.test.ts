@@ -13,11 +13,6 @@ const MOCK_STRATEGY: ArbitrageStrategy = {
 };
 
 describe('MockYellowSession', () => {
-  it('isUsingMock returns true', () => {
-    const session = new MockYellowSession();
-    expect(session.isUsingMock()).toBe(true);
-  });
-
   it('creates a session with unique ID', async () => {
     const session = new MockYellowSession();
     const info = await session.createSession(MOCK_STRATEGY);

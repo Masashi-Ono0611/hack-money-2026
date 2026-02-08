@@ -16,7 +16,6 @@ async function main(): Promise<void> {
     chainB: config.chainB.name,
     pollIntervalMs: config.pollIntervalMs,
     thresholdBps: config.thresholdBps,
-    useYellowMock: config.useYellowMock,
     logLevel: config.logLevel,
   });
 

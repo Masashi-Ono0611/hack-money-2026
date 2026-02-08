@@ -2,9 +2,9 @@
  * Hackathon Demo Script
  *
  * Automates the full Zombie L2 Clearinghouse flow:
- * 1. Simulate L2 utilization changes via Mock Oracle
+ * 1. Simulate L2 utilization changes via Oracle
  * 2. Detect price discrepancy across chains
- * 3. Execute arbitrage via Yellow session (mock)
+ * 3. Execute arbitrage via Yellow session (ClearNode)
  * 4. Settle profit to Operator Vault
  * 5. Display summary
  */
@@ -82,13 +82,12 @@ class DemoRunner {
         chainA: config.chainA.name,
         chainB: config.chainB.name,
         thresholdBps: config.thresholdBps,
-        useYellowMock: config.useYellowMock,
       });
       this.markStep(s1, 'done', `Chain A: ${config.chainA.name}, Chain B: ${config.chainB.name}`);
       console.log(`  ✅ Chain A: ${config.chainA.name} (ID: ${config.chainA.chainId})`);
       console.log(`  ✅ Chain B: ${config.chainB.name} (ID: ${config.chainB.chainId})`);
       console.log(`  ✅ Threshold: ${config.thresholdBps} bps`);
-      console.log(`  ✅ Yellow SDK: ${config.useYellowMock ? 'MOCK MODE' : 'LIVE'}`);
+      console.log(`  ✅ Yellow SDK: LIVE (ClearNode)`);
     } catch (err) {
       this.markStep(s1, 'failed', String(err));
       console.log(`  ❌ Failed to load config: ${err}`);
@@ -108,7 +107,7 @@ class DemoRunner {
 
     console.log('  ✅ PriceWatcher initialized');
     console.log('  ✅ ArbitrageEngine initialized');
-    console.log(`  ✅ YellowSessionManager initialized (mock: ${config.useYellowMock})`);
+    console.log(`  ✅ YellowSessionManager initialized (Yellow ClearNode)`);
     this.markStep(s2, 'done');
 
     // ── Step 3: Fetch Current Prices ──
@@ -284,7 +283,7 @@ class DemoRunner {
 
     console.log(`  📊 Total Arbitrage Profit: $${totalProfit.toFixed(6)} USDC`);
     console.log(`  ⏱️  Total Duration: ${elapsed}ms`);
-    console.log(`  🔧 Yellow SDK: MOCK MODE`);
+    console.log(`  🔧 Yellow SDK: LIVE (ClearNode)`);
     console.log(`  📦 Sessions Executed: ${this.results.length}`);
 
     console.log(`\n${'═'.repeat(56)}`);

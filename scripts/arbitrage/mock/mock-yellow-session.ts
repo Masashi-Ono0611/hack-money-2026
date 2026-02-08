@@ -107,7 +107,4 @@ export class MockYellowSession implements IYellowSession {
     return result;
   }
 
-  isUsingMock(): boolean {
-    return true;
-  }
 }

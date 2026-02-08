@@ -160,7 +160,6 @@ export function loadConfig(): ArbitrageConfig {
     thresholdBps: Number(optionalEnv('THRESHOLD_BPS', '50')),
     maxTradeAmountUSDC: BigInt(optionalEnv('MAX_TRADE_AMOUNT_USDC', '100000000')),
     minProfitUSDC: BigInt(optionalEnv('MIN_PROFIT_USDC', '1000000')),
-    useYellowMock: optionalEnv('USE_YELLOW_MOCK', 'true') === 'true',
     logLevel: optionalEnv('LOG_LEVEL', 'INFO') as LogLevel,
   };
 

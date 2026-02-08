@@ -43,7 +43,6 @@ function createConfig(overrides?: Partial<ArbitrageConfig>): ArbitrageConfig {
     thresholdBps: 50,
     maxTradeAmountUSDC: 100_000_000n, // 100 USDC
     minProfitUSDC: 1_000_000n, // 1 USDC
-    useYellowMock: true,
     logLevel: 'INFO',
     ...overrides,
   };

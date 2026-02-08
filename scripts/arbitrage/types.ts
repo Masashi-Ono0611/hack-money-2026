@@ -53,7 +53,6 @@ export interface ArbitrageConfig {
   thresholdBps: number;
   maxTradeAmountUSDC: bigint;
   minProfitUSDC: bigint;
-  useYellowMock: boolean;
   logLevel: LogLevel;
 }
 
@@ -155,7 +154,6 @@ export interface IYellowSession {
   createSession(strategy: ArbitrageStrategy): Promise<SessionInfo>;
   placeOrder(sessionId: string, order: TradeOrder): Promise<TradeResult>;
   closeSession(sessionId: string): Promise<SessionResult>;
-  isUsingMock(): boolean;
 }
 
 export interface IYellowSessionManager {

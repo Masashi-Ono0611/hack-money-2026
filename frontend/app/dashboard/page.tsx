@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { RefreshCw, Play, Square, X } from "lucide-react";
+import { RefreshCw, Play, Square } from "lucide-react";
 import { MetricsRow } from "./_components/metrics-row";
 import { PriceSpreadChart } from "./_components/price-spread-chart";
 import { SessionLog } from "./_components/session-log";
@@ -15,7 +15,6 @@ function now(): string {
 export default function DashboardPage() {
   const [chainData, setChainData] = useState<ChainPrice[]>([]);
   const [priceHistory, setPriceHistory] = useState<PriceDataPoint[]>([]);
-  const [showMockBanner, setShowMockBanner] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDemoRunning, setIsDemoRunning] = useState(false);
   const [sessionLogs, setSessionLogs] = useState<LogEntry[]>([]);
@@ -96,7 +95,7 @@ export default function DashboardPage() {
 
         if (step.step === 4 && step.status === "done") {
           const detail = step.detail ?? "";
-          const sessionMatch = detail.match(/Session: (mock-session-[\w-]+)/);
+          const sessionMatch = detail.match(/Session: ([\w-]+)/);
           const profitMatch = detail.match(/Profit: \$([\d.]+)/);
           if (sessionMatch) {
             await new Promise((r) => setTimeout(r, 200));
@@ -159,26 +158,6 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
-
-      {/* Mock Banner */}
-      {showMockBanner && (
-        <div className="flex items-center justify-between border border-[#FF880040] bg-[#0A0A0A] px-4 py-3">
-          <div className="flex items-center gap-3">
-            <span className="bg-[#FF8800] px-2 py-1 font-mono text-[9px] font-bold text-[#0C0C0C]">
-              MOCK
-            </span>
-            <span className="font-mono text-xs text-[#8a8a8a]">
-              Yellow SDK running in mock mode — USE_YELLOW_MOCK=true
-            </span>
-          </div>
-          <button
-            onClick={() => setShowMockBanner(false)}
-            className="font-mono text-xs font-semibold text-[#7a7a7a] hover:text-white"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      )}
 
       {/* Metrics Row */}
       <MetricsRow chainData={chainData} priceHistory={priceHistory} />

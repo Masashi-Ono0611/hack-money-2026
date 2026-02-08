@@ -7,7 +7,7 @@ import type {
   SessionResult,
   TradeOrder,
 } from './types.js';
-import { MockYellowSession } from './mock/mock-yellow-session.js';
+import { RealYellowSession } from './real-yellow-session.js';
 
 const COMPONENT = 'YellowSessionManager';
 
@@ -15,17 +15,10 @@ export class YellowSessionManager implements IYellowSessionManager {
   private readonly session: IYellowSession;
   private readonly logger: ILogger;
 
-  constructor(config: ArbitrageConfig, logger: ILogger) {
+  constructor(_config: ArbitrageConfig, logger: ILogger) {
     this.logger = logger;
-
-    if (config.useYellowMock) {
-      this.session = new MockYellowSession();
-      this.logger.info(COMPONENT, 'Using MockYellowSession (USE_YELLOW_MOCK=true)');
-    } else {
-      // Fallback to mock if real session is not available
-      this.logger.warn(COMPONENT, 'Real Yellow session not available, falling back to mock');
-      this.session = new MockYellowSession();
-    }
+    this.session = new RealYellowSession();
+    this.logger.info(COMPONENT, 'Using RealYellowSession (Yellow ClearNode)');
   }
 
   async executeArbitrage(strategy: ArbitrageStrategy): Promise<SessionResult> {
@@ -39,7 +32,6 @@ export class YellowSessionManager implements IYellowSessionManager {
       this.logger.info(COMPONENT, 'Session created', {
         sessionId,
         direction: strategy.direction,
-        isMock: this.session.isUsingMock(),
       });
 
       // 2. Place buy order (buy cheap CPT)
@@ -115,7 +107,6 @@ export class YellowSessionManager implements IYellowSessionManager {
 
   private estimateBuyPrice(strategy: ArbitrageStrategy): number {
     // Use the spread to estimate: the buy side is the cheaper chain
-    // For mock, we use a base price of ~1.0 USDC/CPT adjusted by spread
     const basePrice = 1.0;
     const spreadFraction = strategy.spreadBps / 10000;
     return basePrice * (1 - spreadFraction / 2);
