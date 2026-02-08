@@ -15,22 +15,22 @@
 
 提出直前の品質向上に向けた最小セット。既存構成を壊さずに信頼性を上げる。
 
-- [ ] A. Functions 側更新のメタ記録を補完する
+- [x] A. Functions 側更新のメタ記録を補完する
   - `MockOracle` に Functions 経路の `timestamp` / 最終値を保持する状態を追加
   - `setUtilizationFromFunctions()` でメタ情報を確実に記録
   - _Requirements: 1.3, 2.2, 8.1_
 
-- [ ] B. FunctionsReceiver の運用間隔を要件値に整合する
+- [x] B. FunctionsReceiver の運用間隔を要件値に整合する
   - `DEFAULT_MIN_UPKEEP_INTERVAL` を 15分（900秒）へ更新
   - README で「15分デフォルト」を明示
   - _Requirements: 7.2_
 
-- [ ] C. Functions 更新の一気通貫スクリプト/手順を用意する
+- [x] C. Functions 更新の一気通貫スクリプト/手順を用意する
   - source 登録 → args 更新 → `performUpkeep` 実行までを手順化
   - `scripts/arbitrage/functions/deploy/README.md` に追記
   - _Requirements: 7.4, 7.5_
 
-- [ ] D. 設定値の反映運用を明文化する
+- [x] D. 設定値の反映運用を明文化する
   - `divergenceThreshold` / `staleTtl` の適用方法を README に追記
   - 例: デプロイ後に `setStaleTtl()` / allowlist 更新を行う
   - _Requirements: 11.1_
