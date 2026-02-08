@@ -3,13 +3,21 @@
 import { useState } from "react";
 import { Droplets } from "lucide-react";
 
+export interface LiquidityLogEvent {
+  type: "LIQUIDITY" | "ERROR";
+  chain: string;
+  message: string;
+  txHash?: string;
+}
+
 interface LiquidityPanelProps {
   chain: string;
   label: string;
   onSuccess: () => void;
+  onLog?: (event: LiquidityLogEvent) => void;
 }
 
-export function LiquidityPanel({ chain, label, onSuccess }: LiquidityPanelProps) {
+export function LiquidityPanel({ chain, label, onSuccess, onLog }: LiquidityPanelProps) {
   const [liquidityDelta, setLiquidityDelta] = useState("100000000000000");
   const [tickLower, setTickLower] = useState("276240");
   const [tickUpper, setTickUpper] = useState("276420");
@@ -19,6 +27,7 @@ export function LiquidityPanel({ chain, label, onSuccess }: LiquidityPanelProps)
   const handleAddLiquidity = async () => {
     setIsSubmitting(true);
     setResult("");
+    onLog?.({ type: "LIQUIDITY", chain, message: `Adding liquidity (delta: ${liquidityDelta}, ticks: ${tickLower}-${tickUpper})...` });
     try {
       const res = await fetch("/api/admin/add-liquidity", {
         method: "POST",
@@ -33,12 +42,17 @@ export function LiquidityPanel({ chain, label, onSuccess }: LiquidityPanelProps)
       const data = await res.json();
       if (data.ok && data.success) {
         setResult(`Added liquidity (tx: ${data.txHash?.slice(0, 14) ?? "confirmed"}...)`);
+        onLog?.({ type: "LIQUIDITY", chain, message: `Liquidity added successfully`, txHash: data.txHash ?? undefined });
         onSuccess();
       } else {
-        setResult(`Error: ${data.error ?? "Unknown error"}`);
+        const errMsg = data.error ?? "Unknown error";
+        setResult(`Error: ${errMsg}`);
+        onLog?.({ type: "ERROR", chain, message: `Add liquidity failed: ${errMsg}` });
       }
     } catch (err) {
-      setResult(`Error: ${err instanceof Error ? err.message : String(err)}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setResult(`Error: ${errMsg}`);
+      onLog?.({ type: "ERROR", chain, message: `Add liquidity error: ${errMsg}` });
     } finally {
       setIsSubmitting(false);
     }

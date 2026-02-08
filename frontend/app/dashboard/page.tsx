@@ -25,11 +25,11 @@ export default function DashboardPage() {
   const logCounter = useRef(0);
 
   const addLog = useCallback(
-    (type: LogEntry["type"], message: string, detail?: string) => {
+    (type: LogEntry["type"], message: string, detail?: string, extra?: { txHash?: string; chain?: string }) => {
       logCounter.current += 1;
       setSessionLogs((prev) => [
         ...prev,
-        { id: String(logCounter.current), timestamp: now(), type, message, detail },
+        { id: String(logCounter.current), timestamp: now(), type, message, detail, ...extra },
       ]);
     },
     [],
@@ -154,7 +154,7 @@ export default function DashboardPage() {
       // Settlement
       if (data.txHash) {
         await new Promise((r) => setTimeout(r, 200));
-        addLog("INFO", `Arc Settlement: ${data.txHash.slice(0, 18)}...`);
+        addLog("INFO", `Arc Settlement`, undefined, { txHash: data.txHash, chain: "sepolia" });
         if (data.vaultBefore && data.vaultAfter) {
           addLog("INFO", `Vault: ${data.vaultBefore} → ${data.vaultAfter} USDC`);
         }

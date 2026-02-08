@@ -3,13 +3,21 @@
 import { useState } from "react";
 import { ArrowLeftRight } from "lucide-react";
 
+export interface SwapLogEvent {
+  type: "SWAP" | "ERROR";
+  chain: string;
+  message: string;
+  txHash?: string;
+}
+
 interface SwapPanelProps {
   chain: string;
   label: string;
   onSuccess: () => void;
+  onLog?: (event: SwapLogEvent) => void;
 }
 
-export function SwapPanel({ chain, label, onSuccess }: SwapPanelProps) {
+export function SwapPanel({ chain, label, onSuccess, onLog }: SwapPanelProps) {
   const [zeroForOne, setZeroForOne] = useState(true);
   const [swapAmount, setSwapAmount] = useState("100000");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,6 +26,7 @@ export function SwapPanel({ chain, label, onSuccess }: SwapPanelProps) {
   const handleSwap = async () => {
     setIsSubmitting(true);
     setResult("");
+    onLog?.({ type: "SWAP", chain, message: `Swapping ${directionLabel} (amount: ${swapAmount})...` });
     try {
       const res = await fetch("/api/admin/swap", {
         method: "POST",
@@ -31,12 +40,17 @@ export function SwapPanel({ chain, label, onSuccess }: SwapPanelProps) {
             ? ` tick: ${data.beforeTick} → ${data.afterTick}`
             : "";
         setResult(`Swap executed${tickInfo} (tx: ${data.txHash?.slice(0, 14) ?? "confirmed"}...)`);
+        onLog?.({ type: "SWAP", chain, message: `Swap ${directionLabel} executed${tickInfo}`, txHash: data.txHash ?? undefined });
         onSuccess();
       } else {
-        setResult(`Error: ${data.error ?? "Unknown error"}`);
+        const errMsg = data.error ?? "Unknown error";
+        setResult(`Error: ${errMsg}`);
+        onLog?.({ type: "ERROR", chain, message: `Swap failed: ${errMsg}` });
       }
     } catch (err) {
-      setResult(`Error: ${err instanceof Error ? err.message : String(err)}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setResult(`Error: ${errMsg}`);
+      onLog?.({ type: "ERROR", chain, message: `Swap error: ${errMsg}` });
     } finally {
       setIsSubmitting(false);
     }
