@@ -12,10 +12,9 @@ import {
 } from "recharts";
 import type { PriceDataPoint } from "../_types";
 
-const THRESHOLD_BPS = 50;
-
 interface PriceSpreadChartProps {
   priceHistory: PriceDataPoint[];
+  thresholdBps: number;
 }
 
 function formatTime(ts: number): string {
@@ -26,7 +25,7 @@ function formatTime(ts: number): string {
   });
 }
 
-export function PriceSpreadChart({ priceHistory }: PriceSpreadChartProps) {
+export function PriceSpreadChart({ priceHistory, thresholdBps }: PriceSpreadChartProps) {
   const displayData = priceHistory.slice(-30).map((p) => ({
     time: formatTime(p.timestamp),
     spread: Number(p.spreadBps.toFixed(2)),
@@ -36,7 +35,7 @@ export function PriceSpreadChart({ priceHistory }: PriceSpreadChartProps) {
 
   const maxSpread = Math.max(
     ...displayData.map((d) => d.spread),
-    THRESHOLD_BPS * 1.5,
+    thresholdBps * 1.5,
   );
 
   return (
@@ -56,7 +55,7 @@ export function PriceSpreadChart({ priceHistory }: PriceSpreadChartProps) {
           <div className="flex items-center gap-1.5">
             <div className="h-0.5 w-4 bg-[#FF8800]" />
             <span className="font-mono text-[10px] font-medium text-[#8a8a8a]">
-              THRESHOLD ({THRESHOLD_BPS} bps)
+              THRESHOLD ({thresholdBps} bps)
             </span>
           </div>
         </div>
@@ -111,12 +110,12 @@ export function PriceSpreadChart({ priceHistory }: PriceSpreadChartProps) {
                 ]}
               />
               <ReferenceLine
-                y={THRESHOLD_BPS}
+                y={thresholdBps}
                 stroke="#FF8800"
                 strokeDasharray="6 3"
                 strokeWidth={1.5}
                 label={{
-                  value: `${THRESHOLD_BPS} bps`,
+                  value: `${thresholdBps} bps`,
                   position: "right",
                   fill: "#FF8800",
                   fontSize: 10,

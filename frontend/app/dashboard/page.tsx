@@ -16,8 +16,9 @@ export default function DashboardPage() {
   const [chainData, setChainData] = useState<ChainPrice[]>([]);
   const [priceHistory, setPriceHistory] = useState<PriceDataPoint[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDemoRunning, setIsDemoRunning] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
   const [sessionLogs, setSessionLogs] = useState<LogEntry[]>([]);
+  const [thresholdBps, setThresholdBps] = useState(10);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const logCounter = useRef(0);
 
@@ -71,12 +72,22 @@ export default function DashboardPage() {
     setIsRefreshing(false);
   };
 
-  const handleRunDemo = async () => {
-    if (isDemoRunning) return;
-    setIsDemoRunning(true);
+  const currentSpreadBps = (() => {
+    const priceA = chainData[0]?.price ?? null;
+    const priceB = chainData[1]?.price ?? null;
+    if (!priceA || !priceB) return 0;
+    const avg = (priceA + priceB) / 2;
+    return avg > 0 ? (Math.abs(priceA - priceB) / avg) * 10000 : 0;
+  })();
+
+  const hasOpportunity = currentSpreadBps >= thresholdBps;
+
+  const handleExecuteArbitrage = async () => {
+    if (isExecuting) return;
+    setIsExecuting(true);
     setSessionLogs([]);
 
-    addLog("INFO", "Starting real arbitrage pipeline...");
+    addLog("INFO", `Executing arbitrage (spread: ${currentSpreadBps.toFixed(1)} bps, threshold: ${thresholdBps} bps)...`);
     addLog("INFO", "Connecting to on-chain pools + Yellow ClearNode + Arc...");
 
     try {
@@ -85,7 +96,7 @@ export default function DashboardPage() {
 
       if (!data.ok) {
         addLog("INFO", `Pipeline failed: ${data.error ?? "unknown"}`);
-        setIsDemoRunning(false);
+        setIsExecuting(false);
         return;
       }
 
@@ -135,7 +146,7 @@ export default function DashboardPage() {
       addLog("INFO", `Pipeline error: ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    setIsDemoRunning(false);
+    setIsExecuting(false);
   };
 
   return (
@@ -150,7 +161,21 @@ export default function DashboardPage() {
             Monitor cross-chain CPT arbitrage in real-time
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Threshold control */}
+          <div className="flex items-center gap-1.5 border border-[#2f2f2f] bg-[#0A0A0A] px-3 py-1.5">
+            <span className="font-mono text-[10px] font-medium text-[#8a8a8a]">THRESHOLD</span>
+            <input
+              type="number"
+              min={1}
+              max={500}
+              value={thresholdBps}
+              onChange={(e) => setThresholdBps(Math.max(1, Math.min(500, parseInt(e.target.value) || 10)))}
+              className="w-12 border-none bg-transparent text-center font-mono text-[12px] font-bold text-white focus:outline-none"
+            />
+            <span className="font-mono text-[10px] text-[#8a8a8a]">bps</span>
+          </div>
+
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -163,30 +188,33 @@ export default function DashboardPage() {
             REFRESH
           </button>
           <button
-            onClick={handleRunDemo}
-            disabled={isDemoRunning}
-            className={`flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-60 ${
-              isDemoRunning
+            onClick={handleExecuteArbitrage}
+            disabled={isExecuting || !hasOpportunity}
+            title={!hasOpportunity ? `Spread (${currentSpreadBps.toFixed(1)} bps) below threshold (${thresholdBps} bps)` : "Execute arbitrage"}
+            className={`flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] font-bold transition-opacity hover:opacity-90 disabled:opacity-40 ${
+              isExecuting
                 ? "bg-[#FF8800] text-[#0C0C0C]"
-                : "bg-[#00FF88] text-[#0C0C0C]"
+                : hasOpportunity
+                  ? "bg-[#00FF88] text-[#0C0C0C]"
+                  : "bg-[#333] text-[#888]"
             }`}
           >
-            {isDemoRunning ? <Square size={14} /> : <Play size={14} />}
-            {isDemoRunning ? "RUNNING..." : "RUN DEMO"}
+            {isExecuting ? <Square size={14} /> : <Play size={14} />}
+            {isExecuting ? "EXECUTING..." : "EXECUTE ARBITRAGE"}
           </button>
         </div>
       </div>
 
       {/* Metrics Row */}
-      <MetricsRow chainData={chainData} priceHistory={priceHistory} />
+      <MetricsRow chainData={chainData} priceHistory={priceHistory} thresholdBps={thresholdBps} />
 
       {/* Middle Row: Chart + Session Log */}
       <div className="grid grid-cols-5 gap-3">
         <div className="col-span-3">
-          <PriceSpreadChart priceHistory={priceHistory} />
+          <PriceSpreadChart priceHistory={priceHistory} thresholdBps={thresholdBps} />
         </div>
         <div className="col-span-2">
-          <SessionLog logs={sessionLogs} isRunning={isDemoRunning} />
+          <SessionLog logs={sessionLogs} isRunning={isExecuting} />
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import type { ChainPrice, PriceDataPoint } from "../_types";
 interface MetricsRowProps {
   chainData: ChainPrice[];
   priceHistory: PriceDataPoint[];
+  thresholdBps: number;
 }
 
 function PriceCard({
@@ -53,11 +54,13 @@ function PriceCard({
 function SpreadCard({
   spreadValue,
   spreadBps,
+  thresholdBps,
 }: {
   spreadValue: number;
   spreadBps: number;
+  thresholdBps: number;
 }) {
-  const isOpportunity = spreadBps >= 50;
+  const isOpportunity = spreadBps >= thresholdBps / 100;
   return (
     <div
       className={`flex flex-col gap-3 border bg-[#0A0A0A] p-5 ${
@@ -104,7 +107,7 @@ function VaultCard() {
   );
 }
 
-export function MetricsRow({ chainData, priceHistory }: MetricsRowProps) {
+export function MetricsRow({ chainData, priceHistory, thresholdBps }: MetricsRowProps) {
   const priceA = chainData[0]?.price ?? null;
   const priceB = chainData[1]?.price ?? null;
 
@@ -135,7 +138,7 @@ export function MetricsRow({ chainData, priceHistory }: MetricsRowProps) {
         price={priceB}
         changePercent={calcChange(1)}
       />
-      <SpreadCard spreadValue={spreadValue} spreadBps={spreadBps / 100} />
+      <SpreadCard spreadValue={spreadValue} spreadBps={spreadBps / 100} thresholdBps={thresholdBps} />
       <VaultCard />
     </div>
   );
