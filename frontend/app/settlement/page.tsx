@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { RefreshCw, Vault } from "lucide-react";
 import { YellowStatusCard } from "./_components/yellow-status-card";
-import { VaultBalanceCard } from "./_components/vault-balance-card";
 import { SettlePanel, type SettleLogEvent } from "./_components/settle-panel";
 import { SettlementActivityLog, type SettlementLogEntry } from "./_components/settlement-activity-log";
 import { VaultHistoryChart, type VaultSnapshot } from "./_components/vault-history-chart";
@@ -76,9 +75,6 @@ export default function SettlementPage() {
     addLog("INFO", msg);
   };
 
-  const vaultCardLog = (msg: string) => {
-    addLog("VAULT", msg);
-  };
 
   return (
     <div className="flex flex-col gap-6 p-8 px-10">
@@ -102,8 +98,8 @@ export default function SettlementPage() {
         </button>
       </div>
 
-      {/* Vault Balance Summary */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* Vault Balance + Yellow Status */}
+      <div className="grid grid-cols-2 gap-3">
         <div className="flex items-center gap-4 border border-[#2f2f2f] bg-[#0A0A0A] px-6 py-5">
           <Vault size={24} className="text-[#6a9fff]" />
           <div>
@@ -113,11 +109,10 @@ export default function SettlementPage() {
             <p className="font-mono text-2xl font-bold tabular-nums text-white">
               {vaultBalance ? `$${vaultBalance}` : "—"}
             </p>
-            <span className="font-mono text-[10px] text-[#8a8a8a]">USDC</span>
+            <span className="font-mono text-[10px] text-[#8a8a8a]">USDC (Arc Operator Vault)</span>
           </div>
         </div>
         <YellowStatusCard onLog={yellowLog} />
-        <VaultBalanceCard onLog={vaultCardLog} />
       </div>
 
       {/* Vault Balance History Chart */}
