@@ -30,10 +30,11 @@ export async function POST(req: Request) {
       shell: "/bin/zsh",
     });
 
-    const profitMatch = out.match(/Net profit:\s*([\d.]+)\s*USDC/);
-    const transferMatch = out.match(/Transfer.*?(\d[\d.]*)\s*USDC/i);
-    const txMatch = out.match(/Transaction ID:\s*(\S+)/);
-    const success = out.includes("Settlement complete") || out.includes("DRY-RUN");
+    const profitMatch = out.match(/Profit\s*:\s*([\d.]+)\s*USDC/);
+    const transferMatch = out.match(/Settled\s*:\s*([\d.]+)\s*USDC/)
+      ?? out.match(/To settle\s*:\s*([\d.]+)\s*USDC/);
+    const txMatch = out.match(/Tx Hash\s*:\s*(0x[0-9a-fA-F]+)/);
+    const success = out.includes("=== Done ===") || out.includes("DRY RUN");
 
     return NextResponse.json({
       ok: true,
