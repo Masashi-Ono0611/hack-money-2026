@@ -19,8 +19,8 @@ interface Props {
 interface SettleResult {
   ok: boolean;
   success: boolean;
-  dryRun: boolean;
-  sessionId: string;
+  dryRun?: boolean;
+  sessionId?: string;
   profit: string | null;
   transferAmount: string | null;
   transactionId: string | null;
@@ -29,8 +29,6 @@ interface SettleResult {
 }
 
 export function SettlePanel({ onLog, onVaultUpdate }: Props) {
-  const [sessionId, setSessionId] = useState("demo-session-001");
-  const [dryRun, setDryRun] = useState(false);
   const [profitUsdc, setProfitUsdc] = useState("1.5");
   const [result, setResult] = useState<SettleResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,14 +36,13 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
   const runSettle = async () => {
     setLoading(true);
     setResult(null);
-    const mode = dryRun ? "DRY-RUN" : "LIVE";
-    onLog({ type: "INFO", message: `Starting settlement (${mode}) — session: ${sessionId}, profit: ${profitUsdc} USDC` });
+    onLog({ type: "INFO", message: `Starting settlement — transfer: ${profitUsdc} USDC` });
 
     try {
       const res = await fetch("/api/settlement/auto-settle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, dryRun, profitUsdc: parseFloat(profitUsdc) }),
+        body: JSON.stringify({ profitUsdc: parseFloat(profitUsdc) }),
       });
       const data = await res.json();
       setResult(data);
@@ -53,13 +50,11 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
       if (data.ok && data.success) {
         onLog({
           type: "SETTLE",
-          message: `Settlement ${dryRun ? "(DRY-RUN) " : ""}completed — profit: ${data.profit ?? profitUsdc} USDC, transferred: ${data.transferAmount ?? "?"} USDC`,
+          message: `Settlement completed — transferred: ${data.transferAmount ?? profitUsdc} USDC`,
           txHash: data.transactionId ?? undefined,
           chain: "arc-testnet",
         });
-        if (!dryRun) {
-          onVaultUpdate();
-        }
+        onVaultUpdate();
       } else {
         onLog({ type: "ERROR", message: `Settlement failed: ${data.error ?? "unknown error"}` });
       }
@@ -67,7 +62,7 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
       const errMsg = err instanceof Error ? err.message : String(err);
       onLog({ type: "ERROR", message: `Settlement error: ${errMsg}` });
       setResult({
-        ok: false, success: false, dryRun, sessionId,
+        ok: false, success: false, dryRun: false, sessionId: undefined,
         profit: null, transferAmount: null, transactionId: null, error: errMsg,
       });
     } finally {
@@ -90,19 +85,7 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
       </div>
 
       <div className="space-y-4 border-t border-[#2f2f2f] px-6 py-5">
-        <div className="grid grid-cols-3 gap-3">
-          <div className="space-y-1">
-            <span className="font-mono text-[9px] font-bold tracking-wider text-[#8a8a8a]">
-              SESSION ID
-            </span>
-            <input
-              type="text"
-              value={sessionId}
-              onChange={(e) => setSessionId(e.target.value)}
-              className="w-full border border-[#2f2f2f] bg-[#0C0C0C] px-3 py-2 font-mono text-[11px] text-white outline-none focus:border-[#00FF8860]"
-              placeholder="session-id"
-            />
-          </div>
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <span className="font-mono text-[9px] font-bold tracking-wider text-[#8a8a8a]">
               PROFIT (USDC)
@@ -116,18 +99,9 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
             />
           </div>
           <div className="flex items-end gap-2">
-            <label className="flex items-center gap-2 pb-2 font-mono text-[11px] text-[#8a8a8a]">
-              <input
-                type="checkbox"
-                checked={dryRun}
-                onChange={(e) => setDryRun(e.target.checked)}
-                className="accent-[#00FF88]"
-              />
-              DRY RUN
-            </label>
             <button
               onClick={runSettle}
-              disabled={loading || !sessionId}
+              disabled={loading}
               className="flex items-center gap-2 bg-[#00FF88] px-4 py-2 font-mono text-[11px] font-bold text-[#0C0C0C] transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {loading ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
@@ -150,33 +124,16 @@ export function SettlePanel({ onLog, onVaultUpdate }: Props) {
                 >
                   {result.success ? "SUCCESS" : "FAILED"}
                 </span>
-                {result.dryRun && (
-                  <span className="bg-[#FF880020] px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#FF8800]">
-                    DRY-RUN
-                  </span>
-                )}
               </div>
 
-              {result.profit && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="font-mono text-[9px] font-bold tracking-wider text-[#8a8a8a]">
-                      NET PROFIT
-                    </span>
-                    <p className="mt-1 font-mono text-lg font-bold text-[#00FF88]">
-                      {result.profit} USDC
-                    </p>
-                  </div>
-                  {result.transferAmount && (
-                    <div>
-                      <span className="font-mono text-[9px] font-bold tracking-wider text-[#8a8a8a]">
-                        TRANSFERRED
-                      </span>
-                      <p className="mt-1 font-mono text-lg font-bold text-white">
-                        {result.transferAmount} USDC
-                      </p>
-                    </div>
-                  )}
+              {result.transferAmount && (
+                <div>
+                  <span className="font-mono text-[9px] font-bold tracking-wider text-[#8a8a8a]">
+                    TRANSFERRED
+                  </span>
+                  <p className="mt-1 font-mono text-lg font-bold text-white">
+                    {result.transferAmount} USDC
+                  </p>
                 </div>
               )}
 

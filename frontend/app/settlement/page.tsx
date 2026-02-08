@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { RefreshCw, Vault } from "lucide-react";
-import { YellowStatusCard } from "./_components/yellow-status-card";
 import { SettlePanel, type SettleLogEvent } from "./_components/settle-panel";
 import { SettlementActivityLog, type SettlementLogEntry } from "./_components/settlement-activity-log";
 import { VaultHistoryChart, type VaultSnapshot } from "./_components/vault-history-chart";
@@ -71,9 +70,6 @@ export default function SettlementPage() {
     fetchVaultBalance();
   };
 
-  const yellowLog = (msg: string) => {
-    addLog("INFO", msg);
-  };
 
 
   return (
@@ -98,21 +94,18 @@ export default function SettlementPage() {
         </button>
       </div>
 
-      {/* Vault Balance + Yellow Status */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex items-center gap-4 border border-[#2f2f2f] bg-[#0A0A0A] px-6 py-5">
-          <Vault size={24} className="text-[#6a9fff]" />
-          <div>
-            <span className="font-mono text-[9px] font-bold tracking-wider text-[#8a8a8a]">
-              VAULT BALANCE
-            </span>
-            <p className="font-mono text-2xl font-bold tabular-nums text-white">
-              {vaultBalance ? `$${vaultBalance}` : "—"}
-            </p>
-            <span className="font-mono text-[10px] text-[#8a8a8a]">USDC (Arc Operator Vault)</span>
-          </div>
+      {/* Vault Balance */}
+      <div className="flex items-center gap-4 border border-[#2f2f2f] bg-[#0A0A0A] px-6 py-5">
+        <Vault size={24} className="text-[#6a9fff]" />
+        <div>
+          <span className="font-mono text-[9px] font-bold tracking-wider text-[#8a8a8a]">
+            VAULT BALANCE
+          </span>
+          <p className="font-mono text-2xl font-bold tabular-nums text-white">
+            {vaultBalance ? `$${vaultBalance}` : "—"}
+          </p>
+          <span className="font-mono text-[10px] text-[#8a8a8a]">USDC (Arc Operator Vault)</span>
         </div>
-        <YellowStatusCard onLog={yellowLog} />
       </div>
 
       {/* Vault Balance History Chart */}

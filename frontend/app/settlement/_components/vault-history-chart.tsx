@@ -48,10 +48,10 @@ export function VaultHistoryChart({ history }: Props) {
       </div>
 
       <div className="border-t border-[#2f2f2f] px-6 py-5">
-        {data.length < 2 ? (
+        {data.length === 0 ? (
           <div className="flex h-[180px] items-center justify-center">
             <span className="font-mono text-xs text-[#8a8a8a]">
-              Collecting vault snapshots... ({data.length}/2 minimum)
+              Waiting for first vault snapshot...
             </span>
           </div>
         ) : (

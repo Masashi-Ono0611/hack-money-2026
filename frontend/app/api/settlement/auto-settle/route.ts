@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json().catch(() => ({}))) as AutoSettleRequest;
     const sessionId = body.sessionId ?? "demo-session-001";
-    const dryRun = body.dryRun !== false;
+    const dryRun = body.dryRun === true;
     const profitUsdc = body.profitUsdc;
 
     const flags = [

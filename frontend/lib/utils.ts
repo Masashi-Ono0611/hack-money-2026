@@ -9,7 +9,7 @@ const EXPLORER_BASE: Record<string, string> = {
   "base-sepolia": "https://sepolia.basescan.org",
   "unichain-sepolia": "https://sepolia.uniscan.xyz",
   sepolia: "https://sepolia.etherscan.io",
-  "arc-testnet": "https://testnet.arcscan.circle.com",
+  "arc-testnet": "https://testnet.arcscan.app",
 };
 
 export function explorerTxUrl(chain: string, txHash: string): string {

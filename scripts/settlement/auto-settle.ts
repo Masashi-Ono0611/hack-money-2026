@@ -59,7 +59,7 @@ function parseArgs(): AutoSettleArgs {
 
 function deriveIdempotencyKey(sessionId: string): string {
   return createHash('sha256')
-    .update(`settle:${sessionId}`)
+    .update(`settle:${sessionId}:${Date.now()}:${Math.random()}`)
     .digest('hex')
     .slice(0, 32);
 }
