@@ -38,7 +38,7 @@ function feeBps(utilization: number): number {
 }
 
 export async function GET() {
-  const chainKeys: ChainKey[] = ["sepolia", "base-sepolia", "unichain-sepolia"];
+  const chainKeys: ChainKey[] = ["base-sepolia", "unichain-sepolia"];
 
   const results = await Promise.allSettled(
     chainKeys.map(async (key) => {

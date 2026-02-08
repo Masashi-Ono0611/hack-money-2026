@@ -8,6 +8,32 @@ export const MockOracleAbi = [
     stateMutability: "view",
     type: "function",
   },
+  {
+    inputs: [],
+    name: "getUtilizationWithMeta",
+    outputs: [
+      { name: "utilization", type: "uint256" },
+      { name: "updatedAt", type: "uint256" },
+      { name: "stale", type: "bool" },
+      { name: "source", type: "uint8" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ name: "utilization", type: "uint256" }],
+    name: "setUtilization",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
 ] as const;
 
 export const StateViewAbi = [

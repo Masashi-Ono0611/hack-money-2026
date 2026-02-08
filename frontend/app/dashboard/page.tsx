@@ -76,45 +76,63 @@ export default function DashboardPage() {
     setIsDemoRunning(true);
     setSessionLogs([]);
 
-    addLog("INFO", "Starting demo...");
+    addLog("INFO", "Starting real arbitrage pipeline...");
+    addLog("INFO", "Connecting to on-chain pools + Yellow ClearNode + Arc...");
 
     try {
-      const res = await fetch("/api/demo/run", { method: "POST" });
+      const res = await fetch("/api/arbitrage/run", { method: "POST" });
       const data = await res.json();
 
       if (!data.ok) {
-        addLog("INFO", "Demo failed to start");
+        addLog("INFO", `Pipeline failed: ${data.error ?? "unknown"}`);
         setIsDemoRunning(false);
         return;
       }
 
-      for (const step of data.steps) {
-        await new Promise((r) => setTimeout(r, 400));
+      // Step-by-step display
+      for (const step of data.steps ?? []) {
+        await new Promise((r) => setTimeout(r, 300));
         const icon = step.status === "done" ? "✅" : step.status === "skipped" ? "⏭️" : "❌";
         addLog("STEP", `${icon} Step ${step.step}: ${step.label}`, step.detail);
+      }
 
-        if (step.step === 4 && step.status === "done") {
-          const detail = step.detail ?? "";
-          const sessionMatch = detail.match(/Session: ([\w-]+)/);
-          const profitMatch = detail.match(/Profit: \$([\d.]+)/);
-          if (sessionMatch) {
-            await new Promise((r) => setTimeout(r, 200));
-            addLog("SESSION", "Session created", sessionMatch[1]);
-          }
-          await new Promise((r) => setTimeout(r, 200));
-          addLog("BUY", `BUY CPT-A @ simulated price`, "Base Sepolia");
-          await new Promise((r) => setTimeout(r, 200));
-          addLog("SELL", `SELL CPT-B @ simulated price`, "Unichain Sepolia");
-          if (profitMatch) {
-            await new Promise((r) => setTimeout(r, 200));
-            addLog("PROFIT", `Net P&L: +$${profitMatch[1]} USDC`, `${data.totalDurationMs}ms`);
-          }
+      // Price info
+      if (data.priceA && data.priceB) {
+        await new Promise((r) => setTimeout(r, 200));
+        addLog("INFO", `Prices: A=$${data.priceA.toFixed(6)}, B=$${data.priceB.toFixed(6)}`);
+      }
+      if (data.spreadBps) {
+        addLog("INFO", `Spread: ${data.spreadBps.toFixed(2)} bps (${data.direction})`);
+      }
+
+      // Session & trade details
+      if (data.sessionId) {
+        await new Promise((r) => setTimeout(r, 200));
+        addLog("SESSION", "Yellow session created", data.sessionId);
+        await new Promise((r) => setTimeout(r, 200));
+        addLog("BUY", "BUY CPT on cheaper chain", "via Yellow ClearNode");
+        await new Promise((r) => setTimeout(r, 200));
+        addLog("SELL", "SELL CPT on expensive chain", "via Yellow ClearNode");
+      }
+
+      // Profit
+      if (data.profit) {
+        await new Promise((r) => setTimeout(r, 200));
+        addLog("PROFIT", `Net P&L: $${data.profit.toFixed(6)} USDC`);
+      }
+
+      // Settlement
+      if (data.txHash) {
+        await new Promise((r) => setTimeout(r, 200));
+        addLog("INFO", `Arc Settlement: ${data.txHash.slice(0, 18)}...`);
+        if (data.vaultBefore && data.vaultAfter) {
+          addLog("INFO", `Vault: ${data.vaultBefore} → ${data.vaultAfter} USDC`);
         }
       }
 
-      addLog("INFO", `Demo complete — ${data.sessionsExecuted} session(s), $${data.totalProfitUsdc.toFixed(4)} USDC profit`);
+      addLog("INFO", `Pipeline complete — profit: $${(data.profit ?? 0).toFixed(4)} USDC`);
     } catch (err) {
-      addLog("INFO", `Demo error: ${err instanceof Error ? err.message : String(err)}`);
+      addLog("INFO", `Pipeline error: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     setIsDemoRunning(false);

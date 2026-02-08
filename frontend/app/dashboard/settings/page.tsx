@@ -186,11 +186,9 @@ export default function SettingsPage() {
                   className="h-2.5 w-2.5"
                   style={{
                     backgroundColor:
-                      chainKey === "sepolia"
-                        ? "#6a9fff"
-                        : chainKey === "base-sepolia"
-                          ? "#00FF88"
-                          : "#FF8800",
+                      chainKey === "base-sepolia"
+                        ? "#00FF88"
+                        : "#FF8800",
                   }}
                 />
                 <span className="font-sans text-base font-semibold text-white">
