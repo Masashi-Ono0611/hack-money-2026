@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { RefreshCw, Radio, Gauge, Droplets, Send } from "lucide-react";
+import { Droplets, Gauge, Radio, RefreshCw, Send } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityLog, type AdminLogEntry } from "./_components/activity-log";
+import { LeverChart } from "./_components/lever-chart";
 import { LiquidityPanel } from "./_components/liquidity-panel";
 import { SwapPanel } from "./_components/swap-panel";
-import { ActivityLog, type AdminLogEntry } from "./_components/activity-log";
 
 interface PoolChain {
   chain: string;
@@ -276,6 +277,11 @@ export default function AdminPage() {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* 3 Levers Visualization */}
+          <div className="mb-5">
+            <LeverChart currentUtilization={c.utilization} />
           </div>
 
           {/* Liquidity & Swap */}
