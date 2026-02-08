@@ -16,10 +16,10 @@ export const unichainSepolia = defineChain({
 // Deployed contract addresses (synced with contract/deployed-addresses.json)
 export const DEPLOYED = {
   "base-sepolia": {
-    cpt: "0x8845A9E68A7cac280a70aeE76d3b963FfF803aA9" as const,
-    hook: "0x67AB6743B441aBDB346C9cb9C97949405c858080" as const,
-    oracle: "0xF00fF91fDB4c8e7c3C352880A71B9Fa7bf1Bcb0B" as const,
-    poolId: "0x11db39746a398dc60abd801cc5806cc528b3ae20ae74b6069abb648aefd53189" as const,
+    cpt: "0x774DD9f4b87CE3f46f258Dc503e804916B0153Be" as const,
+    hook: "0x5273D0C12CB1Ab06b573e57eA4C5039160B98080" as const,
+    oracle: "0x11252DD106AEA013cCAa432654A4EC056e0A2F88" as const,
+    poolId: "0xdd9d92b4c6178fec5cf3140230947529ed370b9bd38d054052894a33aa6aa225" as const,
     poolManager: "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408" as const,
     stateView: "0x571291b572ed32ce6751a2cb2486ebee8defb9b4" as const,
     usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e" as const,
