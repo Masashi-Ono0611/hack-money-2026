@@ -10,6 +10,7 @@ import {
   Settings,
   Server,
 } from "lucide-react";
+import Image from "next/image";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "DASHBOARD", icon: LayoutDashboard },
@@ -29,10 +30,16 @@ export function Sidebar() {
       <div>
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-6">
-          <div className="flex h-8 w-8 items-center justify-center bg-[#00FF88]">
-            <span className="font-sans text-lg font-bold text-[#0C0C0C]">
-              G
-            </span>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#00FF8830] bg-[#00FF880d]">
+            <Image
+              src="/ghost_yield_icon_nobg.png"
+              alt="Ghost icon"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+              style={{ transform: "translateX(1px) translateY(1px)" }}
+              priority
+            />
           </div>
           <span className="font-mono text-sm font-semibold tracking-wider text-white">
             GHOST YIELD

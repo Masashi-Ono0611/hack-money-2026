@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Sidebar } from "./_components/sidebar";
+import ghostIcon from "./ghost_yield_icon_nobg.png";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,6 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Ghost Yield",
   description: "Turn idle Ethereum L2 compute into USDC revenue",
+  icons: {
+    icon: "/ghost_yield_icon.png",
+    shortcut: "/ghost_yield_icon.png",
+    apple: "/ghost_yield_icon.png",
+  },
 };
 
 export default function RootLayout({
