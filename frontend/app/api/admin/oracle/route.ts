@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server";
-import { execSync } from "child_process";
-import path from "path";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { baseSepolia } from "viem/chains";
+import { unichainSepolia, DEPLOYED, type ChainKey } from "@/lib/chains";
+import { MockOracleAbi } from "@/lib/abis";
 
-const ROOT = path.resolve(process.cwd(), "..");
+const CHAIN_MAP = {
+  "base-sepolia": baseSepolia,
+  "unichain-sepolia": unichainSepolia,
+} as const;
+
+const RPC_ENV_MAP: Record<string, string> = {
+  "base-sepolia": "BASE_SEPOLIA_RPC_URL",
+  "unichain-sepolia": "UNICHAIN_SEPOLIA_RPC_URL",
+};
 
 type OracleUpdateRequest = {
   chain: string;
@@ -28,17 +39,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const rpcEnvMap: Record<string, string> = {
-      "base-sepolia": "BASE_SEPOLIA_RPC_URL",
-      "unichain-sepolia": "UNICHAIN_SEPOLIA_RPC_URL",
-    };
-
-    const deployedPath = path.resolve(ROOT, "contract/deployed-addresses.json");
-    const deployed = JSON.parse(
-      require("fs").readFileSync(deployedPath, "utf-8"),
-    );
-    const oracleAddress = deployed[chain]?.oracle;
-
+    const chainKey = chain as ChainKey;
+    const oracleAddress = DEPLOYED[chainKey]?.oracle;
     if (!oracleAddress) {
       return NextResponse.json(
         { ok: false, error: `No oracle address for ${chain}` },
@@ -46,44 +48,39 @@ export async function POST(req: Request) {
       );
     }
 
-    const rpcVar = rpcEnvMap[chain];
-    const cmd = [
-      `set -a && source .env && source contract/.env && set +a`,
-      `&& cast send ${oracleAddress}`,
-      `"setUtilization(uint256)" ${utilization}`,
-      `--rpc-url $${rpcVar}`,
-      `--private-key $DEPLOYER_PRIVATE_KEY`,
-      `2>&1`,
-    ].join(" ");
+    const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
+    if (!privateKey) {
+      return NextResponse.json(
+        { ok: false, error: "DEPLOYER_PRIVATE_KEY not configured" },
+        { status: 500 },
+      );
+    }
 
-    const out = execSync(cmd, {
-      cwd: ROOT,
-      timeout: 30_000,
-      encoding: "utf-8",
-      shell: "/bin/zsh",
+    const rpcUrl = process.env[RPC_ENV_MAP[chain]] ?? CHAIN_MAP[chainKey].rpcUrls.default.http[0];
+    const account = privateKeyToAccount(privateKey as `0x${string}`);
+    const walletClient = createWalletClient({
+      account,
+      chain: CHAIN_MAP[chainKey],
+      transport: http(rpcUrl),
     });
 
-    const txMatch = out.match(/transactionHash\s+(0x[\da-fA-F]+)/);
+    const txHash = await walletClient.writeContract({
+      address: oracleAddress as `0x${string}`,
+      abi: MockOracleAbi,
+      functionName: "setUtilization",
+      args: [BigInt(utilization)],
+    });
 
     return NextResponse.json({
       ok: true,
       chain,
       utilization,
-      txHash: txMatch?.[1] ?? null,
-      raw: out.slice(-500),
+      txHash,
     });
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
-    const raw =
-      typeof err === "object" && err !== null && "stdout" in err
-        ? String(
-            (err as { stdout?: string; stderr?: string }).stdout ??
-              (err as { stderr?: string }).stderr ??
-              "",
-          ).slice(-500)
-        : "";
     return NextResponse.json(
-      { ok: false, error: error.message, raw },
+      { ok: false, error: error.message },
       { status: 500 },
     );
   }

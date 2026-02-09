@@ -1,31 +1,13 @@
 import { NextResponse } from "next/server";
-import { execSync } from "child_process";
-import { readFileSync } from "fs";
-import path from "path";
 
-const ROOT = path.resolve(process.cwd(), "..");
-const CONTRACT_DIR = path.resolve(ROOT, "contract");
-
-const RPC_ENV_MAP: Record<string, string> = {
-  "base-sepolia": "BASE_SEPOLIA_RPC_URL",
-  "unichain-sepolia": "UNICHAIN_SEPOLIA_RPC_URL",
-};
-
-const CHAIN_ID: Record<string, number> = {
-  "base-sepolia": 84532,
-  "unichain-sepolia": 1301,
-};
-
-function readBroadcastTxHash(script: string, chainId: number): string | null {
-  try {
-    const p = path.resolve(CONTRACT_DIR, `broadcast/${script}/${chainId}/run-latest.json`);
-    const data = JSON.parse(readFileSync(p, "utf-8"));
-    const txs = data.transactions ?? [];
-    return txs[txs.length - 1]?.hash ?? null;
-  } catch {
-    return null;
-  }
-}
+/**
+ * POST /api/admin/swap
+ *
+ * This operation requires Foundry CLI (forge script) to deploy a
+ * PoolSwapTest helper contract on-chain. Only available locally.
+ *
+ * In Vercel/serverless, returns a descriptive error.
+ */
 
 type SwapRequest = {
   chain: string;
@@ -34,16 +16,46 @@ type SwapRequest = {
 };
 
 export async function POST(req: Request) {
-  try {
-    const body = (await req.json()) as SwapRequest;
-    const { chain } = body;
+  const body = (await req.json().catch(() => ({}))) as SwapRequest;
+  const { chain } = body;
 
-    if (!RPC_ENV_MAP[chain]) {
-      return NextResponse.json(
-        { ok: false, error: `Invalid chain: ${chain}` },
-        { status: 400 },
-      );
-    }
+  if (!chain || !["base-sepolia", "unichain-sepolia"].includes(chain)) {
+    return NextResponse.json(
+      { ok: false, error: `Invalid chain: ${chain}` },
+      { status: 400 },
+    );
+  }
+
+  // Detect serverless environment (no shell available)
+  const isServerless = !process.env.SHELL && !process.env.HOME?.startsWith("/Users");
+
+  if (isServerless) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Swap requires Foundry CLI (forge). Run locally: cd frontend && pnpm dev",
+      },
+      { status: 501 },
+    );
+  }
+
+  // Local execution path
+  try {
+    const { execSync } = await import("child_process");
+    const path = await import("path");
+    const { readFileSync } = await import("fs");
+
+    const ROOT = path.resolve(process.cwd(), "..");
+    const CONTRACT_DIR = path.resolve(ROOT, "contract");
+
+    const RPC_ENV_MAP: Record<string, string> = {
+      "base-sepolia": "BASE_SEPOLIA_RPC_URL",
+      "unichain-sepolia": "UNICHAIN_SEPOLIA_RPC_URL",
+    };
+    const CHAIN_ID: Record<string, number> = {
+      "base-sepolia": 84532,
+      "unichain-sepolia": 1301,
+    };
 
     const zeroForOne = body.zeroForOne ?? true;
     const swapAmount = body.swapAmount ?? "100000";
@@ -71,9 +83,14 @@ export async function POST(req: Request) {
     const success = out.includes("SwapPool: success");
     const beforeTickMatch = out.match(/Before tick:\s*(-?\d+)/);
     const afterTickMatch = out.match(/After tick:\s*(-?\d+)/);
-    const beforePriceMatch = out.match(/Before sqrtPriceX96:\s*(\d+)/);
-    const afterPriceMatch = out.match(/After sqrtPriceX96:\s*(\d+)/);
-    const txHash = readBroadcastTxHash("SwapPool.s.sol", CHAIN_ID[chain]);
+
+    let txHash: string | null = null;
+    try {
+      const p = path.resolve(CONTRACT_DIR, `broadcast/SwapPool.s.sol/${CHAIN_ID[chain]}/run-latest.json`);
+      const data = JSON.parse(readFileSync(p, "utf-8"));
+      const txs = data.transactions ?? [];
+      txHash = txs[txs.length - 1]?.hash ?? null;
+    } catch { /* ignore */ }
 
     return NextResponse.json({
       ok: true,
@@ -88,16 +105,8 @@ export async function POST(req: Request) {
     });
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
-    const raw =
-      typeof err === "object" && err !== null && "stdout" in err
-        ? String(
-            (err as { stdout?: string; stderr?: string }).stdout ??
-              (err as { stderr?: string }).stderr ??
-              "",
-          ).slice(-1500)
-        : "";
     return NextResponse.json(
-      { ok: false, error: error.message, raw },
+      { ok: false, error: error.message },
       { status: 500 },
     );
   }
