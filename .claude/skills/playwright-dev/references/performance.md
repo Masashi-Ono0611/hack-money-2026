@@ -222,8 +222,8 @@ jobs:
       matrix:
         shard: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
       - name: Install dependencies
@@ -232,7 +232,7 @@ jobs:
         run: npx playwright install --with-deps
       - name: Run tests
         run: npx playwright test --shard=${{ matrix.shard }}/8
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: blob-report-${{ matrix.shard }}
@@ -288,12 +288,12 @@ merge-reports:
   needs: [test]
   runs-on: ubuntu-latest
   steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v7
     - name: Install dependencies
       run: npm ci
     - name: Download blob reports
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         path: all-blob-reports
         pattern: blob-report-*
@@ -301,7 +301,7 @@ merge-reports:
     - name: Merge into HTML Report
       run: npx playwright merge-reports --reporter html ./all-blob-reports
     - name: Upload HTML report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: html-report
         path: playwright-report
